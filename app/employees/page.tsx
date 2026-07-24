@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { EmployeeTable } from "@/components/employees/EmployeeTable";
 import {
   EmployeeFormDialog,
@@ -120,19 +121,15 @@ export default function EmployeesPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">
-            ระบบลูกจ้าง
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            จัดการข้อมูลลูกจ้างของกิจการ
-          </p>
-        </div>
-        <Button variant="primary" onClick={openAddForm}>
-          + เพิ่มลูกจ้างใหม่
-        </Button>
-      </div>
+      <PageHeader
+        title="ระบบลูกจ้าง"
+        description="จัดการข้อมูลลูกจ้างของกิจการ"
+        action={
+          <Button variant="primary" onClick={openAddForm}>
+            + เพิ่มลูกจ้างใหม่
+          </Button>
+        }
+      />
 
       <div className="mb-5 max-w-sm">
         <Input
@@ -144,7 +141,9 @@ export default function EmployeesPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-500">กำลังโหลดข้อมูล...</p>
+        <div className="rounded-xl border border-slate-200 bg-white py-16 text-center text-sm text-slate-500 shadow-sm">
+          กำลังโหลดข้อมูล...
+        </div>
       ) : (
         <EmployeeTable
           employees={filteredEmployees}

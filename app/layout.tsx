@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
+
+const notoSansThai = Noto_Sans_Thai({
+  subsets: ["thai", "latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-thai",
+});
 
 export const metadata: Metadata = {
   title: "Field Latex Project",
@@ -13,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th" className="h-full antialiased">
+    <html lang="th" className={`h-full antialiased ${notoSansThai.variable}`}>
       <body className="flex h-full min-h-screen bg-slate-50 font-sans text-slate-900">
         <Sidebar />
         <main className="flex-1 overflow-y-auto">{children}</main>

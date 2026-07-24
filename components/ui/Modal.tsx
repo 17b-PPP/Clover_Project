@@ -31,9 +31,10 @@ export function Modal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-[2px]">
       <div
-        className={`w-full ${widthClassName} rounded-lg bg-white shadow-xl`}
+        className={`w-full ${widthClassName} rounded-xl bg-white shadow-2xl ring-1 ring-slate-900/5`}
+        style={{ animation: "modal-in 0.15s ease-out" }}
         role="dialog"
         aria-modal="true"
       >
@@ -42,7 +43,7 @@ export function Modal({
           <button
             onClick={onClose}
             aria-label="ปิด"
-            className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-md p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
           >
             ✕
           </button>

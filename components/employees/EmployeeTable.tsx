@@ -25,7 +25,7 @@ export function EmployeeTable({
 }: EmployeeTableProps) {
   if (employees.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-slate-300 py-16 text-center text-sm text-slate-500">
+      <div className="rounded-xl border border-dashed border-slate-300 bg-white py-16 text-center text-sm text-slate-500">
         ไม่พบข้อมูลลูกจ้าง
       </div>
     );

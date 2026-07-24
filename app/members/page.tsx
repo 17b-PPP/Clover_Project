@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { MemberTable } from "@/components/members/MemberTable";
 import {
   MemberFormDialog,
@@ -118,19 +119,15 @@ export default function MembersPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">
-            ระบบสมาชิก
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            จัดการข้อมูลสมาชิกผู้ขายน้ำยางพารา
-          </p>
-        </div>
-        <Button variant="primary" onClick={openAddForm}>
-          + เพิ่มสมาชิกใหม่
-        </Button>
-      </div>
+      <PageHeader
+        title="ระบบสมาชิก"
+        description="จัดการข้อมูลสมาชิกผู้ขายน้ำยางพารา"
+        action={
+          <Button variant="primary" onClick={openAddForm}>
+            + เพิ่มสมาชิกใหม่
+          </Button>
+        }
+      />
 
       <div className="mb-5 max-w-sm">
         <Input
@@ -142,7 +139,9 @@ export default function MembersPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-500">กำลังโหลดข้อมูล...</p>
+        <div className="rounded-xl border border-slate-200 bg-white py-16 text-center text-sm text-slate-500 shadow-sm">
+          กำลังโหลดข้อมูล...
+        </div>
       ) : (
         <MemberTable
           members={filteredMembers}

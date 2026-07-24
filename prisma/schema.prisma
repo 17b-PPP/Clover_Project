@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Member {
+  id           String       @id @default(cuid())
+  memberCode   String       @unique
+  firstName    String
+  lastName     String
+  idCardNumber String       @unique
+  phone        String
+  address      String
+  postalCode   String
+  photoUrl     String?
+  balance      Decimal      @default(0)
+  status       MemberStatus @default(ACTIVE)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  mePairs      MePair[]
+}
+
+model Employee {
+  id           String         @id @default(cuid())
+  employeeCode String         @unique
+  firstName    String
+  lastName     String
+  idCardNumber String         @unique
+  phone        String
+  address      String
+  postalCode   String
+  photoUrl     String?
+  status       EmployeeStatus @default(ACTIVE)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  mePairs      MePair[]
+}
+
+enum MemberStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model MePair {
+  id                String     @id @default(cuid())
+  pairCode          String     @unique
+  memberId          String
+  employeeId        String
+  memberShare       Decimal    @db.Decimal(5, 2)
+  employeeShare     Decimal    @db.Decimal(5, 2)
+  contractStartDate DateTime   @default(now())
+  contractEndDate   DateTime?
+  status            PairStatus @default(Active)
+  contractFileUrl   String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  member   Member   @relation(fields: [memberId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([memberId])
+  @@index([employeeId])
+}
+
+enum PairStatus {
+  Active
+  Inactive
+}

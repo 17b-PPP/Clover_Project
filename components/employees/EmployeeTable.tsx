@@ -1,0 +1,85 @@
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+} from "@/components/ui/Table";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import type { Employee } from "@/lib/types";
+
+interface EmployeeTableProps {
+  employees: Employee[];
+  onView: (employee: Employee) => void;
+  onEdit: (employee: Employee) => void;
+  onToggleStatus: (employee: Employee) => void;
+}
+
+export function EmployeeTable({
+  employees,
+  onView,
+  onEdit,
+  onToggleStatus,
+}: EmployeeTableProps) {
+  if (employees.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-slate-300 py-16 text-center text-sm text-slate-500">
+        ไม่พบข้อมูลลูกจ้าง
+      </div>
+    );
+  }
+
+  return (
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableHeaderCell>รหัสลูกจ้าง</TableHeaderCell>
+          <TableHeaderCell>ชื่อ-นามสกุล</TableHeaderCell>
+          <TableHeaderCell>สถานะ</TableHeaderCell>
+          <TableHeaderCell>จัดการ</TableHeaderCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {employees.map((employee) => (
+          <TableRow key={employee.id}>
+            <TableCell>
+              <span className="font-medium text-slate-900">
+                {employee.employeeCode}
+              </span>
+            </TableCell>
+            <TableCell>
+              {employee.firstName} {employee.lastName}
+            </TableCell>
+            <TableCell>
+              {employee.status === "ACTIVE" ? (
+                <Badge tone="success">ใช้งานอยู่</Badge>
+              ) : (
+                <Badge tone="danger">ถูกระงับ</Badge>
+              )}
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" onClick={() => onView(employee)}>
+                  ดูข้อมูล
+                </Button>
+                <Button variant="ghost" onClick={() => onEdit(employee)}>
+                  แก้ไข
+                </Button>
+                <Button
+                  variant={
+                    employee.status === "ACTIVE" ? "danger" : "secondary"
+                  }
+                  onClick={() => onToggleStatus(employee)}
+                >
+                  {employee.status === "ACTIVE" ? "ระงับ" : "เปิดใช้งาน"}
+                </Button>
+              </div>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}

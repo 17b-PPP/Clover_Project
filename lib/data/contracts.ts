@@ -111,3 +111,7 @@ export async function setContractStatus(
     return undefined;
   }
 }
+
+export async function deleteContract(id: string): Promise<void> {
+  await prisma.mePair.delete({ where: { id } });
+}

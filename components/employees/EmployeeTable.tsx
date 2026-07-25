@@ -15,6 +15,7 @@ interface EmployeeTableProps {
   onView: (employee: Employee) => void;
   onEdit: (employee: Employee) => void;
   onToggleStatus: (employee: Employee) => void;
+  onDelete: (employee: Employee) => void;
 }
 
 export function EmployeeTable({
@@ -22,6 +23,7 @@ export function EmployeeTable({
   onView,
   onEdit,
   onToggleStatus,
+  onDelete,
 }: EmployeeTableProps) {
   if (employees.length === 0) {
     return (
@@ -75,6 +77,11 @@ export function EmployeeTable({
                 >
                   {employee.status === "ACTIVE" ? "ระงับ" : "เปิดใช้งาน"}
                 </Button>
+                {employee.status === "SUSPENDED" && (
+                  <Button variant="danger" onClick={() => onDelete(employee)}>
+                    ลบ
+                  </Button>
+                )}
               </div>
             </TableCell>
           </TableRow>

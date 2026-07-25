@@ -10,6 +10,7 @@ import {
   ContractFormMode,
 } from "@/components/contracts/ContractFormDialog";
 import { SuspendConfirmDialog } from "@/components/contracts/SuspendConfirmDialog";
+import { DeleteConfirmDialog } from "@/components/contracts/DeleteConfirmDialog";
 import type { Contract, ContractInput } from "@/lib/types";
 
 export default function ContractsPage() {
@@ -25,6 +26,9 @@ export default function ContractsPage() {
 
   const [statusContract, setStatusContract] = useState<Contract | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+
+  const [deleteContract, setDeleteContract] = useState<Contract | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   async function loadContracts() {
     setLoading(true);
@@ -90,6 +94,11 @@ export default function ContractsPage() {
     setStatusDialogOpen(true);
   }
 
+  function openDeleteDialog(contract: Contract) {
+    setDeleteContract(contract);
+    setDeleteDialogOpen(true);
+  }
+
   async function handleFormSubmit(input: ContractInput) {
     if (formMode === "add") {
       const res = await fetch("/api/contracts", {
@@ -127,6 +136,18 @@ export default function ContractsPage() {
     await loadContracts();
   }
 
+  async function handleDelete() {
+    if (!deleteContract) return;
+    const res = await fetch(`/api/contracts/${deleteContract.id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error ?? "ไม่สามารถลบสัญญาจ้างได้");
+    }
+    await loadContracts();
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
       <PageHeader
@@ -158,6 +179,7 @@ export default function ContractsPage() {
           onView={openViewForm}
           onEdit={openEditForm}
           onToggleStatus={openStatusDialog}
+          onDelete={openDeleteDialog}
         />
       )}
 
@@ -178,6 +200,13 @@ export default function ContractsPage() {
         contract={statusContract}
         onClose={() => setStatusDialogOpen(false)}
         onConfirm={handleToggleStatus}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        contract={deleteContract}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
       />
     </div>
   );

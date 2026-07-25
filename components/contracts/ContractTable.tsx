@@ -15,6 +15,7 @@ interface ContractTableProps {
   onView: (contract: Contract) => void;
   onEdit: (contract: Contract) => void;
   onToggleStatus: (contract: Contract) => void;
+  onDelete: (contract: Contract) => void;
 }
 
 export function ContractTable({
@@ -22,6 +23,7 @@ export function ContractTable({
   onView,
   onEdit,
   onToggleStatus,
+  onDelete,
 }: ContractTableProps) {
   if (contracts.length === 0) {
     return (
@@ -83,6 +85,11 @@ export function ContractTable({
                 >
                   {contract.status === "Active" ? "ระงับ" : "เปิดใช้งาน"}
                 </Button>
+                {contract.status === "Inactive" && (
+                  <Button variant="danger" onClick={() => onDelete(contract)}>
+                    ลบ
+                  </Button>
+                )}
               </div>
             </TableCell>
           </TableRow>

@@ -83,3 +83,7 @@ export async function setEmployeeStatus(
     return undefined;
   }
 }
+
+export async function deleteEmployee(id: string): Promise<void> {
+  await prisma.employee.delete({ where: { id } });
+}

@@ -10,6 +10,7 @@ import {
   EmployeeFormMode,
 } from "@/components/employees/EmployeeFormDialog";
 import { SuspendConfirmDialog } from "@/components/employees/SuspendConfirmDialog";
+import { DeleteConfirmDialog } from "@/components/employees/DeleteConfirmDialog";
 import type { Employee, EmployeeInput } from "@/lib/types";
 
 export default function EmployeesPage() {
@@ -25,6 +26,9 @@ export default function EmployeesPage() {
 
   const [statusEmployee, setStatusEmployee] = useState<Employee | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+
+  const [deleteEmployee, setDeleteEmployee] = useState<Employee | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   async function loadEmployees() {
     setLoading(true);
@@ -82,6 +86,11 @@ export default function EmployeesPage() {
     setStatusDialogOpen(true);
   }
 
+  function openDeleteDialog(employee: Employee) {
+    setDeleteEmployee(employee);
+    setDeleteDialogOpen(true);
+  }
+
   async function handleFormSubmit(input: EmployeeInput) {
     if (formMode === "add") {
       const res = await fetch("/api/employees", {
@@ -119,6 +128,18 @@ export default function EmployeesPage() {
     await loadEmployees();
   }
 
+  async function handleDelete() {
+    if (!deleteEmployee) return;
+    const res = await fetch(`/api/employees/${deleteEmployee.id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error ?? "ไม่สามารถลบลูกจ้างได้");
+    }
+    await loadEmployees();
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
       <PageHeader
@@ -150,6 +171,7 @@ export default function EmployeesPage() {
           onView={openViewForm}
           onEdit={openEditForm}
           onToggleStatus={openStatusDialog}
+          onDelete={openDeleteDialog}
         />
       )}
 
@@ -170,6 +192,13 @@ export default function EmployeesPage() {
         employee={statusEmployee}
         onClose={() => setStatusDialogOpen(false)}
         onConfirm={handleToggleStatus}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        employee={deleteEmployee}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
       />
     </div>
   );

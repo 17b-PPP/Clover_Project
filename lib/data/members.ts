@@ -82,3 +82,7 @@ export async function setMemberStatus(
     return undefined;
   }
 }
+
+export async function deleteMember(id: string): Promise<void> {
+  await prisma.member.delete({ where: { id } });
+}

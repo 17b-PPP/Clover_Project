@@ -10,6 +10,7 @@ import {
   MemberFormMode,
 } from "@/components/members/MemberFormDialog";
 import { SuspendConfirmDialog } from "@/components/members/SuspendConfirmDialog";
+import { DeleteConfirmDialog } from "@/components/members/DeleteConfirmDialog";
 import type { Member, MemberInput } from "@/lib/types";
 
 export default function MembersPage() {
@@ -23,6 +24,9 @@ export default function MembersPage() {
 
   const [statusMember, setStatusMember] = useState<Member | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+
+  const [deleteMember, setDeleteMember] = useState<Member | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   async function loadMembers() {
     setLoading(true);
@@ -80,6 +84,11 @@ export default function MembersPage() {
     setStatusDialogOpen(true);
   }
 
+  function openDeleteDialog(member: Member) {
+    setDeleteMember(member);
+    setDeleteDialogOpen(true);
+  }
+
   async function handleFormSubmit(input: MemberInput) {
     if (formMode === "add") {
       const res = await fetch("/api/members", {
@@ -117,6 +126,18 @@ export default function MembersPage() {
     await loadMembers();
   }
 
+  async function handleDelete() {
+    if (!deleteMember) return;
+    const res = await fetch(`/api/members/${deleteMember.id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error ?? "ไม่สามารถลบสมาชิกได้");
+    }
+    await loadMembers();
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
       <PageHeader
@@ -148,6 +169,7 @@ export default function MembersPage() {
           onView={openViewForm}
           onEdit={openEditForm}
           onToggleStatus={openStatusDialog}
+          onDelete={openDeleteDialog}
         />
       )}
 
@@ -168,6 +190,13 @@ export default function MembersPage() {
         member={statusMember}
         onClose={() => setStatusDialogOpen(false)}
         onConfirm={handleToggleStatus}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        member={deleteMember}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
       />
     </div>
   );

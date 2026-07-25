@@ -16,6 +16,7 @@ interface MemberTableProps {
   onView: (member: Member) => void;
   onEdit: (member: Member) => void;
   onToggleStatus: (member: Member) => void;
+  onDelete: (member: Member) => void;
 }
 
 export function MemberTable({
@@ -23,6 +24,7 @@ export function MemberTable({
   onView,
   onEdit,
   onToggleStatus,
+  onDelete,
 }: MemberTableProps) {
   if (members.length === 0) {
     return (
@@ -76,6 +78,11 @@ export function MemberTable({
                 >
                   {member.status === "ACTIVE" ? "ระงับ" : "เปิดใช้งาน"}
                 </Button>
+                {member.status === "SUSPENDED" && (
+                  <Button variant="danger" onClick={() => onDelete(member)}>
+                    ลบ
+                  </Button>
+                )}
               </div>
             </TableCell>
           </TableRow>

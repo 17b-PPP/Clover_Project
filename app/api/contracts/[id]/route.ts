@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
+  deleteContract,
   getContract,
   setContractStatus,
   updateContract,
@@ -53,6 +54,30 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       );
     }
     return NextResponse.json(updated);
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}
+
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id } = await params;
+    const contract = await getContract(id);
+    if (!contract) {
+      return NextResponse.json(
+        { error: "Contract not found" },
+        { status: 404 }
+      );
+    }
+    if (contract.status !== "Inactive") {
+      return NextResponse.json(
+        { error: "ต้องระงับสัญญาก่อนจึงจะลบได้" },
+        { status: 400 }
+      );
+    }
+
+    await deleteContract(id);
+    return NextResponse.json({ success: true });
   } catch (error) {
     return handleRouteError(error);
   }

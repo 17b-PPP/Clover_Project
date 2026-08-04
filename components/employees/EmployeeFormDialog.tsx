@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
+import { usePostalCodeLookup } from "@/components/hooks/usePostalCodeLookup";
 import type { Employee, EmployeeInput } from "@/lib/types";
 
 export type EmployeeFormMode = "add" | "view" | "edit";
@@ -22,8 +23,11 @@ const emptyForm: EmployeeInput = {
   firstName: "",
   lastName: "",
   idCardNumber: "",
+  dateOfBirth: "",
   phone: "",
   address: "",
+  district: "",
+  province: "",
   postalCode: "",
   photoUrl: null,
 };
@@ -48,8 +52,11 @@ export function EmployeeFormDialog({
           firstName: employee.firstName,
           lastName: employee.lastName,
           idCardNumber: employee.idCardNumber,
+          dateOfBirth: employee.dateOfBirth.slice(0, 10),
           phone: employee.phone,
           address: employee.address,
+          district: employee.district,
+          province: employee.province,
           postalCode: employee.postalCode,
           photoUrl: employee.photoUrl,
         }
@@ -58,6 +65,16 @@ export function EmployeeFormDialog({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const readOnly = mode === "view";
+  const postalMatches = usePostalCodeLookup(form.postalCode);
+
+  useEffect(() => {
+    if (readOnly || postalMatches.length === 0) return;
+    setForm((prev) => ({
+      ...prev,
+      district: postalMatches[0].amphoe,
+      province: postalMatches[0].province,
+    }));
+  }, [postalMatches, readOnly]);
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -171,24 +188,51 @@ export function EmployeeFormDialog({
           />
         </div>
 
-        <Input
-          label="เลขบัตรประชาชน"
-          required
-          disabled={readOnly}
-          maxLength={13}
-          value={form.idCardNumber}
-          onChange={(e) =>
-            setForm((prev) => ({ ...prev, idCardNumber: e.target.value }))
-          }
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="เลขบัตรประชาชน"
+            required
+            disabled={readOnly}
+            inputMode="numeric"
+            pattern="[0-9]{13}"
+            title="เลขบัตรประชาชน 13 หลัก"
+            minLength={13}
+            maxLength={13}
+            value={form.idCardNumber}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                idCardNumber: e.target.value.replace(/\D/g, ""),
+              }))
+            }
+          />
+          <Input
+            label="วันเกิด"
+            type="date"
+            required
+            disabled={readOnly}
+            value={form.dateOfBirth}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, dateOfBirth: e.target.value }))
+            }
+          />
+        </div>
 
         <Input
           label="เบอร์โทร"
           required
           disabled={readOnly}
+          inputMode="numeric"
+          pattern="[0-9]{10}"
+          title="เบอร์โทร 10 หลัก"
+          minLength={10}
+          maxLength={10}
           value={form.phone}
           onChange={(e) =>
-            setForm((prev) => ({ ...prev, phone: e.target.value }))
+            setForm((prev) => ({
+              ...prev,
+              phone: e.target.value.replace(/\D/g, ""),
+            }))
           }
         />
 
@@ -203,14 +247,39 @@ export function EmployeeFormDialog({
           }
         />
 
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="อำเภอ"
+            required
+            disabled={readOnly}
+            value={form.district}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, district: e.target.value }))
+            }
+          />
+          <Input
+            label="จังหวัด"
+            required
+            disabled={readOnly}
+            value={form.province}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, province: e.target.value }))
+            }
+          />
+        </div>
+
         <Input
           label="รหัสไปรษณีย์"
           required
           disabled={readOnly}
+          inputMode="numeric"
           maxLength={5}
           value={form.postalCode}
           onChange={(e) =>
-            setForm((prev) => ({ ...prev, postalCode: e.target.value }))
+            setForm((prev) => ({
+              ...prev,
+              postalCode: e.target.value.replace(/\D/g, ""),
+            }))
           }
         />
 

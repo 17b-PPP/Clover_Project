@@ -40,6 +40,7 @@ export function MemberTable({
         <TableRow>
           <TableHeaderCell>รหัสสมาชิก</TableHeaderCell>
           <TableHeaderCell>ชื่อ-นามสกุล</TableHeaderCell>
+          <TableHeaderCell>เลขบัตรประชาชน</TableHeaderCell>
           <TableHeaderCell>ยอดเงินสะสม</TableHeaderCell>
           <TableHeaderCell>สถานะ</TableHeaderCell>
           <TableHeaderCell>จัดการ</TableHeaderCell>
@@ -56,9 +57,14 @@ export function MemberTable({
             <TableCell>
               {member.firstName} {member.lastName}
             </TableCell>
-            <TableCell>{formatCurrency(member.balance)}</TableCell>
             <TableCell>
-              {member.status === "ACTIVE" ? (
+              <span className="font-mono text-slate-600">
+                {member.idCardNumber}
+              </span>
+            </TableCell>
+            <TableCell>{formatCurrency(member.walletBalance)}</TableCell>
+            <TableCell>
+              {member.status === "Active" ? (
                 <Badge tone="success">ใช้งานอยู่</Badge>
               ) : (
                 <Badge tone="danger">ถูกระงับ</Badge>
@@ -73,12 +79,12 @@ export function MemberTable({
                   แก้ไข
                 </Button>
                 <Button
-                  variant={member.status === "ACTIVE" ? "danger" : "secondary"}
+                  variant={member.status === "Active" ? "danger" : "secondary"}
                   onClick={() => onToggleStatus(member)}
                 >
-                  {member.status === "ACTIVE" ? "ระงับ" : "เปิดใช้งาน"}
+                  {member.status === "Active" ? "ระงับ" : "เปิดใช้งาน"}
                 </Button>
-                {member.status === "SUSPENDED" && (
+                {member.status === "Inactive" && (
                   <Button variant="danger" onClick={() => onDelete(member)}>
                     ลบ
                   </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -13,9 +13,12 @@ import { SuspendConfirmDialog } from "@/components/members/SuspendConfirmDialog"
 import { DeleteConfirmDialog } from "@/components/members/DeleteConfirmDialog";
 import type { Member, MemberInput } from "@/lib/types";
 
-export default function MembersPage() {
-  const [members, setMembers] = useState<Member[]>([]);
-  const [loading, setLoading] = useState(true);
+interface MembersPageClientProps {
+  initialMembers: Member[];
+}
+
+export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
+  const [members, setMembers] = useState<Member[]>(initialMembers);
   const [search, setSearch] = useState("");
 
   const [formOpen, setFormOpen] = useState(false);
@@ -29,26 +32,10 @@ export default function MembersPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   async function loadMembers() {
-    setLoading(true);
     const res = await fetch("/api/members");
     const data = (await res.json()) as Member[];
     setMembers(data);
-    setLoading(false);
   }
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/members")
-      .then((res) => res.json())
-      .then((data: Member[]) => {
-        if (cancelled) return;
-        setMembers(data);
-        setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const filteredMembers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -117,7 +104,7 @@ export default function MembersPage() {
   async function handleToggleStatus() {
     if (!statusMember) return;
     const nextStatus =
-      statusMember.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+      statusMember.status === "Active" ? "Inactive" : "Active";
     await fetch(`/api/members/${statusMember.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -159,19 +146,13 @@ export default function MembersPage() {
         />
       </div>
 
-      {loading ? (
-        <div className="rounded-xl border border-slate-200 bg-white py-16 text-center text-sm text-slate-500 shadow-sm">
-          กำลังโหลดข้อมูล...
-        </div>
-      ) : (
-        <MemberTable
-          members={filteredMembers}
-          onView={openViewForm}
-          onEdit={openEditForm}
-          onToggleStatus={openStatusDialog}
-          onDelete={openDeleteDialog}
-        />
-      )}
+      <MemberTable
+        members={filteredMembers}
+        onView={openViewForm}
+        onEdit={openEditForm}
+        onToggleStatus={openStatusDialog}
+        onDelete={openDeleteDialog}
+      />
 
       <MemberFormDialog
         key={`${formMode}-${selectedMember?.id ?? "new"}-${formOpen}`}

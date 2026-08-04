@@ -16,6 +16,7 @@ interface ContractTableProps {
   onEdit: (contract: Contract) => void;
   onToggleStatus: (contract: Contract) => void;
   onDelete: (contract: Contract) => void;
+  onViewHistory: (contract: Contract) => void;
 }
 
 export function ContractTable({
@@ -24,6 +25,7 @@ export function ContractTable({
   onEdit,
   onToggleStatus,
   onDelete,
+  onViewHistory,
 }: ContractTableProps) {
   if (contracts.length === 0) {
     return (
@@ -46,54 +48,77 @@ export function ContractTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        {contracts.map((contract) => (
-          <TableRow key={contract.id}>
-            <TableCell>
-              <span className="font-medium text-slate-900">
-                {contract.pairCode}
-              </span>
-            </TableCell>
-            <TableCell>
-              {contract.member.firstName} {contract.member.lastName}
-            </TableCell>
-            <TableCell>
-              {contract.employee.firstName} {contract.employee.lastName}
-            </TableCell>
-            <TableCell>
-              {contract.memberShare}% / {contract.employeeShare}%
-            </TableCell>
-            <TableCell>
-              {contract.status === "Active" ? (
-                <Badge tone="success">ใช้งานอยู่</Badge>
-              ) : (
-                <Badge tone="danger">ถูกระงับ</Badge>
-              )}
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" onClick={() => onView(contract)}>
-                  ดูข้อมูล
-                </Button>
-                <Button variant="ghost" onClick={() => onEdit(contract)}>
-                  แก้ไข
-                </Button>
-                <Button
-                  variant={
-                    contract.status === "Active" ? "danger" : "secondary"
-                  }
-                  onClick={() => onToggleStatus(contract)}
-                >
-                  {contract.status === "Active" ? "ระงับ" : "เปิดใช้งาน"}
-                </Button>
-                {contract.status === "Inactive" && (
-                  <Button variant="danger" onClick={() => onDelete(contract)}>
-                    ลบ
+        {contracts.map((contract) => {
+          const isExpired =
+            contract.contractEndDate !== null &&
+            new Date(contract.contractEndDate) <= new Date();
+
+          return (
+            <TableRow key={contract.id}>
+              <TableCell>
+                <span className="font-medium text-slate-900">
+                  {contract.pairCode}
+                </span>
+              </TableCell>
+              <TableCell>
+                {contract.member.firstName} {contract.member.lastName}
+              </TableCell>
+              <TableCell>
+                {contract.employee.firstName} {contract.employee.lastName}
+              </TableCell>
+              <TableCell>
+                {contract.memberShare}% / {contract.employeeShare}%
+              </TableCell>
+              <TableCell>
+                <div className="flex flex-wrap gap-1.5">
+                  {isExpired ? (
+                    <Badge tone="neutral">สิ้นสุดสัญญาแล้ว</Badge>
+                  ) : contract.status === "Active" ? (
+                    <Badge tone="success">ใช้งานอยู่</Badge>
+                  ) : (
+                    <Badge tone="danger">ถูกระงับ</Badge>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" onClick={() => onView(contract)}>
+                    ดูข้อมูล
                   </Button>
-                )}
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
+                  <Button
+                    variant="ghost"
+                    onClick={() => onViewHistory(contract)}
+                  >
+                    ประวัติ
+                  </Button>
+                  {!isExpired && (
+                    <>
+                      <Button variant="ghost" onClick={() => onEdit(contract)}>
+                        ต่อสัญญา
+                      </Button>
+                      <Button
+                        variant={
+                          contract.status === "Active" ? "danger" : "secondary"
+                        }
+                        onClick={() => onToggleStatus(contract)}
+                      >
+                        {contract.status === "Active" ? "ระงับ" : "เปิดใช้งาน"}
+                      </Button>
+                      {contract.status === "Inactive" && (
+                        <Button
+                          variant="danger"
+                          onClick={() => onDelete(contract)}
+                        >
+                          ลบ
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </TableCell>
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   );

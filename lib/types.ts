@@ -1,4 +1,4 @@
-export type MemberStatus = "ACTIVE" | "SUSPENDED";
+export type MemberStatus = "Active" | "Inactive";
 
 export interface Member {
   id: string;
@@ -6,11 +6,16 @@ export interface Member {
   firstName: string;
   lastName: string;
   idCardNumber: string;
+  dateOfBirth: string;
   phone: string;
   address: string;
+  district: string;
+  province: string;
   postalCode: string;
   photoUrl: string | null;
-  balance: number;
+  gardenName: string | null;
+  walletBalance: number;
+  dividendBalance: number;
   status: MemberStatus;
   createdAt: string;
   updatedAt: string;
@@ -20,13 +25,17 @@ export interface MemberInput {
   firstName: string;
   lastName: string;
   idCardNumber: string;
+  dateOfBirth: string;
   phone: string;
   address: string;
+  district: string;
+  province: string;
   postalCode: string;
   photoUrl: string | null;
+  gardenName: string | null;
 }
 
-export type EmployeeStatus = "ACTIVE" | "SUSPENDED";
+export type EmployeeStatus = "Active" | "Inactive";
 
 export interface Employee {
   id: string;
@@ -34,8 +43,11 @@ export interface Employee {
   firstName: string;
   lastName: string;
   idCardNumber: string;
+  dateOfBirth: string;
   phone: string;
   address: string;
+  district: string;
+  province: string;
   postalCode: string;
   photoUrl: string | null;
   status: EmployeeStatus;
@@ -47,8 +59,11 @@ export interface EmployeeInput {
   firstName: string;
   lastName: string;
   idCardNumber: string;
+  dateOfBirth: string;
   phone: string;
   address: string;
+  district: string;
+  province: string;
   postalCode: string;
   photoUrl: string | null;
 }
@@ -83,4 +98,40 @@ export interface ContractInput {
   employeeId: string;
   memberShare: number;
   employeeShare: number;
+}
+
+export type UserRole = "STAFF" | "ADMIN";
+
+export type UserStatus = "Active" | "Inactive";
+
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  status: UserStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserInput {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  username: string;
+  role: UserRole;
+  password?: string;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  timestamp: string;
+  username: string;
+  role: UserRole;
+  action: string;
+  details: string;
 }

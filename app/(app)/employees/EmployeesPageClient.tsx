@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -13,9 +13,14 @@ import { SuspendConfirmDialog } from "@/components/employees/SuspendConfirmDialo
 import { DeleteConfirmDialog } from "@/components/employees/DeleteConfirmDialog";
 import type { Employee, EmployeeInput } from "@/lib/types";
 
-export default function EmployeesPage() {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loading, setLoading] = useState(true);
+interface EmployeesPageClientProps {
+  initialEmployees: Employee[];
+}
+
+export function EmployeesPageClient({
+  initialEmployees,
+}: EmployeesPageClientProps) {
+  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
   const [search, setSearch] = useState("");
 
   const [formOpen, setFormOpen] = useState(false);
@@ -31,26 +36,10 @@ export default function EmployeesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   async function loadEmployees() {
-    setLoading(true);
     const res = await fetch("/api/employees");
     const data = (await res.json()) as Employee[];
     setEmployees(data);
-    setLoading(false);
   }
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/employees")
-      .then((res) => res.json())
-      .then((data: Employee[]) => {
-        if (cancelled) return;
-        setEmployees(data);
-        setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const filteredEmployees = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -119,7 +108,7 @@ export default function EmployeesPage() {
   async function handleToggleStatus() {
     if (!statusEmployee) return;
     const nextStatus =
-      statusEmployee.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+      statusEmployee.status === "Active" ? "Inactive" : "Active";
     await fetch(`/api/employees/${statusEmployee.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -161,19 +150,13 @@ export default function EmployeesPage() {
         />
       </div>
 
-      {loading ? (
-        <div className="rounded-xl border border-slate-200 bg-white py-16 text-center text-sm text-slate-500 shadow-sm">
-          กำลังโหลดข้อมูล...
-        </div>
-      ) : (
-        <EmployeeTable
-          employees={filteredEmployees}
-          onView={openViewForm}
-          onEdit={openEditForm}
-          onToggleStatus={openStatusDialog}
-          onDelete={openDeleteDialog}
-        />
-      )}
+      <EmployeeTable
+        employees={filteredEmployees}
+        onView={openViewForm}
+        onEdit={openEditForm}
+        onToggleStatus={openStatusDialog}
+        onDelete={openDeleteDialog}
+      />
 
       <EmployeeFormDialog
         key={`${formMode}-${selectedEmployee?.id ?? "new"}-${formOpen}`}

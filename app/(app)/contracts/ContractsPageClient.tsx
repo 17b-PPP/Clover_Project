@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -11,11 +11,21 @@ import {
 } from "@/components/contracts/ContractFormDialog";
 import { SuspendConfirmDialog } from "@/components/contracts/SuspendConfirmDialog";
 import { DeleteConfirmDialog } from "@/components/contracts/DeleteConfirmDialog";
-import type { Contract, ContractInput } from "@/lib/types";
+import { ContractHistoryDialog } from "@/components/contracts/ContractHistoryDialog";
+import type { Contract, ContractInput, Employee, Member } from "@/lib/types";
 
-export default function ContractsPage() {
-  const [contracts, setContracts] = useState<Contract[]>([]);
-  const [loading, setLoading] = useState(true);
+interface ContractsPageClientProps {
+  initialContracts: Contract[];
+  members: Member[];
+  employees: Employee[];
+}
+
+export function ContractsPageClient({
+  initialContracts,
+  members,
+  employees,
+}: ContractsPageClientProps) {
+  const [contracts, setContracts] = useState<Contract[]>(initialContracts);
   const [search, setSearch] = useState("");
 
   const [formOpen, setFormOpen] = useState(false);
@@ -30,46 +40,39 @@ export default function ContractsPage() {
   const [deleteContract, setDeleteContract] = useState<Contract | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  const [historyContract, setHistoryContract] = useState<Contract | null>(
+    null
+  );
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+
+  const [showExpired, setShowExpired] = useState(false);
+
   async function loadContracts() {
-    setLoading(true);
     const res = await fetch("/api/contracts");
     const data = (await res.json()) as Contract[];
     setContracts(data);
-    setLoading(false);
   }
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/contracts")
-      .then((res) => res.json())
-      .then((data: Contract[]) => {
-        if (cancelled) return;
-        setContracts(data);
-        setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const filteredContracts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return contracts;
-    return contracts.filter((c) =>
-      [
-        c.pairCode,
-        c.member.firstName,
-        c.member.lastName,
-        c.member.code,
-        c.employee.firstName,
-        c.employee.lastName,
-        c.employee.code,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(q)
-    );
-  }, [contracts, search]);
+    return contracts
+      .filter((c) => showExpired || c.contractEndDate === null)
+      .filter((c) => {
+        if (!q) return true;
+        return [
+          c.pairCode,
+          c.member.firstName,
+          c.member.lastName,
+          c.member.code,
+          c.employee.firstName,
+          c.employee.lastName,
+          c.employee.code,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(q);
+      });
+  }, [contracts, search, showExpired]);
 
   function openAddForm() {
     setSelectedContract(null);
@@ -97,6 +100,11 @@ export default function ContractsPage() {
   function openDeleteDialog(contract: Contract) {
     setDeleteContract(contract);
     setDeleteDialogOpen(true);
+  }
+
+  function openHistoryDialog(contract: Contract) {
+    setHistoryContract(contract);
+    setHistoryDialogOpen(true);
   }
 
   async function handleFormSubmit(input: ContractInput) {
@@ -160,34 +168,42 @@ export default function ContractsPage() {
         }
       />
 
-      <div className="mb-5 max-w-sm">
-        <Input
-          label="ค้นหาสัญญาจ้าง"
-          placeholder="ค้นหาด้วยรหัสจับคู่ ชื่อ หรือรหัสสมาชิก/ลูกจ้าง"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div className="max-w-sm flex-1">
+          <Input
+            label="ค้นหาสัญญาจ้าง"
+            placeholder="ค้นหาด้วยรหัสจับคู่ ชื่อ หรือรหัสสมาชิก/ลูกจ้าง"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <label className="flex items-center gap-2 pb-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={showExpired}
+            onChange={(e) => setShowExpired(e.target.checked)}
+            className="h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600"
+          />
+          แสดงสัญญาที่สิ้นสุดแล้ว
+        </label>
       </div>
 
-      {loading ? (
-        <div className="rounded-xl border border-slate-200 bg-white py-16 text-center text-sm text-slate-500 shadow-sm">
-          กำลังโหลดข้อมูล...
-        </div>
-      ) : (
-        <ContractTable
-          contracts={filteredContracts}
-          onView={openViewForm}
-          onEdit={openEditForm}
-          onToggleStatus={openStatusDialog}
-          onDelete={openDeleteDialog}
-        />
-      )}
+      <ContractTable
+        contracts={filteredContracts}
+        onView={openViewForm}
+        onEdit={openEditForm}
+        onToggleStatus={openStatusDialog}
+        onDelete={openDeleteDialog}
+        onViewHistory={openHistoryDialog}
+      />
 
       <ContractFormDialog
         key={`${formMode}-${selectedContract?.id ?? "new"}-${formOpen}`}
         open={formOpen}
         mode={formMode}
         contract={selectedContract}
+        members={members}
+        employees={employees}
         onClose={() => setFormOpen(false)}
         onSubmit={handleFormSubmit}
         onRequestEdit={
@@ -207,6 +223,13 @@ export default function ContractsPage() {
         contract={deleteContract}
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleDelete}
+      />
+
+      <ContractHistoryDialog
+        key={historyContract?.id ?? "none"}
+        open={historyDialogOpen}
+        contract={historyContract}
+        onClose={() => setHistoryDialogOpen(false)}
       />
     </div>
   );

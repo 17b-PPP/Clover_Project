@@ -41,12 +41,12 @@ function serialize(pair: MePairWithParties): Contract {
 }
 
 async function nextPairCode(): Promise<string> {
-  const existing = await prisma.mePair.findMany({ select: { pairCode: true } });
-  const maxCode = existing.reduce((max, p) => {
-    const n = parseInt(p.pairCode.replace("C-", ""), 10);
-    return Number.isNaN(n) ? max : Math.max(max, n);
-  }, 0);
-  return `C-${String(maxCode + 1).padStart(4, "0")}`;
+  const last = await prisma.mePair.findFirst({
+    orderBy: { pairCode: "desc" },
+    select: { pairCode: true },
+  });
+  const n = last ? parseInt(last.pairCode.replace("C-", ""), 10) : 0;
+  return `C-${String((Number.isNaN(n) ? 0 : n) + 1).padStart(4, "0")}`;
 }
 
 export async function getContracts(): Promise<Contract[]> {
@@ -80,20 +80,48 @@ export async function createContract(
   return serialize(pair);
 }
 
-export async function updateContract(
+export async function renewContract(
   id: string,
-  input: Partial<ContractInput>
+  shares: { memberShare: number; employeeShare: number }
 ): Promise<Contract | undefined> {
-  try {
-    const pair = await prisma.mePair.update({
+  const current = await prisma.mePair.findUnique({ where: { id } });
+  if (!current) return undefined;
+
+  const pairCode = await nextPairCode();
+  const now = new Date();
+
+  const [, newPair] = await prisma.$transaction([
+    prisma.mePair.update({
       where: { id },
-      data: input,
+      data: { contractEndDate: now },
+    }),
+    prisma.mePair.create({
+      data: {
+        pairCode,
+        memberId: current.memberId,
+        employeeId: current.employeeId,
+        memberShare: shares.memberShare,
+        employeeShare: shares.employeeShare,
+        contractStartDate: now,
+        status: "Active",
+      },
       ...withParties,
-    });
-    return serialize(pair);
-  } catch {
-    return undefined;
-  }
+    }),
+  ]);
+
+  return serialize(newPair as MePairWithParties);
+}
+
+export async function getContractHistory(
+  memberId: string,
+  employeeId: string
+): Promise<Contract[]> {
+  const pairs = await prisma.mePair.findMany({
+    where: { memberId, employeeId },
+    ...withParties,
+    orderBy: { contractStartDate: "desc" },
+  });
+  return pairs.map(serialize);
 }
 
 export async function setContractStatus(

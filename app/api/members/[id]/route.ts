@@ -7,6 +7,8 @@ import {
   updateMember,
 } from "@/lib/data/members";
 import { handleRouteError } from "@/lib/api-error";
+import { isValidIdCardNumber, isValidPhone } from "@/lib/validate";
+import { logActivity } from "@/lib/activity-log";
 import type { MemberInput, MemberStatus } from "@/lib/types";
 
 interface RouteParams {
@@ -41,13 +43,40 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           { status: 404 }
         );
       }
+      await logActivity({
+        action: "SUSPEND_MEMBER",
+        targetType: "MEMBER",
+        targetId: updated.id,
+        description: `${
+          body.status === "Inactive" ? "ระงับ" : "เปิดใช้งาน"
+        }สมาชิก ${updated.memberCode} (${updated.firstName} ${updated.lastName})`,
+      });
       return NextResponse.json(updated);
+    }
+
+    if (body.idCardNumber && !isValidIdCardNumber(body.idCardNumber)) {
+      return NextResponse.json(
+        { error: "เลขบัตรประชาชนต้องเป็นตัวเลข 13 หลัก" },
+        { status: 400 }
+      );
+    }
+    if (body.phone && !isValidPhone(body.phone)) {
+      return NextResponse.json(
+        { error: "เบอร์โทรต้องเป็นตัวเลข 10 หลัก" },
+        { status: 400 }
+      );
     }
 
     const updated = await updateMember(id, body);
     if (!updated) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
     }
+    await logActivity({
+      action: "UPDATE_MEMBER",
+      targetType: "MEMBER",
+      targetId: updated.id,
+      description: `แก้ไขข้อมูลสมาชิก ${updated.memberCode} (${updated.firstName} ${updated.lastName})`,
+    });
     return NextResponse.json(updated);
   } catch (error) {
     return handleRouteError(error);
@@ -61,7 +90,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     if (!member) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
     }
-    if (member.status !== "SUSPENDED") {
+    if (member.status !== "Inactive") {
       return NextResponse.json(
         { error: "ต้องระงับสมาชิกก่อนจึงจะลบได้" },
         { status: 400 }
@@ -82,6 +111,13 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
       }
       throw error;
     }
+
+    await logActivity({
+      action: "DELETE_MEMBER",
+      targetType: "MEMBER",
+      targetId: member.id,
+      description: `ลบสมาชิก ${member.memberCode} (${member.firstName} ${member.lastName})`,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

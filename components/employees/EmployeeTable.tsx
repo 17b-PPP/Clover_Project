@@ -55,7 +55,7 @@ export function EmployeeTable({
               {employee.firstName} {employee.lastName}
             </TableCell>
             <TableCell>
-              {employee.status === "ACTIVE" ? (
+              {employee.status === "Active" ? (
                 <Badge tone="success">ใช้งานอยู่</Badge>
               ) : (
                 <Badge tone="danger">ถูกระงับ</Badge>
@@ -71,13 +71,13 @@ export function EmployeeTable({
                 </Button>
                 <Button
                   variant={
-                    employee.status === "ACTIVE" ? "danger" : "secondary"
+                    employee.status === "Active" ? "danger" : "secondary"
                   }
                   onClick={() => onToggleStatus(employee)}
                 >
-                  {employee.status === "ACTIVE" ? "ระงับ" : "เปิดใช้งาน"}
+                  {employee.status === "Active" ? "ระงับ" : "เปิดใช้งาน"}
                 </Button>
-                {employee.status === "SUSPENDED" && (
+                {employee.status === "Inactive" && (
                   <Button variant="danger" onClick={() => onDelete(employee)}>
                     ลบ
                   </Button>

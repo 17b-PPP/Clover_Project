@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -13,6 +13,8 @@ interface ContractFormDialogProps {
   open: boolean;
   mode: ContractFormMode;
   contract?: Contract | null;
+  members: Member[];
+  employees: Employee[];
   onClose: () => void;
   onSubmit: (input: ContractInput) => Promise<void>;
   onRequestEdit?: () => void;
@@ -21,21 +23,19 @@ interface ContractFormDialogProps {
 const titleByMode: Record<ContractFormMode, string> = {
   add: "เพิ่มสัญญาจ้างใหม่",
   view: "ข้อมูลสัญญาจ้าง",
-  edit: "แก้ไขข้อมูลสัญญาจ้าง",
+  edit: "ต่อสัญญาด้วยสัดส่วนใหม่",
 };
 
 export function ContractFormDialog({
   open,
   mode,
   contract,
+  members,
+  employees,
   onClose,
   onSubmit,
   onRequestEdit,
 }: ContractFormDialogProps) {
-  const [members, setMembers] = useState<Member[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [loadingParties, setLoadingParties] = useState(open);
-
   const [memberId, setMemberId] = useState(contract?.member.id ?? "");
   const [employeeId, setEmployeeId] = useState(contract?.employee.id ?? "");
   const [memberShare, setMemberShare] = useState(
@@ -44,19 +44,15 @@ export function ContractFormDialog({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const readOnly = mode === "view";
+  const isRenew = mode === "edit";
   const employeeShare = Math.round((100 - memberShare) * 100) / 100;
 
-  useEffect(() => {
-    if (!open) return;
-    Promise.all([
-      fetch("/api/members").then((res) => res.json()),
-      fetch("/api/employees").then((res) => res.json()),
-    ]).then(([memberData, employeeData]: [Member[], Employee[]]) => {
-      setMembers(memberData);
-      setEmployees(employeeData);
-      setLoadingParties(false);
-    });
-  }, [open]);
+  const activeMembers = members.filter(
+    (m) => m.status === "Active" || m.id === memberId
+  );
+  const activeEmployees = employees.filter(
+    (e) => e.status === "Active" || e.id === employeeId
+  );
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -85,7 +81,7 @@ export function ContractFormDialog({
       </Button>
       {onRequestEdit && (
         <Button variant="primary" onClick={onRequestEdit}>
-          แก้ไขข้อมูล
+          ต่อสัญญาด้วยสัดส่วนใหม่
         </Button>
       )}
     </>
@@ -98,9 +94,13 @@ export function ContractFormDialog({
         variant="primary"
         type="submit"
         form="contract-form"
-        disabled={submitting || loadingParties}
+        disabled={submitting}
       >
-        {submitting ? "กำลังบันทึก..." : "บันทึก"}
+        {submitting
+          ? "กำลังบันทึก..."
+          : isRenew
+          ? "ยืนยันการต่อสัญญา"
+          : "บันทึก"}
       </Button>
     </>
   );
@@ -143,39 +143,56 @@ export function ContractFormDialog({
         </div>
       ) : (
         <form id="contract-form" onSubmit={handleSubmit} className="space-y-5">
-          <Select
-            label="เจ้าของสวน (รหัสสมาชิก)"
-            required
-            disabled={loadingParties}
-            value={memberId}
-            onChange={(e) => setMemberId(e.target.value)}
-          >
-            <option value="" disabled>
-              เลือกสมาชิก
-            </option>
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.memberCode} — {m.firstName} {m.lastName}
-              </option>
-            ))}
-          </Select>
+          {isRenew && contract ? (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
+              <p className="text-slate-500">
+                คู่สัญญา (ไม่สามารถเปลี่ยนได้เมื่อต่อสัญญา)
+              </p>
+              <p className="mt-1 font-medium text-slate-900">
+                {contract.member.firstName} {contract.member.lastName} (
+                {contract.member.code}) ↔ {contract.employee.firstName}{" "}
+                {contract.employee.lastName} ({contract.employee.code})
+              </p>
+              <p className="mt-2 text-slate-500">
+                สัดส่วนเดิม: เจ้าของสวน {contract.memberShare}% / ลูกจ้าง{" "}
+                {contract.employeeShare}%
+              </p>
+            </div>
+          ) : (
+            <>
+              <Select
+                label="เจ้าของสวน (รหัสสมาชิก)"
+                required
+                value={memberId}
+                onChange={(e) => setMemberId(e.target.value)}
+              >
+                <option value="" disabled>
+                  เลือกสมาชิก
+                </option>
+                {activeMembers.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.memberCode} — {m.firstName} {m.lastName}
+                  </option>
+                ))}
+              </Select>
 
-          <Select
-            label="ลูกจ้าง (รหัสลูกจ้าง)"
-            required
-            disabled={loadingParties}
-            value={employeeId}
-            onChange={(e) => setEmployeeId(e.target.value)}
-          >
-            <option value="" disabled>
-              เลือกลูกจ้าง
-            </option>
-            {employees.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.employeeCode} — {e.firstName} {e.lastName}
-              </option>
-            ))}
-          </Select>
+              <Select
+                label="ลูกจ้าง (รหัสลูกจ้าง)"
+                required
+                value={employeeId}
+                onChange={(e) => setEmployeeId(e.target.value)}
+              >
+                <option value="" disabled>
+                  เลือกลูกจ้าง
+                </option>
+                {activeEmployees.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.employeeCode} — {e.firstName} {e.lastName}
+                  </option>
+                ))}
+              </Select>
+            </>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <Input

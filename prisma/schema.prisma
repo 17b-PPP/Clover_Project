@@ -8,48 +8,144 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Member {
-  id           String       @id @default(cuid())
-  memberCode   String       @unique
-  firstName    String
-  lastName     String
-  idCardNumber String       @unique
-  phone        String
-  address      String
-  postalCode   String
-  photoUrl     String?
-  balance      Decimal      @default(0)
-  status       MemberStatus @default(ACTIVE)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  mePairs      MePair[]
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum StaffRole {
+  STAFF
+  ADMIN
 }
+
+enum StaffStatus {
+  Active
+  Inactive
+}
+
+enum MemberStatus {
+  Active
+  Inactive
+}
+
+enum EmployeeStatus {
+  Active
+  Inactive
+}
+
+enum PairStatus {
+  Active
+  Inactive
+}
+
+enum ActionType {
+  LOGIN
+  LOGIN_FAILED
+  LOGOUT
+  CREATE_STAFF
+  UPDATE_STAFF
+  SUSPEND_STAFF
+  CREATE_MEMBER
+  UPDATE_MEMBER
+  SUSPEND_MEMBER
+  DELETE_MEMBER
+  CREATE_EMPLOYEE
+  UPDATE_EMPLOYEE
+  SUSPEND_EMPLOYEE
+  DELETE_EMPLOYEE
+  CREATE_CONTRACT
+  UPDATE_CONTRACT
+  SUSPEND_CONTRACT
+  DELETE_CONTRACT
+}
+
+enum ActionStatus {
+  SUCCESS
+  FAILED
+}
+
+enum TargetType {
+  STAFF
+  MEMBER
+  EMPLOYEE
+  CONTRACT
+}
+
+// ==========================================
+// MEMBER (สมาชิกเจ้าของสวนยาง)
+// ==========================================
+
+model Member {
+  id              String       @id @default(cuid())
+  memberCode      String       @unique
+  firstName       String
+  lastName        String
+  idCardNumber    String       @unique @db.VarChar(13)
+  dateOfBirth     DateTime
+  phone           String       @db.VarChar(10)
+  address         String
+  district        String
+  province        String
+  postalCode      String
+  photoUrl        String?
+  gardenName      String?
+  walletBalance   Decimal      @default(0) @db.Decimal(12, 2)
+  dividendBalance Decimal      @default(0) @db.Decimal(12, 2)
+  status          MemberStatus @default(Active)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  mePairs MePair[]
+}
+
+// ==========================================
+// EMPLOYEE (ลูกจ้างรับซื้อยางหน้างาน)
+// ==========================================
 
 model Employee {
   id           String         @id @default(cuid())
   employeeCode String         @unique
   firstName    String
   lastName     String
-  idCardNumber String         @unique
-  phone        String
+  idCardNumber String         @unique @db.VarChar(13)
+  dateOfBirth  DateTime
+  phone        String         @db.VarChar(10)
   address      String
+  district     String
+  province     String
   postalCode   String
   photoUrl     String?
-  status       EmployeeStatus @default(ACTIVE)
+  status       EmployeeStatus @default(Active)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  mePairs      MePair[]
+
+  mePairs MePair[]
 }
 
-enum MemberStatus {
-  ACTIVE
-  SUSPENDED
+// ==========================================
+// STAFF (พนักงานออฟฟิศ / ผู้ดูแลระบบ — ใช้เป็นบัญชี "ผู้ใช้งาน" ของหน้า Admin)
+// ==========================================
+
+model Staff {
+  id        String      @id @default(cuid())
+  staffCode String      @unique
+  firstName String
+  lastName  String
+  username  String      @unique
+  email     String      @unique
+  phone     String      @db.VarChar(10)
+  password  String
+  role      StaffRole
+  status    StaffStatus @default(Active)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  activityLogs ActivityLog[]
 }
 
-enum EmployeeStatus {
-  ACTIVE
-  SUSPENDED
-}
+// ==========================================
+// ME_PAIR (สัญญาจับคู่สมาชิก-ลูกจ้าง + สัดส่วนรายได้)
+// memberShare + employeeShare ต้องรวมกันเป็น 100 — ตรวจสอบที่ app layer
+// ==========================================
 
 model MePair {
   id                String     @id @default(cuid())
@@ -72,7 +168,23 @@ model MePair {
   @@index([employeeId])
 }
 
-enum PairStatus {
-  Active
-  Inactive
+// ==========================================
+// ACTIVITY LOG (ประวัติการใช้งานของ Staff/Admin)
+// ==========================================
+
+model ActivityLog {
+  logId       BigInt       @id @default(autoincrement())
+  staffId     String
+  action      ActionType
+  targetType  TargetType?
+  targetId    String?
+  status      ActionStatus @default(SUCCESS)
+  description String?
+  actionTime  DateTime     @default(now())
+
+  staff Staff @relation(fields: [staffId], references: [id])
+
+  @@index([staffId])
+  @@index([actionTime])
+  @@index([targetType, targetId])
 }

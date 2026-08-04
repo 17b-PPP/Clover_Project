@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createContract, getContracts } from "@/lib/data/contracts";
 import { handleRouteError } from "@/lib/api-error";
+import { logActivity } from "@/lib/activity-log";
 import type { ContractInput } from "@/lib/types";
 
 export async function GET() {
@@ -36,6 +37,13 @@ export async function POST(request: NextRequest) {
       employeeId: body.employeeId!,
       memberShare: body.memberShare!,
       employeeShare: body.employeeShare!,
+    });
+
+    await logActivity({
+      action: "CREATE_CONTRACT",
+      targetType: "CONTRACT",
+      targetId: contract.id,
+      description: `เพิ่มสัญญาจ้างใหม่ ${contract.pairCode} (${contract.member.firstName} ${contract.member.lastName} ↔ ${contract.employee.firstName} ${contract.employee.lastName})`,
     });
 
     return NextResponse.json(contract, { status: 201 });

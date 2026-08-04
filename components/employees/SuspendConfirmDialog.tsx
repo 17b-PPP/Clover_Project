@@ -21,7 +21,7 @@ export function SuspendConfirmDialog({
   const [submitting, setSubmitting] = useState(false);
   if (!employee) return null;
 
-  const willSuspend = employee.status === "ACTIVE";
+  const willSuspend = employee.status === "Active";
 
   async function handleConfirm() {
     setSubmitting(true);

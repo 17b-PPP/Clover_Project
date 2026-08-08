@@ -1,13 +1,35 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import type { Member, Employee, MePair } from "@prisma/client";
+import type { MePair } from "@prisma/client";
 import type { Contract, ContractInput } from "@/lib/types";
 
+const memberSummarySelect = {
+  id: true,
+  memberCode: true,
+  firstName: true,
+  lastName: true,
+  status: true,
+} as const satisfies Prisma.MemberSelect;
+
+const employeeSummarySelect = {
+  id: true,
+  employeeCode: true,
+  firstName: true,
+  lastName: true,
+  status: true,
+} as const satisfies Prisma.EmployeeSelect;
+
 const withParties = Prisma.validator<Prisma.MePairDefaultArgs>()({
-  include: { member: true, employee: true },
+  include: {
+    member: { select: memberSummarySelect },
+    employee: { select: employeeSummarySelect },
+  },
 });
 
-type MePairWithParties = MePair & { member: Member; employee: Employee };
+type MePairWithParties = MePair & {
+  member: Prisma.MemberGetPayload<{ select: typeof memberSummarySelect }>;
+  employee: Prisma.EmployeeGetPayload<{ select: typeof employeeSummarySelect }>;
+};
 
 function serialize(pair: MePairWithParties): Contract {
   return {

@@ -16,6 +16,8 @@ function serialize(purchase: PrismaPurchase): Purchase {
     dryPercentage: purchase.dryPercentage.toNumber(),
     dryWeightKg: purchase.dryWeightKg.toNumber(),
     totalAmount: purchase.totalAmount.toNumber(),
+    employeePayout: purchase.employeePayout.toNumber(),
+    ownerPayout: purchase.ownerPayout.toNumber(),
     createdAt: purchase.createdAt.toISOString(),
     memberId: purchase.memberId,
     employeeId: purchase.employeeId,
@@ -51,6 +53,8 @@ export async function lookupSeller(code: string): Promise<SellerLookup> {
       employeeId: null,
       ownerName: fullName,
       deliveredByName: fullName,
+      memberShare: 100,
+      employeeShare: 0,
     };
   }
 
@@ -79,6 +83,8 @@ export async function lookupSeller(code: string): Promise<SellerLookup> {
       employeeId: employee.id,
       ownerName: `${pair.member.firstName} ${pair.member.lastName}`,
       deliveredByName: `${employee.firstName} ${employee.lastName}`,
+      memberShare: pair.memberShare.toNumber(),
+      employeeShare: pair.employeeShare.toNumber(),
     };
   }
 
@@ -99,23 +105,38 @@ export async function createPurchase(
   const dryWeightKg = (input.rawWeightKg * input.dryPercentage) / 100;
   const totalAmount = dryWeightKg * input.marketPrice;
 
+  // Employee's share is paid out on the spot (not tracked in the DB);
+  // the owner's share is credited to their wallet, so it's computed as
+  // the remainder to guarantee the two payouts always sum to totalAmount.
+  const employeePayout =
+    Math.round(totalAmount * (seller.employeeShare / 100) * 100) / 100;
+  const ownerPayout = Math.round((totalAmount - employeePayout) * 100) / 100;
+
   const purchaseCode = await nextPurchaseCode();
-  const purchase = await prisma.purchase.create({
-    data: {
-      purchaseCode,
-      recordDate: new Date(input.recordDate),
-      marketPrice: input.marketPrice,
-      sellerCode: seller.sellerCode,
-      sellerType: seller.sellerType,
-      ownerName: seller.ownerName,
-      deliveredByName: seller.deliveredByName,
-      rawWeightKg: input.rawWeightKg,
-      dryPercentage: input.dryPercentage,
-      dryWeightKg,
-      totalAmount,
-      memberId: seller.memberId,
-      employeeId: seller.employeeId,
-    },
-  });
+  const [purchase] = await prisma.$transaction([
+    prisma.purchase.create({
+      data: {
+        purchaseCode,
+        recordDate: new Date(input.recordDate),
+        marketPrice: input.marketPrice,
+        sellerCode: seller.sellerCode,
+        sellerType: seller.sellerType,
+        ownerName: seller.ownerName,
+        deliveredByName: seller.deliveredByName,
+        rawWeightKg: input.rawWeightKg,
+        dryPercentage: input.dryPercentage,
+        dryWeightKg,
+        totalAmount,
+        employeePayout,
+        ownerPayout,
+        memberId: seller.memberId,
+        employeeId: seller.employeeId,
+      },
+    }),
+    prisma.member.update({
+      where: { id: seller.memberId },
+      data: { walletBalance: { increment: ownerPayout } },
+    }),
+  ]);
   return serialize(purchase);
 }

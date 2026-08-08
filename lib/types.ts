@@ -152,6 +152,8 @@ export interface SellerLookup {
   employeeId: string | null;
   ownerName: string;
   deliveredByName: string;
+  memberShare: number;
+  employeeShare: number;
 }
 
 export interface Purchase {
@@ -167,6 +169,8 @@ export interface Purchase {
   dryPercentage: number;
   dryWeightKg: number;
   totalAmount: number;
+  employeePayout: number;
+  ownerPayout: number;
   createdAt: string;
   memberId: string;
   employeeId: string | null;

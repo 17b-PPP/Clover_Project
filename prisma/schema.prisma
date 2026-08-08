@@ -196,6 +196,8 @@ model Purchase {
   dryPercentage  Decimal    @db.Decimal(5, 2)
   dryWeightKg    Decimal    @db.Decimal(10, 2)
   totalAmount    Decimal    @db.Decimal(12, 2)
+  employeePayout Decimal    @default(0) @db.Decimal(12, 2)
+  ownerPayout    Decimal    @default(0) @db.Decimal(12, 2)
   createdAt      DateTime   @default(now())
 
   memberId   String

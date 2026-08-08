@@ -31,12 +31,6 @@ export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
   const [deleteMember, setDeleteMember] = useState<Member | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  async function loadMembers() {
-    const res = await fetch("/api/members");
-    const data = (await res.json()) as Member[];
-    setMembers(data);
-  }
-
   const filteredMembers = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return members;
@@ -83,34 +77,40 @@ export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error ?? "ไม่สามารถเพิ่มสมาชิกได้");
       }
+      setMembers((prev) => [...prev, data as Member]);
     } else if (formMode === "edit" && selectedMember) {
       const res = await fetch(`/api/members/${selectedMember.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error ?? "ไม่สามารถแก้ไขข้อมูลได้");
       }
+      setMembers((prev) =>
+        prev.map((m) => (m.id === data.id ? (data as Member) : m))
+      );
     }
-    await loadMembers();
   }
 
   async function handleToggleStatus() {
     if (!statusMember) return;
     const nextStatus =
       statusMember.status === "Active" ? "Inactive" : "Active";
-    await fetch(`/api/members/${statusMember.id}`, {
+    const res = await fetch(`/api/members/${statusMember.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: nextStatus }),
     });
-    await loadMembers();
+    const data = await res.json();
+    setMembers((prev) =>
+      prev.map((m) => (m.id === data.id ? (data as Member) : m))
+    );
   }
 
   async function handleDelete() {
@@ -122,7 +122,7 @@ export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
       const data = await res.json();
       throw new Error(data.error ?? "ไม่สามารถลบสมาชิกได้");
     }
-    await loadMembers();
+    setMembers((prev) => prev.filter((m) => m.id !== deleteMember.id));
   }
 
   return (

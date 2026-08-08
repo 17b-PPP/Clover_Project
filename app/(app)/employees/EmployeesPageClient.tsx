@@ -35,12 +35,6 @@ export function EmployeesPageClient({
   const [deleteEmployee, setDeleteEmployee] = useState<Employee | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  async function loadEmployees() {
-    const res = await fetch("/api/employees");
-    const data = (await res.json()) as Employee[];
-    setEmployees(data);
-  }
-
   const filteredEmployees = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return employees;
@@ -87,34 +81,40 @@ export function EmployeesPageClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error ?? "ไม่สามารถเพิ่มลูกจ้างได้");
       }
+      setEmployees((prev) => [...prev, data as Employee]);
     } else if (formMode === "edit" && selectedEmployee) {
       const res = await fetch(`/api/employees/${selectedEmployee.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error ?? "ไม่สามารถแก้ไขข้อมูลได้");
       }
+      setEmployees((prev) =>
+        prev.map((emp) => (emp.id === data.id ? (data as Employee) : emp))
+      );
     }
-    await loadEmployees();
   }
 
   async function handleToggleStatus() {
     if (!statusEmployee) return;
     const nextStatus =
       statusEmployee.status === "Active" ? "Inactive" : "Active";
-    await fetch(`/api/employees/${statusEmployee.id}`, {
+    const res = await fetch(`/api/employees/${statusEmployee.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: nextStatus }),
     });
-    await loadEmployees();
+    const data = await res.json();
+    setEmployees((prev) =>
+      prev.map((emp) => (emp.id === data.id ? (data as Employee) : emp))
+    );
   }
 
   async function handleDelete() {
@@ -126,7 +126,7 @@ export function EmployeesPageClient({
       const data = await res.json();
       throw new Error(data.error ?? "ไม่สามารถลบลูกจ้างได้");
     }
-    await loadEmployees();
+    setEmployees((prev) => prev.filter((emp) => emp.id !== deleteEmployee.id));
   }
 
   return (

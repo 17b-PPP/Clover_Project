@@ -27,12 +27,6 @@ export function UsersPageClient({ initialUsers }: UsersPageClientProps) {
   const [statusUser, setStatusUser] = useState<User | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
 
-  async function loadUsers() {
-    const res = await fetch("/api/users");
-    const data = (await res.json()) as User[];
-    setUsers(data);
-  }
-
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return users;
@@ -74,33 +68,39 @@ export function UsersPageClient({ initialUsers }: UsersPageClientProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error ?? "ไม่สามารถเพิ่มผู้ใช้งานได้");
       }
+      setUsers((prev) => [...prev, data as User]);
     } else if (formMode === "edit" && selectedUser) {
       const res = await fetch(`/api/users/${selectedUser.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error ?? "ไม่สามารถแก้ไขข้อมูลได้");
       }
+      setUsers((prev) =>
+        prev.map((u) => (u.id === data.id ? (data as User) : u))
+      );
     }
-    await loadUsers();
   }
 
   async function handleToggleStatus() {
     if (!statusUser) return;
     const nextStatus = statusUser.status === "Active" ? "Inactive" : "Active";
-    await fetch(`/api/users/${statusUser.id}`, {
+    const res = await fetch(`/api/users/${statusUser.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: nextStatus }),
     });
-    await loadUsers();
+    const data = await res.json();
+    setUsers((prev) =>
+      prev.map((u) => (u.id === data.id ? (data as User) : u))
+    );
   }
 
   return (

@@ -119,10 +119,11 @@ export function ContractsPageClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error ?? "ไม่สามารถเพิ่มสัญญาจ้างได้");
       }
+      setContracts((prev) => [...prev, data as Contract]);
     } else if (formMode === "edit" && selectedContract) {
       const res = await fetch(`/api/contracts/${selectedContract.id}`, {
         method: "PATCH",
@@ -133,20 +134,25 @@ export function ContractsPageClient({
         const data = await res.json();
         throw new Error(data.error ?? "ไม่สามารถแก้ไขข้อมูลได้");
       }
+      // Renewing ends the old contract row and creates a new one server-side,
+      // so a single response can't describe both changes — refresh the list.
+      await loadContracts();
     }
-    await loadContracts();
   }
 
   async function handleToggleStatus() {
     if (!statusContract) return;
     const nextStatus =
       statusContract.status === "Active" ? "Inactive" : "Active";
-    await fetch(`/api/contracts/${statusContract.id}`, {
+    const res = await fetch(`/api/contracts/${statusContract.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: nextStatus }),
     });
-    await loadContracts();
+    const data = await res.json();
+    setContracts((prev) =>
+      prev.map((c) => (c.id === data.id ? (data as Contract) : c))
+    );
   }
 
   async function handleDelete() {
@@ -158,7 +164,7 @@ export function ContractsPageClient({
       const data = await res.json();
       throw new Error(data.error ?? "ไม่สามารถลบสัญญาจ้างได้");
     }
-    await loadContracts();
+    setContracts((prev) => prev.filter((c) => c.id !== deleteContract.id));
   }
 
   return (

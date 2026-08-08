@@ -1,4 +1,4 @@
-import type { Purchase } from "@/lib/types";
+import type { Withdrawal } from "@/lib/types";
 
 const ORG_NAME = "สหกรณ์กองทุนสวนยางบ้านบางบอนจำกัด";
 
@@ -19,7 +19,7 @@ const THAI_MONTHS = [
 
 function formatThaiDate(iso: string): string {
   const d = new Date(iso);
-  return `${d.getUTCDate()} ${THAI_MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear() + 543}`;
+  return `${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${d.getFullYear() + 543}`;
 }
 
 function formatTime(iso: string): string {
@@ -27,15 +27,15 @@ function formatTime(iso: string): string {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-function receiptNumber(purchaseCode: string): string {
-  return String(parseInt(purchaseCode.replace("P-", ""), 10) || 0);
+function receiptNumber(withdrawalCode: string): string {
+  return String(parseInt(withdrawalCode.replace("W-", ""), 10) || 0);
 }
 
-interface PurchaseReceiptProps {
-  purchase: Purchase;
+interface WithdrawalReceiptProps {
+  withdrawal: Withdrawal;
 }
 
-export function PurchaseReceipt({ purchase }: PurchaseReceiptProps) {
+export function WithdrawalReceipt({ withdrawal }: WithdrawalReceiptProps) {
   return (
     <div className="receipt-print-area hidden print:block">
       <div className="relative mx-auto max-w-lg rounded-2xl border border-slate-200 p-10 text-slate-900">
@@ -56,10 +56,10 @@ export function PurchaseReceipt({ purchase }: PurchaseReceiptProps) {
           </div>
           <h1 className="mt-3 text-base font-semibold">{ORG_NAME}</h1>
           <p className="mt-1 text-sm font-semibold text-emerald-700">
-            ใบเสร็จรับเงิน
+            ใบเสร็จเบิกเงิน
           </p>
           <p className="text-xs tracking-wide text-slate-400">
-            OFFICIAL_PURCHASE_RECEIPT
+            OFFICIAL_WITHDRAWAL_RECEIPT
           </p>
         </div>
 
@@ -68,70 +68,47 @@ export function PurchaseReceipt({ purchase }: PurchaseReceiptProps) {
             <span>
               เลขที่สมาชิก:{" "}
               <span className="font-medium text-emerald-700">
-                {purchase.sellerCode}
+                {withdrawal.memberCode}
               </span>
             </span>
-            <span>เลขที่: {receiptNumber(purchase.purchaseCode)}</span>
+            <span>เลขที่: {receiptNumber(withdrawal.withdrawalCode)}</span>
           </div>
           <div className="flex items-start justify-between">
-            <span>ผู้ส่งน้ำยาง: {purchase.deliveredByName}</span>
-            <span className="text-right">เจ้าของสวน: {purchase.ownerName}</span>
-          </div>
-          <div className="flex items-start justify-between">
-            <span>วันที่: {formatThaiDate(purchase.recordDate)}</span>
-            <span>เวลา: {formatTime(purchase.createdAt)}</span>
+            <span>ชื่อสมาชิก: {withdrawal.memberName}</span>
+            <span className="text-right">
+              วันที่: {formatThaiDate(withdrawal.createdAt)} เวลา:{" "}
+              {formatTime(withdrawal.createdAt)}
+            </span>
           </div>
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           <div className="rounded-lg bg-slate-100 px-4 py-3 text-sm">
-            <p className="text-slate-500">น้ำหนักน้ำยางสดสุทธิ</p>
+            <p className="text-slate-500">ยอดเงินสะสมก่อนเบิก</p>
             <p className="mt-1 font-semibold">
-              {purchase.rawWeightKg.toFixed(0)} กก.
+              {withdrawal.balanceBefore.toFixed(2)} ฿
             </p>
           </div>
           <div className="rounded-lg bg-slate-100 px-4 py-3 text-sm">
-            <p className="text-slate-500">% เนื้อยาง</p>
+            <p className="text-slate-500">ยอดคงเหลือหลังเบิก</p>
             <p className="mt-1 font-semibold">
-              {purchase.dryPercentage.toFixed(0)} %
+              {withdrawal.balanceAfter.toFixed(2)} ฿
             </p>
           </div>
-        </div>
-
-        <div className="mt-3 flex items-center justify-between rounded-lg bg-slate-100 px-4 py-3 text-sm">
-          <span className="text-slate-500">น้ำหนักยางแห้งสุทธิ</span>
-          <span className="font-semibold text-emerald-700">
-            {purchase.dryWeightKg.toFixed(1)} กก.
-          </span>
         </div>
 
         <div className="mt-5 flex items-center justify-between border-t border-dashed border-slate-300 pt-4">
-          <span className="text-base font-semibold">จำนวนเงินรวม</span>
+          <span className="text-base font-semibold">จำนวนเงินที่เบิก</span>
           <span className="text-xl font-bold text-emerald-700">
-            {purchase.totalAmount.toFixed(0)} ฿
+            {withdrawal.amount.toFixed(2)} ฿
           </span>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-lg bg-slate-100 px-4 py-3 text-sm">
-            <p className="text-slate-500">ลูกจ้าง (จ่ายแล้ว)</p>
-            <p className="mt-1 font-semibold">
-              {purchase.employeePayout.toFixed(0)} ฿
-            </p>
-          </div>
-          <div className="rounded-lg bg-slate-100 px-4 py-3 text-sm">
-            <p className="text-slate-500">เจ้าของสวน (สะสม)</p>
-            <p className="mt-1 font-semibold">
-              {purchase.ownerPayout.toFixed(0)} ฿
-            </p>
-          </div>
         </div>
 
         <div className="mt-8 grid grid-cols-2 gap-6 border-t border-slate-200 pt-8 text-center text-xs text-slate-500">
           <div>
             <div className="h-16" />
             <div className="border-t border-slate-300 pt-2">
-              ผู้ส่งน้ำยาง/ผู้รับเงิน
+              ผู้เบิกเงิน/ผู้รับเงิน
             </div>
           </div>
           <div>

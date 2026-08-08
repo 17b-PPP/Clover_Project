@@ -36,11 +36,11 @@ body {
   body * {
     visibility: hidden;
   }
-  #purchase-receipt,
-  #purchase-receipt * {
+  .receipt-print-area,
+  .receipt-print-area * {
     visibility: visible;
   }
-  #purchase-receipt {
+  .receipt-print-area {
     position: absolute;
     top: 0;
     left: 0;

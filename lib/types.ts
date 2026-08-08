@@ -184,6 +184,30 @@ export interface PurchaseInput {
   dryPercentage: number;
 }
 
+export interface MemberLookup {
+  memberId: string;
+  memberCode: string;
+  fullName: string;
+  walletBalance: number;
+}
+
+export interface Withdrawal {
+  id: string;
+  withdrawalCode: string;
+  memberId: string;
+  memberCode: string;
+  memberName: string;
+  amount: number;
+  balanceBefore: number;
+  balanceAfter: number;
+  createdAt: string;
+}
+
+export interface WithdrawalInput {
+  memberCode: string;
+  amount: number;
+}
+
 export interface AuditLogEntry {
   id: string;
   timestamp: string;

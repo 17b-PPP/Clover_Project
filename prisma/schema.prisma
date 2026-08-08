@@ -56,6 +56,7 @@ enum ActionType {
   UPDATE_CONTRACT
   SUSPEND_CONTRACT
   DELETE_CONTRACT
+  CREATE_PURCHASE
 }
 
 enum ActionStatus {
@@ -68,6 +69,12 @@ enum TargetType {
   MEMBER
   EMPLOYEE
   CONTRACT
+  PURCHASE
+}
+
+enum SellerType {
+  MEMBER
+  EMPLOYEE
 }
 
 // ==========================================
@@ -94,7 +101,8 @@ model Member {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
-  mePairs MePair[]
+  mePairs   MePair[]
+  purchases Purchase[]
 }
 
 // ==========================================
@@ -118,7 +126,8 @@ model Employee {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
-  mePairs MePair[]
+  mePairs   MePair[]
+  purchases Purchase[]
 }
 
 // ==========================================
@@ -166,6 +175,37 @@ model MePair {
 
   @@index([memberId])
   @@index([employeeId])
+}
+
+// ==========================================
+// PURCHASE (บันทึกการรับซื้อน้ำยางพารา)
+// dryWeightKg = rawWeightKg * dryPercentage / 100
+// totalAmount = dryWeightKg * marketPrice
+// ==========================================
+
+model Purchase {
+  id             String     @id @default(cuid())
+  purchaseCode   String     @unique
+  recordDate     DateTime
+  marketPrice    Decimal    @db.Decimal(10, 2)
+  sellerCode     String
+  sellerType     SellerType
+  ownerName      String
+  deliveredByName String
+  rawWeightKg    Decimal    @db.Decimal(10, 2)
+  dryPercentage  Decimal    @db.Decimal(5, 2)
+  dryWeightKg    Decimal    @db.Decimal(10, 2)
+  totalAmount    Decimal    @db.Decimal(12, 2)
+  createdAt      DateTime   @default(now())
+
+  memberId   String
+  employeeId String?
+
+  member   Member    @relation(fields: [memberId], references: [id])
+  employee Employee? @relation(fields: [employeeId], references: [id])
+
+  @@index([memberId])
+  @@index([recordDate])
 }
 
 // ==========================================

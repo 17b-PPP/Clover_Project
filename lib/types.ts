@@ -127,6 +127,43 @@ export interface UserInput {
   password?: string;
 }
 
+export type SellerType = "MEMBER" | "EMPLOYEE";
+
+export interface SellerLookup {
+  sellerCode: string;
+  sellerType: SellerType;
+  memberId: string;
+  employeeId: string | null;
+  ownerName: string;
+  deliveredByName: string;
+}
+
+export interface Purchase {
+  id: string;
+  purchaseCode: string;
+  recordDate: string;
+  marketPrice: number;
+  sellerCode: string;
+  sellerType: SellerType;
+  ownerName: string;
+  deliveredByName: string;
+  rawWeightKg: number;
+  dryPercentage: number;
+  dryWeightKg: number;
+  totalAmount: number;
+  createdAt: string;
+  memberId: string;
+  employeeId: string | null;
+}
+
+export interface PurchaseInput {
+  recordDate: string;
+  marketPrice: number;
+  sellerCode: string;
+  rawWeightKg: number;
+  dryPercentage: number;
+}
+
 export interface AuditLogEntry {
   id: string;
   timestamp: string;

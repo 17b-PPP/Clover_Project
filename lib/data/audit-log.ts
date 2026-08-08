@@ -21,6 +21,7 @@ const actionLabel: Record<ActivityLog["action"], string> = {
   UPDATE_CONTRACT: "แก้ไขสัญญาจ้าง",
   SUSPEND_CONTRACT: "ระงับ/เปิดใช้งานสัญญาจ้าง",
   DELETE_CONTRACT: "ลบสัญญาจ้าง",
+  CREATE_PURCHASE: "บันทึกรับซื้อน้ำยาง",
 };
 
 type LogWithStaff = ActivityLog & { staff: Staff };

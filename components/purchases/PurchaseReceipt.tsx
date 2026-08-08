@@ -38,7 +38,7 @@ interface PurchaseReceiptProps {
 export function PurchaseReceipt({ purchase }: PurchaseReceiptProps) {
   return (
     <div id="purchase-receipt" className="hidden print:block">
-      <div className="relative mx-auto max-w-md rounded-2xl border border-slate-200 p-8 text-slate-900">
+      <div className="relative mx-auto max-w-lg rounded-2xl border border-slate-200 p-10 text-slate-900">
         <div className="flex flex-col items-center text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
             <svg
@@ -127,11 +127,17 @@ export function PurchaseReceipt({ purchase }: PurchaseReceiptProps) {
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-6 border-t border-slate-200 pt-6 text-center text-xs text-slate-500">
-          <div className="border-t border-slate-300 pt-2">
-            ผู้ส่งน้ำยาง/ผู้รับเงิน
+        <div className="mt-8 grid grid-cols-2 gap-6 border-t border-slate-200 pt-8 text-center text-xs text-slate-500">
+          <div>
+            <div className="h-16" />
+            <div className="border-t border-slate-300 pt-2">
+              ผู้ส่งน้ำยาง/ผู้รับเงิน
+            </div>
           </div>
-          <div className="border-t border-slate-300 pt-2">ผู้จ่ายเงิน</div>
+          <div>
+            <div className="h-16" />
+            <div className="border-t border-slate-300 pt-2">ผู้จ่ายเงิน</div>
+          </div>
         </div>
 
         <div className="absolute bottom-6 right-6 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">

@@ -300,7 +300,7 @@ export function PurchasesPageClient() {
               disabled={locked || submitting}
               onClick={handleCalculate}
             >
-              {submitting ? "กำลังคำนวณ..." : "คำนวณเงิน"}
+              {submitting ? "กำลังบันทึก..." : "ยืนยัน"}
             </Button>
           </div>
         </div>

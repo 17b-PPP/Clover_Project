@@ -12,12 +12,17 @@ import {
 import { SuspendConfirmDialog } from "@/components/contracts/SuspendConfirmDialog";
 import { DeleteConfirmDialog } from "@/components/contracts/DeleteConfirmDialog";
 import { ContractHistoryDialog } from "@/components/contracts/ContractHistoryDialog";
-import type { Contract, ContractInput, Employee, Member } from "@/lib/types";
+import type {
+  Contract,
+  ContractInput,
+  EmployeeOption,
+  MemberOption,
+} from "@/lib/types";
 
 interface ContractsPageClientProps {
   initialContracts: Contract[];
-  members: Member[];
-  employees: Employee[];
+  members: MemberOption[];
+  employees: EmployeeOption[];
 }
 
 export function ContractsPageClient({

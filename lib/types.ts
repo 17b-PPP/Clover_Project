@@ -68,6 +68,22 @@ export interface EmployeeInput {
   photoUrl: string | null;
 }
 
+export interface MemberOption {
+  id: string;
+  memberCode: string;
+  firstName: string;
+  lastName: string;
+  status: MemberStatus;
+}
+
+export interface EmployeeOption {
+  id: string;
+  employeeCode: string;
+  firstName: string;
+  lastName: string;
+  status: EmployeeStatus;
+}
+
 export type ContractStatus = "Active" | "Inactive";
 
 export interface ContractPartySummary {

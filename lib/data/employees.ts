@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Employee as PrismaEmployee } from "@prisma/client";
-import type { Employee, EmployeeInput } from "@/lib/types";
+import type { Employee, EmployeeInput, EmployeeOption } from "@/lib/types";
 
 function serialize(employee: PrismaEmployee): Employee {
   return {
@@ -36,6 +36,19 @@ export async function getEmployees(): Promise<Employee[]> {
     orderBy: { createdAt: "asc" },
   });
   return employees.map(serialize);
+}
+
+export async function getEmployeeOptions(): Promise<EmployeeOption[]> {
+  return prisma.employee.findMany({
+    select: {
+      id: true,
+      employeeCode: true,
+      firstName: true,
+      lastName: true,
+      status: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
 }
 
 export async function getEmployee(id: string): Promise<Employee | undefined> {

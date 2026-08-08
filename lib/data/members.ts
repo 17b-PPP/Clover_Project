@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Member as PrismaMember } from "@prisma/client";
-import type { Member, MemberInput } from "@/lib/types";
+import type { Member, MemberInput, MemberOption } from "@/lib/types";
 
 function serialize(member: PrismaMember): Member {
   return {
@@ -39,6 +39,19 @@ export async function getMembers(): Promise<Member[]> {
     orderBy: { createdAt: "asc" },
   });
   return members.map(serialize);
+}
+
+export async function getMemberOptions(): Promise<MemberOption[]> {
+  return prisma.member.findMany({
+    select: {
+      id: true,
+      memberCode: true,
+      firstName: true,
+      lastName: true,
+      status: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
 }
 
 export async function getMember(id: string): Promise<Member | undefined> {

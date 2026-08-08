@@ -5,7 +5,12 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import type { Contract, ContractInput, Employee, Member } from "@/lib/types";
+import type {
+  Contract,
+  ContractInput,
+  EmployeeOption,
+  MemberOption,
+} from "@/lib/types";
 
 export type ContractFormMode = "add" | "view" | "edit";
 
@@ -13,8 +18,8 @@ interface ContractFormDialogProps {
   open: boolean;
   mode: ContractFormMode;
   contract?: Contract | null;
-  members: Member[];
-  employees: Employee[];
+  members: MemberOption[];
+  employees: EmployeeOption[];
   onClose: () => void;
   onSubmit: (input: ContractInput) => Promise<void>;
   onRequestEdit?: () => void;

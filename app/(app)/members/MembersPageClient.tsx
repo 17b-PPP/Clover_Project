@@ -48,14 +48,21 @@ export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
     setFormOpen(true);
   }
 
-  function openViewForm(member: Member) {
-    setSelectedMember(member);
+  // The list omits photoUrl (see getMembers()), so viewing/editing a member
+  // fetches the full record — including the real photo — on demand.
+  async function fetchFullMember(id: string): Promise<Member> {
+    const res = await fetch(`/api/members/${id}`);
+    return (await res.json()) as Member;
+  }
+
+  async function openViewForm(member: Member) {
+    setSelectedMember(await fetchFullMember(member.id));
     setFormMode("view");
     setFormOpen(true);
   }
 
-  function openEditForm(member: Member) {
-    setSelectedMember(member);
+  async function openEditForm(member: Member) {
+    setSelectedMember(await fetchFullMember(member.id));
     setFormMode("edit");
     setFormOpen(true);
   }

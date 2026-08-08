@@ -52,14 +52,21 @@ export function EmployeesPageClient({
     setFormOpen(true);
   }
 
-  function openViewForm(employee: Employee) {
-    setSelectedEmployee(employee);
+  // The list omits photoUrl (see getEmployees()), so viewing/editing an
+  // employee fetches the full record — including the real photo — on demand.
+  async function fetchFullEmployee(id: string): Promise<Employee> {
+    const res = await fetch(`/api/employees/${id}`);
+    return (await res.json()) as Employee;
+  }
+
+  async function openViewForm(employee: Employee) {
+    setSelectedEmployee(await fetchFullEmployee(employee.id));
     setFormMode("view");
     setFormOpen(true);
   }
 
-  function openEditForm(employee: Employee) {
-    setSelectedEmployee(employee);
+  async function openEditForm(employee: Employee) {
+    setSelectedEmployee(await fetchFullEmployee(employee.id));
     setFormMode("edit");
     setFormOpen(true);
   }

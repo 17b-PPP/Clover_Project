@@ -31,11 +31,45 @@ async function nextEmployeeCode(): Promise<string> {
   return `E-${String((Number.isNaN(n) ? 0 : n) + 1).padStart(4, "0")}`;
 }
 
+// Excludes photoUrl: the employee table never renders photos, and a single
+// oversized upload here would otherwise bloat every list-page load.
 export async function getEmployees(): Promise<Employee[]> {
   const employees = await prisma.employee.findMany({
+    select: {
+      id: true,
+      employeeCode: true,
+      firstName: true,
+      lastName: true,
+      idCardNumber: true,
+      dateOfBirth: true,
+      phone: true,
+      address: true,
+      district: true,
+      province: true,
+      postalCode: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+    },
     orderBy: { createdAt: "asc" },
   });
-  return employees.map(serialize);
+  return employees.map((employee) => ({
+    id: employee.id,
+    employeeCode: employee.employeeCode,
+    firstName: employee.firstName,
+    lastName: employee.lastName,
+    idCardNumber: employee.idCardNumber,
+    dateOfBirth: employee.dateOfBirth.toISOString(),
+    phone: employee.phone,
+    address: employee.address,
+    district: employee.district,
+    province: employee.province,
+    postalCode: employee.postalCode,
+    photoUrl: null,
+    status: employee.status,
+    createdAt: employee.createdAt.toISOString(),
+    updatedAt: employee.updatedAt.toISOString(),
+  }));
 }
 
 export async function getEmployeeOptions(): Promise<EmployeeOption[]> {

@@ -34,11 +34,51 @@ async function nextMemberCode(): Promise<string> {
   return `M-${String((Number.isNaN(n) ? 0 : n) + 1).padStart(4, "0")}`;
 }
 
+// Excludes photoUrl: the member table never renders photos, and a single
+// oversized upload here would otherwise bloat every list-page load.
 export async function getMembers(): Promise<Member[]> {
   const members = await prisma.member.findMany({
+    select: {
+      id: true,
+      memberCode: true,
+      firstName: true,
+      lastName: true,
+      idCardNumber: true,
+      dateOfBirth: true,
+      phone: true,
+      address: true,
+      district: true,
+      province: true,
+      postalCode: true,
+      gardenName: true,
+      walletBalance: true,
+      dividendBalance: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+    },
     orderBy: { createdAt: "asc" },
   });
-  return members.map(serialize);
+  return members.map((member) => ({
+    id: member.id,
+    memberCode: member.memberCode,
+    firstName: member.firstName,
+    lastName: member.lastName,
+    idCardNumber: member.idCardNumber,
+    dateOfBirth: member.dateOfBirth.toISOString(),
+    phone: member.phone,
+    address: member.address,
+    district: member.district,
+    province: member.province,
+    postalCode: member.postalCode,
+    photoUrl: null,
+    gardenName: member.gardenName,
+    walletBalance: member.walletBalance.toNumber(),
+    dividendBalance: member.dividendBalance.toNumber(),
+    status: member.status,
+    createdAt: member.createdAt.toISOString(),
+    updatedAt: member.updatedAt.toISOString(),
+  }));
 }
 
 export async function getMemberOptions(): Promise<MemberOption[]> {

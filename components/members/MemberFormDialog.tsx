@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
 import { usePostalCodeLookup } from "@/components/hooks/usePostalCodeLookup";
+import { resizeImageToDataUrl } from "@/lib/image";
 import type { Member, MemberInput } from "@/lib/types";
 
 export type MemberFormMode = "add" | "view" | "edit";
@@ -78,14 +79,11 @@ export function MemberFormDialog({
     }));
   }, [postalMatches, readOnly]);
 
-  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      setForm((prev) => ({ ...prev, photoUrl: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
+    const dataUrl = await resizeImageToDataUrl(file);
+    setForm((prev) => ({ ...prev, photoUrl: dataUrl }));
   }
 
   async function handleSubmit(e: FormEvent) {

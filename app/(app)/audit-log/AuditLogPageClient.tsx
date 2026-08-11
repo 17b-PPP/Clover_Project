@@ -1,10 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Pagination } from "@/components/ui/Pagination";
 import { AuditLogTable } from "@/components/audit-log/AuditLogTable";
 import type { AuditLogEntry } from "@/lib/types";
+
+const PAGE_SIZE = 10;
 
 interface AuditLogPageClientProps {
   entries: AuditLogEntry[];
@@ -12,6 +15,7 @@ interface AuditLogPageClientProps {
 
 export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   const filteredEntries = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -20,6 +24,16 @@ export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
       [e.username, e.action, e.details].join(" ").toLowerCase().includes(q)
     );
   }, [entries, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE));
+  const pagedEntries = filteredEntries.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
@@ -37,7 +51,8 @@ export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
         />
       </div>
 
-      <AuditLogTable entries={filteredEntries} />
+      <AuditLogTable entries={pagedEntries} />
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );
 }

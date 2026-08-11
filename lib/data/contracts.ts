@@ -87,6 +87,18 @@ export async function getContract(id: string): Promise<Contract | undefined> {
 export async function createContract(
   input: ContractInput
 ): Promise<Contract> {
+  const [member, employee] = await Promise.all([
+    prisma.member.findUnique({ where: { id: input.memberId } }),
+    prisma.employee.findUnique({ where: { id: input.employeeId } }),
+  ]);
+
+  if (!member || member.status !== "Active") {
+    throw new Error("สมาชิกที่เลือกถูกระงับการใช้งานหรือไม่มีอยู่ในระบบ");
+  }
+  if (!employee || employee.status !== "Active") {
+    throw new Error("ลูกจ้างที่เลือกถูกระงับการใช้งานหรือไม่มีอยู่ในระบบ");
+  }
+
   const pairCode = await nextPairCode();
   const pair = await prisma.mePair.create({
     data: {

@@ -32,11 +32,11 @@ export function AuditLogTable({ entries }: AuditLogTableProps) {
     <Table>
       <TableHead>
         <TableRow>
-          <TableHeaderCell>เวลา</TableHeaderCell>
-          <TableHeaderCell>ชื่อผู้ใช้งาน</TableHeaderCell>
-          <TableHeaderCell>บทบาท</TableHeaderCell>
-          <TableHeaderCell>Action</TableHeaderCell>
-          <TableHeaderCell>รายละเอียด</TableHeaderCell>
+          <TableHeaderCell align="center">เวลา</TableHeaderCell>
+          <TableHeaderCell align="center">ชื่อผู้ใช้งาน</TableHeaderCell>
+          <TableHeaderCell align="center">บทบาท</TableHeaderCell>
+          <TableHeaderCell align="center">Action</TableHeaderCell>
+          <TableHeaderCell align="center">รายละเอียด</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>

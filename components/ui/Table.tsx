@@ -14,9 +14,23 @@ export function TableHead({ children }: { children: ReactNode }) {
   return <thead className="bg-slate-50/80">{children}</thead>;
 }
 
-export function TableHeaderCell({ children }: { children: ReactNode }) {
+const headerAlignClasses = {
+  left: "text-left",
+  center: "text-center",
+  right: "text-right",
+} as const;
+
+export function TableHeaderCell({
+  children,
+  align = "left",
+}: {
+  children: ReactNode;
+  align?: keyof typeof headerAlignClasses;
+}) {
   return (
-    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <th
+      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 ${headerAlignClasses[align]}`}
+    >
       {children}
     </th>
   );

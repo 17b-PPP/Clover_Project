@@ -12,10 +12,13 @@ export interface MemberSessionPayload {
   exp: number;
 }
 
-function getSecret(): string {
+function getSecret(): Buffer {
   const secret = process.env.SESSION_SECRET;
   if (!secret) throw new Error("SESSION_SECRET is not set");
-  return secret;
+  // Derive a member-specific key from SESSION_SECRET so member-signed
+  // tokens can never be valid under the staff decoder's key (which HMACs
+  // with SESSION_SECRET directly), even though both share the same env var.
+  return crypto.createHmac("sha256", secret).update("member-session-v1").digest();
 }
 
 function sign(value: string): string {

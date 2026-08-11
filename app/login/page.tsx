@@ -27,7 +27,11 @@ function LoginForm() {
         const data = await res.json();
         throw new Error(data.error ?? "เข้าสู่ระบบไม่สำเร็จ");
       }
-      const next = searchParams.get("next") ?? "/";
+      const rawNext = searchParams.get("next");
+      const next =
+        rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")
+          ? rawNext
+          : "/";
       router.push(next);
       router.refresh();
     } catch (err) {

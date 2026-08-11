@@ -27,7 +27,11 @@ function MemberLoginForm() {
         const data = await res.json();
         throw new Error(data.error ?? "เข้าสู่ระบบไม่สำเร็จ");
       }
-      const next = searchParams.get("next") ?? "/member/dashboard";
+      const rawNext = searchParams.get("next");
+      const next =
+        rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")
+          ? rawNext
+          : "/member/dashboard";
       router.push(next);
       router.refresh();
     } catch (err) {

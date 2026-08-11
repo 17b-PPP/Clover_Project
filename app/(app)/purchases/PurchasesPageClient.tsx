@@ -8,6 +8,7 @@ import { ThaiDateField } from "@/components/purchases/ThaiDateField";
 import { LiveClock } from "@/components/purchases/LiveClock";
 import { PurchaseReceipt } from "@/components/purchases/PurchaseReceipt";
 import { useSellerLookup } from "@/components/hooks/useSellerLookup";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import type { Purchase } from "@/lib/types";
 
 function todayIso(): string {
@@ -27,6 +28,7 @@ export function PurchasesPageClient() {
   const [saved, setSaved] = useState<Purchase | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const seller = useSellerLookup(sellerCode);
   const locked = saved !== null;
@@ -83,7 +85,7 @@ export function PurchasesPageClient() {
     setFormError(null);
   }
 
-  async function handleCalculate() {
+  function openConfirm() {
     setFormError(null);
 
     if (!seller.data) {
@@ -106,6 +108,10 @@ export function PurchasesPageClient() {
       return;
     }
 
+    setConfirmOpen(true);
+  }
+
+  async function submitPurchase() {
     setSubmitting(true);
     try {
       const res = await fetch("/api/purchases", {
@@ -113,10 +119,10 @@ export function PurchasesPageClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           recordDate,
-          marketPrice: price,
+          marketPrice: Number(marketPrice),
           sellerCode,
-          rawWeightKg: raw,
-          dryPercentage: pct,
+          rawWeightKg: Number(rawWeightKg),
+          dryPercentage: Number(dryPercentage),
         }),
       });
       const data = await res.json();
@@ -298,7 +304,7 @@ export function PurchasesPageClient() {
               variant="primary"
               className="w-full"
               disabled={locked || submitting}
-              onClick={handleCalculate}
+              onClick={openConfirm}
             >
               {submitting ? "กำลังบันทึก..." : "ยืนยัน"}
             </Button>
@@ -336,6 +342,14 @@ export function PurchasesPageClient() {
       </div>
 
       {saved && <PurchaseReceipt purchase={saved} />}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="ยืนยันการทำรายการ"
+        message="ต้องการบันทึกรายการรับซื้อน้ำยางนี้ใช่หรือไม่?"
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={submitPurchase}
+      />
     </div>
   );
 }

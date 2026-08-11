@@ -9,7 +9,7 @@ import {
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/member")) {
+  if (pathname === "/member" || pathname.startsWith("/member/")) {
     const memberSession = decodeMemberSession(
       request.cookies.get(MEMBER_SESSION_COOKIE_NAME)?.value
     );

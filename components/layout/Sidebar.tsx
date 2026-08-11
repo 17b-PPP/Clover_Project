@@ -64,6 +64,16 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    label: "Reports",
+    items: [
+      {
+        label: "ประวัติการรับซื้อน้ำยาง",
+        href: "/performance/purchases",
+        icon: <Icon path="M3 3v18h18M8 17V10M13 17V6M18 17v-4" />,
+      },
+    ],
+  },
+  {
     label: "Admin",
     items: [
       {
@@ -75,16 +85,6 @@ const navGroups: NavGroup[] = [
         label: "ประวัติการใช้งาน",
         href: "/audit-log",
         icon: <Icon path="M12 8v4l3 2M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9Z" />,
-      },
-    ],
-  },
-  {
-    label: "Reports",
-    items: [
-      {
-        label: "ประวัติการรับซื้อน้ำยาง",
-        href: "/performance/purchases",
-        icon: <Icon path="M3 3v18h18M8 17V10M13 17V6M18 17v-4" />,
       },
     ],
   },

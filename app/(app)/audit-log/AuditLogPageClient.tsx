@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
@@ -18,6 +18,16 @@ export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [page, setPage] = useState(1);
+
+  const [prevFilters, setPrevFilters] = useState({ search, dateFrom, dateTo });
+  if (
+    prevFilters.search !== search ||
+    prevFilters.dateFrom !== dateFrom ||
+    prevFilters.dateTo !== dateTo
+  ) {
+    setPrevFilters({ search, dateFrom, dateTo });
+    setPage(1);
+  }
 
   const filteredEntries = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -37,10 +47,6 @@ export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
     (page - 1) * PAGE_SIZE,
     page * PAGE_SIZE
   );
-
-  useEffect(() => {
-    setPage(1);
-  }, [search, dateFrom, dateTo]);
 
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">

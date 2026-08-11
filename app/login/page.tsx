@@ -5,6 +5,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
+function sanitizeNext(rawNext: string | null, fallback: string): string {
+  if (!rawNext) return fallback;
+  try {
+    const url = new URL(rawNext, window.location.origin);
+    if (url.origin !== window.location.origin) return fallback;
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return fallback;
+  }
+}
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -27,11 +38,7 @@ function LoginForm() {
         const data = await res.json();
         throw new Error(data.error ?? "เข้าสู่ระบบไม่สำเร็จ");
       }
-      const rawNext = searchParams.get("next");
-      const next =
-        rawNext && /^\/(?![/\\])/.test(rawNext)
-          ? rawNext
-          : "/";
+      const next = sanitizeNext(searchParams.get("next"), "/");
       router.push(next);
       router.refresh();
     } catch (err) {

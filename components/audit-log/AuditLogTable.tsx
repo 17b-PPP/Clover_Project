@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/Badge";
 import { formatDateTime } from "@/lib/format";
 import type { AuditLogEntry } from "@/lib/types";
+import { DetailsCell } from "@/components/audit-log/DetailsCell";
 
 const roleLabel: Record<AuditLogEntry["role"], string> = {
   ADMIN: "ผู้ดูแลระบบ",
@@ -58,7 +59,9 @@ export function AuditLogTable({ entries }: AuditLogTableProps) {
               </Badge>
             </TableCell>
             <TableCell>{entry.action}</TableCell>
-            <TableCell>{entry.details}</TableCell>
+            <TableCell>
+              <DetailsCell text={entry.details} />
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

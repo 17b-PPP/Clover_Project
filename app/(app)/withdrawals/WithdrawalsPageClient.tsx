@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { LiveClock } from "@/components/purchases/LiveClock";
@@ -16,6 +17,7 @@ export function WithdrawalsPageClient() {
   const [saved, setSaved] = useState<Withdrawal | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const member = useMemberLookup(memberCode);
   const locked = saved !== null;
@@ -27,7 +29,7 @@ export function WithdrawalsPageClient() {
     setFormError(null);
   }
 
-  async function handleConfirm() {
+  function openConfirm() {
     setFormError(null);
 
     if (!member.data) {
@@ -44,12 +46,16 @@ export function WithdrawalsPageClient() {
       return;
     }
 
+    setConfirmOpen(true);
+  }
+
+  async function submitWithdrawal() {
     setSubmitting(true);
     try {
       const res = await fetch("/api/withdrawals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ memberCode, amount: value }),
+        body: JSON.stringify({ memberCode, amount: Number(amount) }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -161,7 +167,7 @@ export function WithdrawalsPageClient() {
             type="button"
             variant="primary"
             disabled={locked || submitting}
-            onClick={handleConfirm}
+            onClick={openConfirm}
           >
             {submitting ? "กำลังบันทึก..." : "ยืนยัน"}
           </Button>
@@ -180,6 +186,14 @@ export function WithdrawalsPageClient() {
       </div>
 
       {saved && <WithdrawalReceipt withdrawal={saved} />}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="ยืนยันการทำรายการ"
+        message="ต้องการบันทึกรายการเบิกเงินนี้ใช่หรือไม่?"
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={submitWithdrawal}
+      />
     </div>
   );
 }

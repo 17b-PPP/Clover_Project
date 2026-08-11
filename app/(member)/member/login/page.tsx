@@ -89,11 +89,18 @@ function MemberLoginForm() {
           />
           <Input
             label="วันเกิด"
-            type="date"
             required
+            inputMode="numeric"
+            pattern="[0-9]{8}"
+            title="วันเกิด 8 หลัก รูปแบบ วว/ดด/ปปปป เช่น 01012000"
+            placeholder="วว/ดด/ปปปป เช่น 01012000"
+            minLength={8}
+            maxLength={8}
             autoComplete="off"
             value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
+            onChange={(e) =>
+              setDateOfBirth(e.target.value.replace(/\D/g, ""))
+            }
           />
 
           {error && <p className="text-sm text-red-600">{error}</p>}

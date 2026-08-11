@@ -98,6 +98,14 @@ export async function getPurchases(): Promise<Purchase[]> {
   return purchases.map(serialize);
 }
 
+export async function getPurchaseHistory(): Promise<Purchase[]> {
+  const purchases = await prisma.purchase.findMany({
+    orderBy: { recordDate: "desc" },
+    take: 200,
+  });
+  return purchases.map(serialize);
+}
+
 export async function createPurchase(
   input: PurchaseInput
 ): Promise<Purchase> {

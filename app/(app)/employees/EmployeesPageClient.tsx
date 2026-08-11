@@ -28,6 +28,7 @@ export function EmployeesPageClient({
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null
   );
+  const [formLoading, setFormLoading] = useState(false);
 
   const [statusEmployee, setStatusEmployee] = useState<Employee | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
@@ -60,15 +61,33 @@ export function EmployeesPageClient({
   }
 
   async function openViewForm(employee: Employee) {
-    setSelectedEmployee(await fetchFullEmployee(employee.id));
+    setSelectedEmployee(null);
     setFormMode("view");
+    setFormLoading(true);
     setFormOpen(true);
+    try {
+      setSelectedEmployee(await fetchFullEmployee(employee.id));
+    } catch {
+      alert("ไม่สามารถโหลดข้อมูลลูกจ้างได้ กรุณาลองใหม่อีกครั้ง");
+      setFormOpen(false);
+    } finally {
+      setFormLoading(false);
+    }
   }
 
   async function openEditForm(employee: Employee) {
-    setSelectedEmployee(await fetchFullEmployee(employee.id));
+    setSelectedEmployee(null);
     setFormMode("edit");
+    setFormLoading(true);
     setFormOpen(true);
+    try {
+      setSelectedEmployee(await fetchFullEmployee(employee.id));
+    } catch {
+      alert("ไม่สามารถโหลดข้อมูลลูกจ้างได้ กรุณาลองใหม่อีกครั้ง");
+      setFormOpen(false);
+    } finally {
+      setFormLoading(false);
+    }
   }
 
   function openStatusDialog(employee: Employee) {
@@ -170,6 +189,7 @@ export function EmployeesPageClient({
         open={formOpen}
         mode={formMode}
         employee={selectedEmployee}
+        loading={formLoading}
         onClose={() => setFormOpen(false)}
         onSubmit={handleFormSubmit}
         onRequestEdit={

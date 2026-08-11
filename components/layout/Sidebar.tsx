@@ -78,6 +78,16 @@ const navGroups: NavGroup[] = [
       },
     ],
   },
+  {
+    label: "Reports",
+    items: [
+      {
+        label: "ประวัติการรับซื้อน้ำยาง",
+        href: "/performance/purchases",
+        icon: <Icon path="M3 3v18h18M8 17V10M13 17V6M18 17v-4" />,
+      },
+    ],
+  },
 ];
 
 const roleLabel: Record<SessionPayload["role"], string> = {

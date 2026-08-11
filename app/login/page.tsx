@@ -29,7 +29,7 @@ function LoginForm() {
       }
       const rawNext = searchParams.get("next");
       const next =
-        rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")
+        rawNext && /^\/(?![/\\])/.test(rawNext)
           ? rawNext
           : "/";
       router.push(next);

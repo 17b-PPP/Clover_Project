@@ -15,7 +15,7 @@ export default async function MemberDashboardPage() {
     select: { status: true },
   });
   if (!member || member.status !== "Active") {
-    redirect("/member/login");
+    redirect("/api/member-auth/force-logout");
   }
 
   const purchases = await getPurchaseHistoryForMember(session.memberId);

@@ -29,7 +29,7 @@ function MemberLoginForm() {
       }
       const rawNext = searchParams.get("next");
       const next =
-        rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")
+        rawNext && /^\/(?![/\\])/.test(rawNext)
           ? rawNext
           : "/member/dashboard";
       router.push(next);

@@ -61,8 +61,14 @@ export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
     setFormMode("view");
     setFormLoading(true);
     setFormOpen(true);
-    setSelectedMember(await fetchFullMember(member.id));
-    setFormLoading(false);
+    try {
+      setSelectedMember(await fetchFullMember(member.id));
+    } catch {
+      alert("ไม่สามารถโหลดข้อมูลสมาชิกได้ กรุณาลองใหม่อีกครั้ง");
+      setFormOpen(false);
+    } finally {
+      setFormLoading(false);
+    }
   }
 
   async function openEditForm(member: Member) {
@@ -70,8 +76,14 @@ export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
     setFormMode("edit");
     setFormLoading(true);
     setFormOpen(true);
-    setSelectedMember(await fetchFullMember(member.id));
-    setFormLoading(false);
+    try {
+      setSelectedMember(await fetchFullMember(member.id));
+    } catch {
+      alert("ไม่สามารถโหลดข้อมูลสมาชิกได้ กรุณาลองใหม่อีกครั้ง");
+      setFormOpen(false);
+    } finally {
+      setFormLoading(false);
+    }
   }
 
   function openStatusDialog(member: Member) {

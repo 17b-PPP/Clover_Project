@@ -10,7 +10,15 @@ function sanitizeNext(rawNext: string | null, fallback: string): string {
   try {
     const url = new URL(rawNext, window.location.origin);
     if (url.origin !== window.location.origin) return fallback;
-    return url.pathname + url.search + url.hash;
+    const path = url.pathname + url.search + url.hash;
+    // Re-validate the OUTPUT: a same-origin parse can still yield a pathname
+    // that is itself protocol-relative (e.g. "//evil.com"), which the router
+    // would hard-navigate off-site. Requiring `path` to re-resolve to the same
+    // origin AND to be a fixed point of the parser closes that whole class.
+    const recheck = new URL(path, window.location.origin);
+    if (recheck.origin !== window.location.origin) return fallback;
+    if (recheck.pathname + recheck.search + recheck.hash !== path) return fallback;
+    return path;
   } catch {
     return fallback;
   }

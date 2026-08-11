@@ -53,6 +53,9 @@ export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
   // fetches the full record — including the real photo — on demand.
   async function fetchFullMember(id: string): Promise<Member> {
     const res = await fetch(`/api/members/${id}`);
+    if (!res.ok) {
+      throw new Error("ไม่สามารถโหลดข้อมูลสมาชิกได้");
+    }
     return (await res.json()) as Member;
   }
 

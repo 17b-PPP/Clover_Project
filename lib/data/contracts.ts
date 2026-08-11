@@ -103,7 +103,7 @@ export async function createContract(
     where: {
       memberId: input.memberId,
       employeeId: input.employeeId,
-      status: "Active",
+      contractEndDate: null,
     },
   });
   if (existingActivePair) {

@@ -35,7 +35,8 @@ export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
       const matchesSearch =
         !q ||
         [e.username, e.action, e.details].join(" ").toLowerCase().includes(q);
-      const entryDate = e.timestamp.slice(0, 10);
+      const d = new Date(e.timestamp);
+      const entryDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       const matchesFrom = !dateFrom || entryDate >= dateFrom;
       const matchesTo = !dateTo || entryDate <= dateTo;
       return matchesSearch && matchesFrom && matchesTo;
@@ -77,6 +78,9 @@ export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
           onChange={(e) => setDateTo(e.target.value)}
         />
       </div>
+      <p className="mb-4 text-xs text-slate-400">
+        แสดงเฉพาะ 200 รายการล่าสุด
+      </p>
 
       <AuditLogTable entries={pagedEntries} />
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />

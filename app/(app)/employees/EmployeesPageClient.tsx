@@ -57,6 +57,9 @@ export function EmployeesPageClient({
   // employee fetches the full record — including the real photo — on demand.
   async function fetchFullEmployee(id: string): Promise<Employee> {
     const res = await fetch(`/api/employees/${id}`);
+    if (!res.ok) {
+      throw new Error("ไม่สามารถโหลดข้อมูลลูกจ้างได้");
+    }
     return (await res.json()) as Employee;
   }
 

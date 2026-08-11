@@ -6,7 +6,7 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/Table";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatCurrency, formatDateUtc } from "@/lib/format";
 import type { Purchase } from "@/lib/types";
 
 interface PurchaseHistoryTableProps {
@@ -40,7 +40,7 @@ export function PurchaseHistoryTable({ purchases }: PurchaseHistoryTableProps) {
           <TableRow key={purchase.id}>
             <TableCell>
               <span className="whitespace-nowrap text-slate-500">
-                {formatDate(purchase.recordDate)}
+                {formatDateUtc(purchase.recordDate)}
               </span>
             </TableCell>
             <TableCell>

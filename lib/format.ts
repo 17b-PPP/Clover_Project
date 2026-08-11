@@ -14,6 +14,13 @@ export function formatDate(iso: string): string {
   }).format(new Date(iso));
 }
 
+export function formatDateUtc(iso: string): string {
+  return new Intl.DateTimeFormat("th-TH", {
+    dateStyle: "medium",
+    timeZone: "UTC",
+  }).format(new Date(iso));
+}
+
 export function formatDateTime(iso: string): string {
   return new Intl.DateTimeFormat("th-TH", {
     dateStyle: "medium",

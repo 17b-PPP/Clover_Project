@@ -40,8 +40,7 @@ export function PurchaseHistoryPageClient({
           .join(" ")
           .toLowerCase()
           .includes(q);
-      const d = new Date(p.recordDate);
-      const recordDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const recordDate = p.recordDate.slice(0, 10);
       const matchesFrom = !dateFrom || recordDate >= dateFrom;
       const matchesTo = !dateTo || recordDate <= dateTo;
       return matchesSearch && matchesFrom && matchesTo;

@@ -15,15 +15,22 @@ interface AuditLogPageClientProps {
 
 export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
   const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [page, setPage] = useState(1);
 
   const filteredEntries = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return entries;
-    return entries.filter((e) =>
-      [e.username, e.action, e.details].join(" ").toLowerCase().includes(q)
-    );
-  }, [entries, search]);
+    return entries.filter((e) => {
+      const matchesSearch =
+        !q ||
+        [e.username, e.action, e.details].join(" ").toLowerCase().includes(q);
+      const entryDate = e.timestamp.slice(0, 10);
+      const matchesFrom = !dateFrom || entryDate >= dateFrom;
+      const matchesTo = !dateTo || entryDate <= dateTo;
+      return matchesSearch && matchesFrom && matchesTo;
+    });
+  }, [entries, search, dateFrom, dateTo]);
 
   const totalPages = Math.max(1, Math.ceil(filteredEntries.length / PAGE_SIZE));
   const pagedEntries = filteredEntries.slice(
@@ -33,7 +40,7 @@ export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
 
   useEffect(() => {
     setPage(1);
-  }, [search]);
+  }, [search, dateFrom, dateTo]);
 
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
@@ -42,12 +49,26 @@ export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
         description="ตรวจสอบกิจกรรมของผู้ใช้งานแต่ละคนภายในระบบ"
       />
 
-      <div className="mb-5 max-w-sm">
+      <div className="mb-5 flex flex-wrap items-end gap-4">
+        <div className="max-w-sm flex-1">
+          <Input
+            label="ค้นหาประวัติ"
+            placeholder="ค้นหาด้วยชื่อผู้ใช้งาน หรือ Action"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
         <Input
-          label="ค้นหาประวัติ"
-          placeholder="ค้นหาด้วยชื่อผู้ใช้งาน หรือ Action"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          label="จากวันที่"
+          type="date"
+          value={dateFrom}
+          onChange={(e) => setDateFrom(e.target.value)}
+        />
+        <Input
+          label="ถึงวันที่"
+          type="date"
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
         />
       </div>
 

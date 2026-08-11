@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";
+import { Spinner } from "@/components/ui/Spinner";
 import { usePostalCodeLookup } from "@/components/hooks/usePostalCodeLookup";
 import { resizeImageToDataUrl } from "@/lib/image";
 import type { Member, MemberInput } from "@/lib/types";
@@ -15,6 +16,7 @@ interface MemberFormDialogProps {
   open: boolean;
   mode: MemberFormMode;
   member?: Member | null;
+  loading?: boolean;
   onClose: () => void;
   onSubmit: (input: MemberInput) => Promise<void>;
   onRequestEdit?: () => void;
@@ -44,6 +46,7 @@ export function MemberFormDialog({
   open,
   mode,
   member,
+  loading = false,
   onClose,
   onSubmit,
   onRequestEdit,
@@ -129,9 +132,14 @@ export function MemberFormDialog({
       onClose={onClose}
       title={titleByMode[mode]}
       widthClassName="max-w-2xl"
-      footer={footer}
+      footer={loading ? undefined : footer}
     >
-      <form id="member-form" onSubmit={handleSubmit} className="space-y-5">
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <Spinner className="h-8 w-8" />
+        </div>
+      ) : (
+        <form id="member-form" onSubmit={handleSubmit} className="space-y-5">
         <div className="flex items-center gap-4">
           <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-xs text-slate-400">
             {form.photoUrl ? (
@@ -291,7 +299,8 @@ export function MemberFormDialog({
         />
 
         {error && <p className="text-sm text-red-600">{error}</p>}
-      </form>
+        </form>
+      )}
     </Modal>
   );
 }

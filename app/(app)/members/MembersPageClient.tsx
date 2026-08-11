@@ -24,6 +24,7 @@ export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<MemberFormMode>("add");
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [formLoading, setFormLoading] = useState(false);
 
   const [statusMember, setStatusMember] = useState<Member | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
@@ -56,15 +57,21 @@ export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
   }
 
   async function openViewForm(member: Member) {
-    setSelectedMember(await fetchFullMember(member.id));
+    setSelectedMember(null);
     setFormMode("view");
+    setFormLoading(true);
     setFormOpen(true);
+    setSelectedMember(await fetchFullMember(member.id));
+    setFormLoading(false);
   }
 
   async function openEditForm(member: Member) {
-    setSelectedMember(await fetchFullMember(member.id));
+    setSelectedMember(null);
     setFormMode("edit");
+    setFormLoading(true);
     setFormOpen(true);
+    setSelectedMember(await fetchFullMember(member.id));
+    setFormLoading(false);
   }
 
   function openStatusDialog(member: Member) {
@@ -166,6 +173,7 @@ export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
         open={formOpen}
         mode={formMode}
         member={selectedMember}
+        loading={formLoading}
         onClose={() => setFormOpen(false)}
         onSubmit={handleFormSubmit}
         onRequestEdit={

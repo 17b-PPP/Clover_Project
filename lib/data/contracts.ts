@@ -99,6 +99,17 @@ export async function createContract(
     throw new Error("ลูกจ้างที่เลือกถูกระงับการใช้งานหรือไม่มีอยู่ในระบบ");
   }
 
+  const existingActivePair = await prisma.mePair.findFirst({
+    where: {
+      memberId: input.memberId,
+      employeeId: input.employeeId,
+      status: "Active",
+    },
+  });
+  if (existingActivePair) {
+    throw new Error("สมาชิกและลูกจ้างคู่นี้มีสัญญาที่ยังใช้งานอยู่แล้ว");
+  }
+
   const pairCode = await nextPairCode();
   const pair = await prisma.mePair.create({
     data: {

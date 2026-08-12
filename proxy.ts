@@ -6,6 +6,14 @@ import {
   decodeMemberSession,
 } from "@/lib/member-session-core";
 
+const ADMIN_ONLY_PATHS = ["/users", "/audit-log", "/api/users", "/api/audit-log"];
+
+function isAdminOnlyPath(pathname: string): boolean {
+  return ADMIN_ONLY_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  );
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -48,6 +56,13 @@ export function proxy(request: NextRequest) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  if (isAdminOnlyPath(pathname) && session.role !== "ADMIN") {
+    if (pathname.startsWith("/api")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
+import { ResetButton } from "@/components/ui/ResetButton";
 import { PurchaseHistoryTable } from "@/components/purchases/PurchaseHistoryTable";
 import type { Purchase } from "@/lib/types";
 
@@ -80,6 +81,13 @@ export function PurchaseHistoryPageClient({
           type="date"
           value={dateTo}
           onChange={(e) => setDateTo(e.target.value)}
+        />
+        <ResetButton
+          disabled={!dateFrom && !dateTo}
+          onClick={() => {
+            setDateFrom("");
+            setDateTo("");
+          }}
         />
       </div>
       <p className="mb-4 text-xs text-slate-400">

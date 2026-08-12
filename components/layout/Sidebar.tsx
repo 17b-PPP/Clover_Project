@@ -32,7 +32,11 @@ interface NavGroup {
   items: NavItem[];
 }
 
-const navGroups: NavGroup[] = [
+interface NavGroupWithRoles extends NavGroup {
+  roles?: SessionPayload["role"][];
+}
+
+const navGroups: NavGroupWithRoles[] = [
   {
     label: "Staff",
     items: [
@@ -75,6 +79,7 @@ const navGroups: NavGroup[] = [
   },
   {
     label: "Admin",
+    roles: ["ADMIN"],
     items: [
       {
         label: "ตรวจสอบสิทธิ์ผู้ใช้งาน",
@@ -129,7 +134,13 @@ export function Sidebar({ currentUser }: SidebarProps) {
         </div>
       </div>
       <nav className="flex-1 space-y-4 px-3 py-4">
-        {navGroups.map((group) => (
+        {navGroups
+          .filter(
+            (group) =>
+              !group.roles ||
+              (currentUser && group.roles.includes(currentUser.role))
+          )
+          .map((group) => (
           <div key={group.label}>
             <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
               {group.label}

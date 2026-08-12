@@ -4,6 +4,7 @@ import { FormEvent, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 function sanitizeNext(rawNext: string | null, fallback: string): string {
   if (!rawNext) return fallback;
@@ -80,9 +81,8 @@ function LoginForm() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-          <Input
+          <PasswordInput
             label="รหัสผ่าน"
-            type="password"
             required
             autoComplete="current-password"
             value={password}

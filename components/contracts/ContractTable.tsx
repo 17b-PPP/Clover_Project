@@ -94,7 +94,7 @@ export function ContractTable({
                   {!isExpired && (
                     <>
                       <Button variant="ghost" onClick={() => onEdit(contract)}>
-                        ต่อสัญญา
+                        แก้ไข
                       </Button>
                       <Button
                         variant={

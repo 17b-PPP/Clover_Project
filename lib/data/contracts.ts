@@ -125,36 +125,23 @@ export async function createContract(
   return serialize(pair);
 }
 
-export async function renewContract(
+export async function updateContractShares(
   id: string,
   shares: { memberShare: number; employeeShare: number }
 ): Promise<Contract | undefined> {
-  const current = await prisma.mePair.findUnique({ where: { id } });
-  if (!current) return undefined;
-
-  const pairCode = await nextPairCode();
-  const now = new Date();
-
-  const [, newPair] = await prisma.$transaction([
-    prisma.mePair.update({
+  try {
+    const pair = await prisma.mePair.update({
       where: { id },
-      data: { contractEndDate: now },
-    }),
-    prisma.mePair.create({
       data: {
-        pairCode,
-        memberId: current.memberId,
-        employeeId: current.employeeId,
         memberShare: shares.memberShare,
         employeeShare: shares.employeeShare,
-        contractStartDate: now,
-        status: "Active",
       },
       ...withParties,
-    }),
-  ]);
-
-  return serialize(newPair as MePairWithParties);
+    });
+    return serialize(pair);
+  } catch {
+    return undefined;
+  }
 }
 
 export async function getContractHistory(

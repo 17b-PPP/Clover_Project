@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   deleteContract,
   getContract,
-  renewContract,
   setContractStatus,
+  updateContractShares,
 } from "@/lib/data/contracts";
 import { handleRouteError } from "@/lib/api-error";
 import { logActivity } from "@/lib/activity-log";
@@ -57,16 +57,16 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     if (body.memberShare === undefined || body.employeeShare === undefined) {
       return NextResponse.json(
-        { error: "ต้องระบุสัดส่วนใหม่เพื่อต่อสัญญา" },
+        { error: "ต้องระบุสัดส่วนรายได้ใหม่" },
         { status: 400 }
       );
     }
 
-    const renewed = await renewContract(id, {
+    const updated = await updateContractShares(id, {
       memberShare: body.memberShare,
       employeeShare: body.employeeShare,
     });
-    if (!renewed) {
+    if (!updated) {
       return NextResponse.json(
         { error: "Contract not found" },
         { status: 404 }
@@ -75,10 +75,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     await logActivity({
       action: "UPDATE_CONTRACT",
       targetType: "CONTRACT",
-      targetId: renewed.id,
-      description: `ต่อสัญญาจ้าง ${renewed.pairCode} ด้วยสัดส่วนใหม่ (เจ้าของสวน ${renewed.memberShare}% / ลูกจ้าง ${renewed.employeeShare}%)`,
+      targetId: updated.id,
+      description: `แก้ไขสัดส่วนรายได้สัญญาจ้าง ${updated.pairCode} (เจ้าของสวน ${updated.memberShare}% / ลูกจ้าง ${updated.employeeShare}%)`,
     });
-    return NextResponse.json(renewed, { status: 201 });
+    return NextResponse.json(updated);
   } catch (error) {
     return handleRouteError(error);
   }

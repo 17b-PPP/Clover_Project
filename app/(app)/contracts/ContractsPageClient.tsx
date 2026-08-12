@@ -52,12 +52,6 @@ export function ContractsPageClient({
 
   const [showExpired, setShowExpired] = useState(false);
 
-  async function loadContracts() {
-    const res = await fetch("/api/contracts");
-    const data = (await res.json()) as Contract[];
-    setContracts(data);
-  }
-
   const filteredContracts = useMemo(() => {
     const q = search.trim().toLowerCase();
     return contracts
@@ -128,15 +122,18 @@ export function ContractsPageClient({
       const res = await fetch(`/api/contracts/${selectedContract.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
+        body: JSON.stringify({
+          memberShare: input.memberShare,
+          employeeShare: input.employeeShare,
+        }),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error ?? "ไม่สามารถแก้ไขข้อมูลได้");
       }
-      // Renewing ends the old contract row and creates a new one server-side,
-      // so a single response can't describe both changes — refresh the list.
-      await loadContracts();
+      setContracts((prev) =>
+        prev.map((c) => (c.id === data.id ? (data as Contract) : c))
+      );
     }
   }
 

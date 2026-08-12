@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
+import { Combobox } from "@/components/ui/Combobox";
 import type {
   Contract,
   ContractInput,
@@ -28,7 +28,7 @@ interface ContractFormDialogProps {
 const titleByMode: Record<ContractFormMode, string> = {
   add: "เพิ่มสัญญาจ้างใหม่",
   view: "ข้อมูลสัญญาจ้าง",
-  edit: "ต่อสัญญาด้วยสัดส่วนใหม่",
+  edit: "แก้ไขสัดส่วนรายได้",
 };
 
 export function ContractFormDialog({
@@ -49,7 +49,7 @@ export function ContractFormDialog({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const readOnly = mode === "view";
-  const isRenew = mode === "edit";
+  const isEdit = mode === "edit";
   const employeeShare = Math.round((100 - memberShare) * 100) / 100;
 
   const activeMembers = members.filter(
@@ -86,7 +86,7 @@ export function ContractFormDialog({
       </Button>
       {onRequestEdit && (
         <Button variant="primary" onClick={onRequestEdit}>
-          ต่อสัญญาด้วยสัดส่วนใหม่
+          แก้ไขสัดส่วนรายได้
         </Button>
       )}
     </>
@@ -103,8 +103,8 @@ export function ContractFormDialog({
       >
         {submitting
           ? "กำลังบันทึก..."
-          : isRenew
-          ? "ยืนยันการต่อสัญญา"
+          : isEdit
+          ? "บันทึกสัดส่วนใหม่"
           : "บันทึก"}
       </Button>
     </>
@@ -148,10 +148,10 @@ export function ContractFormDialog({
         </div>
       ) : (
         <form id="contract-form" onSubmit={handleSubmit} className="space-y-5">
-          {isRenew && contract ? (
+          {isEdit && contract ? (
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
               <p className="text-slate-500">
-                คู่สัญญา (ไม่สามารถเปลี่ยนได้เมื่อต่อสัญญา)
+                คู่สัญญา (ไม่สามารถเปลี่ยนได้เมื่อแก้ไขสัดส่วน)
               </p>
               <p className="mt-1 font-medium text-slate-900">
                 {contract.member.firstName} {contract.member.lastName} (
@@ -159,43 +159,35 @@ export function ContractFormDialog({
                 {contract.employee.lastName} ({contract.employee.code})
               </p>
               <p className="mt-2 text-slate-500">
-                สัดส่วนเดิม: เจ้าของสวน {contract.memberShare}% / ลูกจ้าง{" "}
+                สัดส่วนปัจจุบัน: เจ้าของสวน {contract.memberShare}% / ลูกจ้าง{" "}
                 {contract.employeeShare}%
               </p>
             </div>
           ) : (
             <>
-              <Select
+              <Combobox
                 label="เจ้าของสวน (รหัสสมาชิก)"
                 required
+                placeholder="พิมพ์รหัสหรือชื่อสมาชิก"
                 value={memberId}
-                onChange={(e) => setMemberId(e.target.value)}
-              >
-                <option value="" disabled>
-                  เลือกสมาชิก
-                </option>
-                {activeMembers.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.memberCode} — {m.firstName} {m.lastName}
-                  </option>
-                ))}
-              </Select>
+                onChange={setMemberId}
+                options={activeMembers.map((m) => ({
+                  value: m.id,
+                  label: `${m.memberCode} — ${m.firstName} ${m.lastName}`,
+                }))}
+              />
 
-              <Select
+              <Combobox
                 label="ลูกจ้าง (รหัสลูกจ้าง)"
                 required
+                placeholder="พิมพ์รหัสหรือชื่อลูกจ้าง"
                 value={employeeId}
-                onChange={(e) => setEmployeeId(e.target.value)}
-              >
-                <option value="" disabled>
-                  เลือกลูกจ้าง
-                </option>
-                {activeEmployees.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.employeeCode} — {e.firstName} {e.lastName}
-                  </option>
-                ))}
-              </Select>
+                onChange={setEmployeeId}
+                options={activeEmployees.map((e) => ({
+                  value: e.id,
+                  label: `${e.employeeCode} — ${e.firstName} ${e.lastName}`,
+                }))}
+              />
             </>
           )}
 

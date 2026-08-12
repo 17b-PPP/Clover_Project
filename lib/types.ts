@@ -127,6 +127,7 @@ export interface User {
   username: string;
   email: string;
   phone: string;
+  dateOfBirth: string | null;
   role: UserRole;
   status: UserStatus;
   createdAt: string;
@@ -139,6 +140,7 @@ export interface UserInput {
   phone: string;
   email: string;
   username: string;
+  dateOfBirth: string;
   role: UserRole;
   password?: string;
 }

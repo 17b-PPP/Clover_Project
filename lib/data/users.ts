@@ -12,6 +12,7 @@ function serialize(staff: PrismaStaff): User {
     username: staff.username,
     email: staff.email,
     phone: staff.phone,
+    dateOfBirth: staff.dateOfBirth ? staff.dateOfBirth.toISOString() : null,
     role: staff.role,
     status: staff.status,
     createdAt: staff.createdAt.toISOString(),
@@ -39,15 +40,17 @@ export async function getUser(id: string): Promise<User | undefined> {
 }
 
 export async function createUser(
-  input: UserInput & { password: string }
+  input: UserInput & { password: string; usingDefaultPassword: boolean }
 ): Promise<User> {
   const staffCode = await nextStaffCode();
-  const { password, ...rest } = input;
+  const { password, dateOfBirth, usingDefaultPassword, ...rest } = input;
   const staff = await prisma.staff.create({
     data: {
       staffCode,
       ...rest,
+      dateOfBirth: new Date(dateOfBirth),
       password: hashPassword(password),
+      usingDefaultPassword,
       status: "Active",
     },
   });
@@ -59,12 +62,15 @@ export async function updateUser(
   input: Partial<UserInput>
 ): Promise<User | undefined> {
   try {
-    const { password, ...rest } = input;
+    const { password, dateOfBirth, ...rest } = input;
     const staff = await prisma.staff.update({
       where: { id },
       data: {
         ...rest,
-        ...(password ? { password: hashPassword(password) } : {}),
+        ...(dateOfBirth ? { dateOfBirth: new Date(dateOfBirth) } : {}),
+        ...(password
+          ? { password: hashPassword(password), usingDefaultPassword: false }
+          : {}),
       },
     });
     return serialize(staff);
@@ -89,4 +95,16 @@ export async function setUserStatus(
   } catch {
     return undefined;
   }
+}
+
+export async function deleteUser(id: string): Promise<void> {
+  await prisma.staff.delete({ where: { id } });
+}
+
+export async function isUsingDefaultPassword(id: string): Promise<boolean> {
+  const staff = await prisma.staff.findUnique({
+    where: { id },
+    select: { usingDefaultPassword: true },
+  });
+  return staff?.usingDefaultPassword ?? false;
 }

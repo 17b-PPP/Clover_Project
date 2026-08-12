@@ -9,6 +9,7 @@ const actionLabel: Record<ActivityLog["action"], string> = {
   CREATE_STAFF: "เพิ่มผู้ใช้งาน",
   UPDATE_STAFF: "แก้ไขข้อมูลผู้ใช้งาน",
   SUSPEND_STAFF: "ระงับ/เปิดใช้งานผู้ใช้งาน",
+  DELETE_STAFF: "ลบผู้ใช้งาน",
   CREATE_MEMBER: "เพิ่มสมาชิก",
   UPDATE_MEMBER: "แก้ไขข้อมูลสมาชิก",
   SUSPEND_MEMBER: "ระงับ/เปิดใช้งานสมาชิก",

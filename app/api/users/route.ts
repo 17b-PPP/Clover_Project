@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { createUser, getUsers } from "@/lib/data/users";
 import { handleRouteError } from "@/lib/api-error";
-import { isValidPhone } from "@/lib/validate";
+import { dateToDdmmyyyy, isValidPhone } from "@/lib/validate";
 import { logActivity } from "@/lib/activity-log";
 import type { UserInput } from "@/lib/types";
 
@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
       "phone",
       "email",
       "username",
+      "dateOfBirth",
       "role",
-      "password",
     ];
     const missing = requiredFields.filter((field) => !body[field]);
     if (missing.length > 0) {
@@ -43,14 +43,17 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      const usingDefaultPassword = !body.password;
       const user = await createUser({
         firstName: body.firstName!,
         lastName: body.lastName!,
         phone: body.phone!,
         email: body.email!,
         username: body.username!,
+        dateOfBirth: body.dateOfBirth!,
         role: body.role!,
-        password: body.password!,
+        password: body.password || dateToDdmmyyyy(body.dateOfBirth!),
+        usingDefaultPassword,
       });
       await logActivity({
         action: "CREATE_STAFF",

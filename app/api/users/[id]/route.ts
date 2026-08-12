@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { getUser, setUserStatus, updateUser } from "@/lib/data/users";
+import {
+  deleteUser,
+  getUser,
+  setUserStatus,
+  updateUser,
+} from "@/lib/data/users";
 import { handleRouteError } from "@/lib/api-error";
 import { isValidPhone } from "@/lib/validate";
 import { logActivity } from "@/lib/activity-log";
+import { getSession } from "@/lib/session";
 import type { UserInput, UserStatus } from "@/lib/types";
 
 interface RouteParams {
@@ -74,6 +80,56 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         { status: 409 }
       );
     }
+    return handleRouteError(error);
+  }
+}
+
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id } = await params;
+    const user = await getUser(id);
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    if (user.status !== "Inactive") {
+      return NextResponse.json(
+        { error: "ต้องระงับผู้ใช้งานก่อนจึงจะลบได้" },
+        { status: 400 }
+      );
+    }
+
+    const session = await getSession();
+    if (session?.staffId === id) {
+      return NextResponse.json(
+        { error: "ไม่สามารถลบบัญชีของตนเองได้" },
+        { status: 400 }
+      );
+    }
+
+    try {
+      await deleteUser(id);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2003"
+      ) {
+        return NextResponse.json(
+          { error: "ไม่สามารถลบผู้ใช้งานนี้ได้เนื่องจากมีประวัติการใช้งานที่เกี่ยวข้อง" },
+          { status: 409 }
+        );
+      }
+      throw error;
+    }
+
+    await logActivity({
+      action: "DELETE_STAFF",
+      targetType: "STAFF",
+      targetId: user.id,
+      description: `ลบผู้ใช้งาน ${user.username} (${user.firstName} ${user.lastName})`,
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
     return handleRouteError(error);
   }
 }

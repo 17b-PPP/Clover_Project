@@ -4,6 +4,24 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import type { SessionPayload } from "@/lib/session-core";
+import { ChangePasswordDialog } from "@/components/layout/ChangePasswordDialog";
+
+function GearIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-[18px] w-[18px] shrink-0"
+    >
+      <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82A1.65 1.65 0 0 0 3 13.09H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+    </svg>
+  );
+}
 
 interface NavItem {
   label: string;
@@ -102,12 +120,17 @@ const roleLabel: Record<SessionPayload["role"], string> = {
 
 interface SidebarProps {
   currentUser: SessionPayload | null;
+  usingDefaultPassword?: boolean;
 }
 
-export function Sidebar({ currentUser }: SidebarProps) {
+export function Sidebar({
+  currentUser,
+  usingDefaultPassword = false,
+}: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -177,13 +200,36 @@ export function Sidebar({ currentUser }: SidebarProps) {
       </nav>
       <div className="border-t border-slate-200 px-4 py-4">
         {currentUser && (
-          <div className="mb-3 px-2">
-            <p className="truncate text-sm font-medium text-slate-900">
-              {currentUser.firstName} {currentUser.lastName}
-            </p>
-            <p className="text-xs text-slate-500">
-              {roleLabel[currentUser.role]} · @{currentUser.username}
-            </p>
+          <div className="mb-3 flex items-center justify-between gap-2 px-2">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-slate-900">
+                {currentUser.firstName} {currentUser.lastName}
+              </p>
+              <p className="truncate text-xs text-slate-500">
+                {roleLabel[currentUser.role]} · @{currentUser.username}
+              </p>
+            </div>
+            {currentUser.role === "STAFF" && (
+              <button
+                onClick={() => setChangePasswordOpen(true)}
+                aria-label={
+                  usingDefaultPassword
+                    ? "เปลี่ยนรหัสผ่าน (กำลังใช้รหัสผ่านตั้งต้น)"
+                    : "เปลี่ยนรหัสผ่าน"
+                }
+                title={
+                  usingDefaultPassword
+                    ? "เปลี่ยนรหัสผ่าน (กำลังใช้รหัสผ่านตั้งต้น)"
+                    : "เปลี่ยนรหัสผ่าน"
+                }
+                className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              >
+                <GearIcon />
+                {usingDefaultPassword && (
+                  <span className="absolute right-0.5 top-0.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+                )}
+              </button>
+            )}
           </div>
         )}
         <button
@@ -195,6 +241,12 @@ export function Sidebar({ currentUser }: SidebarProps) {
           {loggingOut ? "กำลังออกจากระบบ..." : "ออกจากระบบ"}
         </button>
       </div>
+
+      <ChangePasswordDialog
+        open={changePasswordOpen}
+        onClose={() => setChangePasswordOpen(false)}
+        onSuccess={() => router.refresh()}
+      />
     </aside>
   );
 }

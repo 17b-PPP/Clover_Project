@@ -20,6 +20,7 @@ interface UserTableProps {
   onView: (user: User) => void;
   onEdit: (user: User) => void;
   onToggleStatus: (user: User) => void;
+  onDelete: (user: User) => void;
 }
 
 export function UserTable({
@@ -27,6 +28,7 @@ export function UserTable({
   onView,
   onEdit,
   onToggleStatus,
+  onDelete,
 }: UserTableProps) {
   if (users.length === 0) {
     return (
@@ -84,6 +86,11 @@ export function UserTable({
                 >
                   {user.status === "Active" ? "ระงับ" : "เปิดใช้งาน"}
                 </Button>
+                {user.status === "Inactive" && (
+                  <Button variant="danger" onClick={() => onDelete(user)}>
+                    ลบ
+                  </Button>
+                )}
               </div>
             </TableCell>
           </TableRow>

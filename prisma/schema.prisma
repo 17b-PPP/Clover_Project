@@ -44,6 +44,7 @@ enum ActionType {
   CREATE_STAFF
   UPDATE_STAFF
   SUSPEND_STAFF
+  DELETE_STAFF
   CREATE_MEMBER
   UPDATE_MEMBER
   SUSPEND_MEMBER
@@ -138,18 +139,20 @@ model Employee {
 // ==========================================
 
 model Staff {
-  id        String      @id @default(cuid())
-  staffCode String      @unique
-  firstName String
-  lastName  String
-  username  String      @unique
-  email     String      @unique
-  phone     String      @db.VarChar(10)
-  password  String
-  role      StaffRole
-  status    StaffStatus @default(Active)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id                   String      @id @default(cuid())
+  staffCode            String      @unique
+  firstName            String
+  lastName             String
+  username             String      @unique
+  email                String      @unique
+  phone                String      @db.VarChar(10)
+  password             String
+  usingDefaultPassword Boolean     @default(false)
+  dateOfBirth          DateTime?
+  role                 StaffRole
+  status               StaffStatus @default(Active)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
 
   activityLogs ActivityLog[]
 }

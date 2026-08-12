@@ -24,6 +24,7 @@ const emptyForm: UserInput = {
   phone: "",
   email: "",
   username: "",
+  dateOfBirth: "",
   role: "STAFF",
   password: "",
 };
@@ -50,6 +51,7 @@ export function UserFormDialog({
           phone: user.phone,
           email: user.email,
           username: user.username,
+          dateOfBirth: user.dateOfBirth ? user.dateOfBirth.slice(0, 10) : "",
           role: user.role,
           password: "",
         }
@@ -126,23 +128,35 @@ export function UserFormDialog({
           />
         </div>
 
-        <Input
-          label="เบอร์โทร"
-          required
-          disabled={readOnly}
-          inputMode="numeric"
-          pattern="[0-9]{10}"
-          title="เบอร์โทร 10 หลัก"
-          minLength={10}
-          maxLength={10}
-          value={form.phone}
-          onChange={(e) =>
-            setForm((prev) => ({
-              ...prev,
-              phone: e.target.value.replace(/\D/g, ""),
-            }))
-          }
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="เบอร์โทร"
+            required
+            disabled={readOnly}
+            inputMode="numeric"
+            pattern="[0-9]{10}"
+            title="เบอร์โทร 10 หลัก"
+            minLength={10}
+            maxLength={10}
+            value={form.phone}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                phone: e.target.value.replace(/\D/g, ""),
+              }))
+            }
+          />
+          <Input
+            label="วันเกิด"
+            type="date"
+            required
+            disabled={readOnly}
+            value={form.dateOfBirth}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, dateOfBirth: e.target.value }))
+            }
+          />
+        </div>
 
         <Input
           label="อีเมล"
@@ -166,21 +180,28 @@ export function UserFormDialog({
         />
 
         {!readOnly && (
-          <Input
-            label={
-              mode === "add"
-                ? "รหัสผ่าน"
-                : "รหัสผ่านใหม่ (เว้นว่างไว้หากไม่ต้องการเปลี่ยน)"
-            }
-            type="password"
-            required={mode === "add"}
-            minLength={6}
-            autoComplete="new-password"
-            value={form.password ?? ""}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, password: e.target.value }))
-            }
-          />
+          <div>
+            <Input
+              label={
+                mode === "add"
+                  ? "รหัสผ่าน (เว้นว่างไว้เพื่อใช้วันเกิดเป็นรหัสผ่านเริ่มต้น)"
+                  : "รหัสผ่านใหม่ (เว้นว่างไว้หากไม่ต้องการเปลี่ยน)"
+              }
+              type="password"
+              minLength={6}
+              autoComplete="new-password"
+              value={form.password ?? ""}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, password: e.target.value }))
+              }
+            />
+            {mode === "add" && (
+              <p className="mt-1.5 text-xs text-slate-500">
+                หากเว้นว่าง ระบบจะตั้งรหัสผ่านเริ่มต้นเป็นวันเกิดในรูปแบบ
+                วว/ดด/ปปปป (8 หลัก) เช่น 01012000
+              </p>
+            )}
+          </div>
         )}
 
         <Select

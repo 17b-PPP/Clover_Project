@@ -10,6 +10,7 @@ import {
   UserFormMode,
 } from "@/components/users/UserFormDialog";
 import { SuspendConfirmDialog } from "@/components/users/SuspendConfirmDialog";
+import { DeleteConfirmDialog } from "@/components/users/DeleteConfirmDialog";
 import type { User, UserInput } from "@/lib/types";
 
 interface UsersPageClientProps {
@@ -26,6 +27,9 @@ export function UsersPageClient({ initialUsers }: UsersPageClientProps) {
 
   const [statusUser, setStatusUser] = useState<User | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+
+  const [deleteUser, setDeleteUser] = useState<User | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -59,6 +63,11 @@ export function UsersPageClient({ initialUsers }: UsersPageClientProps) {
   function openStatusDialog(user: User) {
     setStatusUser(user);
     setStatusDialogOpen(true);
+  }
+
+  function openDeleteDialog(user: User) {
+    setDeleteUser(user);
+    setDeleteDialogOpen(true);
   }
 
   async function handleFormSubmit(input: UserInput) {
@@ -103,6 +112,18 @@ export function UsersPageClient({ initialUsers }: UsersPageClientProps) {
     );
   }
 
+  async function handleDelete() {
+    if (!deleteUser) return;
+    const res = await fetch(`/api/users/${deleteUser.id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error ?? "ไม่สามารถลบผู้ใช้งานได้");
+    }
+    setUsers((prev) => prev.filter((u) => u.id !== deleteUser.id));
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
       <PageHeader
@@ -129,6 +150,7 @@ export function UsersPageClient({ initialUsers }: UsersPageClientProps) {
         onView={openViewForm}
         onEdit={openEditForm}
         onToggleStatus={openStatusDialog}
+        onDelete={openDeleteDialog}
       />
 
       <UserFormDialog
@@ -148,6 +170,13 @@ export function UsersPageClient({ initialUsers }: UsersPageClientProps) {
         user={statusUser}
         onClose={() => setStatusDialogOpen(false)}
         onConfirm={handleToggleStatus}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        user={deleteUser}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDelete}
       />
     </div>
   );

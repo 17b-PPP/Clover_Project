@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 
 export interface ComboboxOption {
   value: string;
@@ -40,9 +40,11 @@ export function Combobox({
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
 
-  useEffect(() => {
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
     setQuery(selectedOption?.label ?? "");
-  }, [selectedOption]);
+  }
 
   const filteredOptions = useMemo(() => {
     const q = query.trim().toLowerCase();

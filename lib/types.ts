@@ -147,6 +147,13 @@ export interface UserInput {
 
 export type SellerType = "MEMBER" | "EMPLOYEE";
 
+export interface SellerOwnerOption {
+  memberId: string;
+  ownerName: string;
+  memberShare: number;
+  employeeShare: number;
+}
+
 export interface SellerLookup {
   sellerCode: string;
   sellerType: SellerType;
@@ -156,6 +163,7 @@ export interface SellerLookup {
   deliveredByName: string;
   memberShare: number;
   employeeShare: number;
+  ownerOptions: SellerOwnerOption[];
 }
 
 export interface Purchase {
@@ -184,6 +192,7 @@ export interface PurchaseInput {
   sellerCode: string;
   rawWeightKg: number;
   dryPercentage: number;
+  memberId?: string;
 }
 
 export interface MemberLookup {

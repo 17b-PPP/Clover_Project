@@ -151,7 +151,7 @@ export function Sidebar({
         </div>
         <div>
           <p className="text-sm font-semibold leading-tight text-slate-900">
-            Field Latex
+            สหกรณ์กองทุนสวนยางบ้านบางบอน
           </p>
           <p className="text-xs text-slate-500">ระบบจัดการรับซื้อน้ำยางพารา</p>
         </div>

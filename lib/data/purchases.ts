@@ -35,7 +35,10 @@ async function nextPurchaseCode(): Promise<string> {
 
 export class SellerLookupError extends Error {}
 
-export async function lookupSeller(code: string): Promise<SellerLookup> {
+export async function lookupSeller(
+  code: string,
+  preferredMemberId?: string
+): Promise<SellerLookup> {
   const trimmed = code.trim();
 
   const member = await prisma.member.findUnique({
@@ -55,6 +58,9 @@ export async function lookupSeller(code: string): Promise<SellerLookup> {
       deliveredByName: fullName,
       memberShare: 100,
       employeeShare: 0,
+      ownerOptions: [
+        { memberId: member.id, ownerName: fullName, memberShare: 100, employeeShare: 0 },
+      ],
     };
   }
 
@@ -65,26 +71,45 @@ export async function lookupSeller(code: string): Promise<SellerLookup> {
     if (employee.status !== "Active") {
       throw new SellerLookupError("ลูกจ้างรายนี้ถูกระงับการใช้งาน");
     }
-    const pair = await prisma.mePair.findFirst({
-      where: { employeeId: employee.id, status: "Active" },
+    const pairs = await prisma.mePair.findMany({
+      where: {
+        employeeId: employee.id,
+        status: "Active",
+        contractEndDate: null,
+      },
       include: { member: true },
       orderBy: { contractStartDate: "desc" },
     });
-    if (!pair) {
+    const activeOwnerPairs = pairs.filter((p) => p.member.status === "Active");
+    if (pairs.length === 0) {
       throw new SellerLookupError("ลูกจ้างรายนี้ไม่มีสัญญาจ้างที่ยังใช้งานอยู่");
     }
-    if (pair.member.status !== "Active") {
+    if (activeOwnerPairs.length === 0) {
       throw new SellerLookupError("เจ้าของสวนของลูกจ้างรายนี้ถูกระงับการใช้งาน");
     }
+
+    const selected = preferredMemberId
+      ? activeOwnerPairs.find((p) => p.memberId === preferredMemberId)
+      : activeOwnerPairs[0];
+    if (!selected) {
+      throw new SellerLookupError("เจ้าของสวนที่เลือกไม่ถูกต้องหรือไม่พร้อมใช้งานแล้ว");
+    }
+
     return {
       sellerCode: employee.employeeCode,
       sellerType: "EMPLOYEE",
-      memberId: pair.member.id,
+      memberId: selected.member.id,
       employeeId: employee.id,
-      ownerName: `${pair.member.firstName} ${pair.member.lastName}`,
+      ownerName: `${selected.member.firstName} ${selected.member.lastName}`,
       deliveredByName: `${employee.firstName} ${employee.lastName}`,
-      memberShare: pair.memberShare.toNumber(),
-      employeeShare: pair.employeeShare.toNumber(),
+      memberShare: selected.memberShare.toNumber(),
+      employeeShare: selected.employeeShare.toNumber(),
+      ownerOptions: activeOwnerPairs.map((p) => ({
+        memberId: p.member.id,
+        ownerName: `${p.member.firstName} ${p.member.lastName}`,
+        memberShare: p.memberShare.toNumber(),
+        employeeShare: p.employeeShare.toNumber(),
+      })),
     };
   }
 
@@ -119,7 +144,7 @@ export async function getPurchaseHistoryForMember(
 export async function createPurchase(
   input: PurchaseInput
 ): Promise<Purchase> {
-  const seller = await lookupSeller(input.sellerCode);
+  const seller = await lookupSeller(input.sellerCode, input.memberId);
   const dryWeightKg = (input.rawWeightKg * input.dryPercentage) / 100;
   const totalAmount = dryWeightKg * input.marketPrice;
 

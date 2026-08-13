@@ -68,7 +68,7 @@ function MemberLoginForm() {
             เข้าสู่ระบบสมาชิก
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Field Latex — ระบบสำหรับสมาชิก
+            สหกรณ์กองทุนสวนยางบ้านบางบอน
           </p>
         </div>
 

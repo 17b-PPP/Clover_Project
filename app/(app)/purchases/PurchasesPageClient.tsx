@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ThaiDateField } from "@/components/purchases/ThaiDateField";
 import { LiveClock } from "@/components/purchases/LiveClock";
@@ -32,6 +33,16 @@ export function PurchasesPageClient() {
 
   const seller = useSellerLookup(sellerCode);
   const locked = saved !== null;
+
+  const [selectedMemberId, setSelectedMemberId] = useState("");
+  const [prevSellerData, setPrevSellerData] = useState(seller.data);
+  if (seller.data !== prevSellerData) {
+    setPrevSellerData(seller.data);
+    setSelectedMemberId(seller.data?.memberId ?? "");
+  }
+  const selectedOwner =
+    seller.data?.ownerOptions.find((o) => o.memberId === selectedMemberId) ??
+    null;
 
   const [priceHydrated, setPriceHydrated] = useState(false);
 
@@ -79,6 +90,7 @@ export function PurchasesPageClient() {
   function resetForm() {
     if (!priceLocked) setMarketPrice("");
     setSellerCode("");
+    setSelectedMemberId("");
     setRawWeightKg("");
     setDryPercentage("");
     setSaved(null);
@@ -123,6 +135,7 @@ export function PurchasesPageClient() {
           sellerCode,
           rawWeightKg: Number(rawWeightKg),
           dryPercentage: Number(dryPercentage),
+          memberId: selectedMemberId || undefined,
         }),
       });
       const data = await res.json();
@@ -249,13 +262,28 @@ export function PurchasesPageClient() {
             )}
           </div>
 
-          <Input
-            label="เจ้าของสวน"
-            value={seller.data?.ownerName ?? ""}
-            readOnly
-            disabled
-            placeholder="ระบบจะแสดงให้อัตโนมัติ"
-          />
+          {seller.data && seller.data.ownerOptions.length > 1 ? (
+            <Select
+              label="เจ้าของสวน"
+              disabled={locked}
+              value={selectedMemberId}
+              onChange={(e) => setSelectedMemberId(e.target.value)}
+            >
+              {seller.data.ownerOptions.map((o) => (
+                <option key={o.memberId} value={o.memberId}>
+                  {o.ownerName}
+                </option>
+              ))}
+            </Select>
+          ) : (
+            <Input
+              label="เจ้าของสวน"
+              value={selectedOwner?.ownerName ?? ""}
+              readOnly
+              disabled
+              placeholder="ระบบจะแสดงให้อัตโนมัติ"
+            />
+          )}
 
           <div className="col-span-2">
             <Input

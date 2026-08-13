@@ -68,7 +68,7 @@ function LoginForm() {
             เข้าสู่ระบบ
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Field Latex — ระบบจัดการรับซื้อน้ำยางพารา
+            สหกรณ์กองทุนสวนยางบ้านบางบอน
           </p>
         </div>
 

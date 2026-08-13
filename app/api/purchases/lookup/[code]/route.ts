@@ -6,10 +6,12 @@ interface RouteParams {
   params: Promise<{ code: string }>;
 }
 
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { code } = await params;
-    const seller = await lookupSeller(decodeURIComponent(code));
+    const preferredMemberId =
+      request.nextUrl.searchParams.get("memberId") ?? undefined;
+    const seller = await lookupSeller(decodeURIComponent(code), preferredMemberId);
     return NextResponse.json(seller);
   } catch (error) {
     if (error instanceof SellerLookupError) {

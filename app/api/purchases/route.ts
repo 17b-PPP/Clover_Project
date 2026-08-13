@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
       sellerCode: body.sellerCode!,
       rawWeightKg: body.rawWeightKg!,
       dryPercentage: body.dryPercentage!,
+      memberId: body.memberId,
     });
 
     await logActivity({

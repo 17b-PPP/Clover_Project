@@ -43,14 +43,14 @@ export function ContractFormDialog({
 }: ContractFormDialogProps) {
   const [memberId, setMemberId] = useState(contract?.member.id ?? "");
   const [employeeId, setEmployeeId] = useState(contract?.employee.id ?? "");
-  const [memberShare, setMemberShare] = useState(
-    contract?.memberShare ?? 50
+  const [employeeShare, setEmployeeShare] = useState(
+    contract?.employeeShare ?? 50
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const readOnly = mode === "view";
   const isEdit = mode === "edit";
-  const employeeShare = Math.round((100 - memberShare) * 100) / 100;
+  const memberShare = Math.round((100 - employeeShare) * 100) / 100;
 
   const activeMembers = members.filter(
     (m) => m.status === "Active" || m.id === memberId
@@ -193,19 +193,19 @@ export function ContractFormDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="สัดส่วนเจ้าของสวน (%)"
+              label="สัดส่วนลูกจ้าง (%)"
               type="number"
               min={0}
               max={100}
               step={0.01}
               required
-              value={memberShare}
-              onChange={(e) => setMemberShare(Number(e.target.value))}
+              value={employeeShare}
+              onChange={(e) => setEmployeeShare(Number(e.target.value))}
             />
             <Input
-              label="สัดส่วนลูกจ้าง (%)"
+              label="สัดส่วนเจ้าของสวน (%)"
               type="number"
-              value={employeeShare}
+              value={memberShare}
               disabled
             />
           </div>

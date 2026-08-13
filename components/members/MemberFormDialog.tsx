@@ -222,18 +222,6 @@ export function MemberFormDialog({
         </div>
 
         <Input
-          label="ชื่อสวนยาง"
-          disabled={readOnly}
-          value={form.gardenName ?? ""}
-          onChange={(e) =>
-            setForm((prev) => ({
-              ...prev,
-              gardenName: e.target.value || null,
-            }))
-          }
-        />
-
-        <Input
           label="เบอร์โทร"
           required
           disabled={readOnly}

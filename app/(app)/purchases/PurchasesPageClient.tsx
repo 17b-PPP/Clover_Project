@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -10,7 +11,7 @@ import { LiveClock } from "@/components/purchases/LiveClock";
 import { PurchaseReceipt } from "@/components/purchases/PurchaseReceipt";
 import { useSellerLookup } from "@/components/hooks/useSellerLookup";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import type { Purchase } from "@/lib/types";
+import type { Purchase, SellerOption } from "@/lib/types";
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -18,7 +19,13 @@ function todayIso(): string {
 
 const LOCKED_PRICE_STORAGE_KEY = "purchases:lockedMarketPrice";
 
-export function PurchasesPageClient() {
+interface PurchasesPageClientProps {
+  sellerOptions: SellerOption[];
+}
+
+export function PurchasesPageClient({
+  sellerOptions,
+}: PurchasesPageClientProps) {
   const [recordDate] = useState(todayIso());
   const [marketPrice, setMarketPrice] = useState("");
   const [priceLocked, setPriceLocked] = useState(false);
@@ -43,6 +50,18 @@ export function PurchasesPageClient() {
   const selectedOwner =
     seller.data?.ownerOptions.find((o) => o.memberId === selectedMemberId) ??
     null;
+
+  const sellerComboOptions = useMemo<ComboboxOption[]>(
+    () =>
+      sellerOptions.map((option) => ({
+        value: option.code,
+        label:
+          option.kind === "employee"
+            ? `${option.code} · ${option.name} (ลูกจ้าง)`
+            : `${option.code} · ${option.name}`,
+      })),
+    [sellerOptions]
+  );
 
   const [priceHydrated, setPriceHydrated] = useState(false);
 
@@ -227,38 +246,21 @@ export function PurchasesPageClient() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-slate-700">
-              เลขที่สมาชิก
-            </label>
-            <div
-              className={`flex items-center gap-2 rounded-lg border px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-emerald-600 ${
-                seller.error ? "border-red-400" : "border-slate-300"
-              }`}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.75}
-                className="h-4 w-4 shrink-0 text-slate-400"
-              >
-                <path d="M12 11a3 3 0 0 0-3 3v1M12 11a3 3 0 0 1 3 3v1M12 4a7 7 0 0 0-7 7v3a9 9 0 0 0 4 7.5M12 4a7 7 0 0 1 7 7v3a9 9 0 0 1-4 7.5M12 11v9" />
-              </svg>
-              <input
-                type="text"
-                value={sellerCode}
-                disabled={locked}
-                onChange={(e) => setSellerCode(e.target.value)}
-                placeholder="เช่น M-0001 หรือ E-0001"
-                className="w-full border-none bg-transparent p-0 text-sm text-slate-900 focus:outline-none focus:ring-0"
-              />
-            </div>
+          <div>
+            <Combobox
+              label="เลขที่สมาชิก"
+              options={sellerComboOptions}
+              value={sellerCode}
+              onChange={setSellerCode}
+              disabled={locked}
+              placeholder="พิมพ์ชื่อหรือรหัส (M- / E-)"
+              error={seller.error ?? undefined}
+              emptyMessage="ไม่พบสมาชิกหรือลูกจ้างที่ตรงกัน"
+            />
             {seller.loading && (
-              <span className="text-xs text-slate-400">กำลังค้นหา...</span>
-            )}
-            {seller.error && (
-              <span className="text-xs text-red-600">{seller.error}</span>
+              <span className="mt-1 block text-xs text-slate-400">
+                กำลังค้นหา...
+              </span>
             )}
           </div>
 

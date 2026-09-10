@@ -33,11 +33,17 @@ function receiptNumber(purchaseCode: string): string {
 
 interface PurchaseReceiptProps {
   purchase: Purchase;
+  // The member portal previews a past receipt on screen inside a dialog; every
+  // other caller renders it purely as print output, hidden until printed.
+  onScreen?: boolean;
 }
 
-export function PurchaseReceipt({ purchase }: PurchaseReceiptProps) {
+export function PurchaseReceipt({
+  purchase,
+  onScreen = false,
+}: PurchaseReceiptProps) {
   return (
-    <div className="receipt-print-area hidden print:block">
+    <div className={onScreen ? "" : "receipt-print-area hidden print:block"}>
       <div className="relative mx-auto max-w-lg rounded-2xl border border-slate-200 p-10 text-slate-900">
         <div className="flex flex-col items-center text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">

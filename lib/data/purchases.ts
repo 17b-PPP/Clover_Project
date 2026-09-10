@@ -131,12 +131,17 @@ export async function getPurchaseHistory(): Promise<Purchase[]> {
   return purchases.map(serialize);
 }
 
+// `limit` is for the member portal's home page, which previews only the latest
+// few sales; omitted, this returns the member's full history (one member's own
+// history is small, and @@index([memberId]) keeps it cheap).
 export async function getPurchaseHistoryForMember(
-  memberId: string
+  memberId: string,
+  limit?: number
 ): Promise<Purchase[]> {
   const purchases = await prisma.purchase.findMany({
     where: { memberId },
     orderBy: [{ recordDate: "desc" }, { createdAt: "desc" }],
+    ...(limit ? { take: limit } : {}),
   });
   return purchases.map(serialize);
 }

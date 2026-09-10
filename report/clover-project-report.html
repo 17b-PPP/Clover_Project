@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>รายงานการวิเคราะห์โค้ด — Clover Project (Field Latex)</title>
+  <style>
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 14px; }
+    body {
+      font-family: 'Segoe UI', 'Noto Sans Thai', Tahoma, sans-serif;
+      color: #1e293b;
+      line-height: 1.75;
+      background: #f8fafc;
+      padding: 2rem;
+    }
+
+    /* ─── Print ─── */
+    @media print {
+      body { background: #fff; padding: 0; font-size: 12px; }
+      .page-break { page-break-before: always; }
+      .no-print { display: none !important; }
+      h1, h2, h3 { page-break-after: avoid; }
+      table, pre { page-break-inside: avoid; }
+    }
+
+    /* ─── Container ─── */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 3rem;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+    @media print { .container { box-shadow: none; border-radius: 0; padding: 0; } }
+
+    /* ─── Cover ─── */
+    .cover {
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+      border-bottom: 3px solid #059669;
+      margin-bottom: 3rem;
+    }
+    .cover .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px; height: 64px;
+      background: #059669;
+      color: #fff;
+      border-radius: 16px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+    }
+    .cover h1 { font-size: 2rem; color: #0f172a; margin-bottom: .5rem; }
+    .cover .subtitle { font-size: 1.1rem; color: #64748b; margin-bottom: 2rem; }
+    .cover .meta { font-size: .85rem; color: #94a3b8; }
+
+    /* ─── TOC ─── */
+    .toc { margin-bottom: 3rem; }
+    .toc h2 { font-size: 1.3rem; color: #059669; border-bottom: 2px solid #d1fae5; padding-bottom: .5rem; margin-bottom: 1rem; }
+    .toc ol { padding-left: 1.5rem; }
+    .toc li { margin-bottom: .4rem; }
+    .toc a { color: #0f766e; text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ─── Headings ─── */
+    h2 {
+      font-size: 1.4rem;
+      color: #059669;
+      border-bottom: 2px solid #d1fae5;
+      padding-bottom: .5rem;
+      margin: 2.5rem 0 1rem;
+    }
+    h3 { font-size: 1.1rem; color: #0f766e; margin: 1.5rem 0 .75rem; }
+    h4 { font-size: 1rem; color: #334155; margin: 1rem 0 .5rem; }
+
+    /* ─── Paragraphs & Lists ─── */
+    p { margin-bottom: .75rem; }
+    ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin-bottom: .35rem; }
+
+    /* ─── Code ─── */
+    code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: .9em;
+      color: #0f766e;
+    }
+    pre {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+      font-size: .85rem;
+      line-height: 1.6;
+    }
+    pre code { background: none; padding: 0; color: #334155; }
+
+    /* ─── Tables ─── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+      font-size: .9rem;
+    }
+    th {
+      background: #f0fdf4;
+      color: #065f46;
+      text-align: left;
+      padding: .6rem .75rem;
+      border: 1px solid #d1fae5;
+      font-weight: 600;
+    }
+    td {
+      padding: .5rem .75rem;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f8fafc; }
+
+    /* ─── Callout ─── */
+    .callout {
+      border-left: 4px solid #059669;
+      background: #f0fdf4;
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1.5rem;
+    }
+    .callout.warn {
+      border-left-color: #d97706;
+      background: #fffbeb;
+    }
+    .callout strong { display: block; margin-bottom: .25rem; }
+
+    /* ─── Diagram ─── */
+    .diagram {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-family: 'Consolas', monospace;
+      font-size: .85rem;
+      line-height: 1.8;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* ─── Badge ─── */
+    .badge {
+      display: inline-block;
+      background: #d1fae5;
+      color: #065f46;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: .8rem;
+      font-weight: 600;
+    }
+    .badge.blue { background: #dbeafe; color: #1e40af; }
+    .badge.amber { background: #fef3c7; color: #92400e; }
+    .badge.red { background: #fee2e2; color: #991b1b; }
+
+    /* ─── Footer ─── */
+    .report-footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid #d1fae5;
+      text-align: center;
+      font-size: .8rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════ COVER ═══════════════════════════════════ -->
+  <div class="cover">
+    <div class="logo">FL</div>
+    <h1>รายงานการวิเคราะห์โค้ดโปรเจกต์</h1>
+    <p class="subtitle">Clover Project — Field Latex<br/>ระบบจัดการการรับซื้อน้ำยางพารา</p>
+    <p class="meta">
+      สร้างอัตโนมัติโดย AI Code Analysis<br/>
+      เวอร์ชัน 1.0
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════ TOC ═══════════════════════════════════ -->
+  <div class="toc">
+    <h2>สารบัญ</h2>
+    <ol>
+      <li><a href="#sec1">ภาพรวมของโปรเจกต์ (Project Overview)</a></li>
+      <li><a href="#sec2">สถาปัตยกรรมระบบ (System Architecture)</a></li>
+      <li><a href="#sec3">โครงสร้างไฟล์และโฟลเดอร์</a></li>
+      <li><a href="#sec4">ฐานข้อมูลและ Schema (Database Layer)</a></li>
+      <li><a href="#sec5">รูปแบบการดึงข้อมูล (Data Fetching Patterns)</a></li>
+      <li><a href="#sec6">ระบบ API Routes</a></li>
+      <li><a href="#sec7">Business Logic — จุดสำคัญ</a></li>
+      <li><a href="#sec8">ระบบ Authentication & Session</a></li>
+      <li><a href="#sec9">คอมโพเนนต์ที่ใช้ซ้ำ (Shared Components)</a></li>
+      <li><a href="#sec10">Custom Hooks</a></li>
+      <li><a href="#sec11">หน้าเพจและ Page Pattern</a></li>
+      <li><a href="#sec12">ระบบความปลอดภัย (Security)</a></li>
+      <li><a href="#sec13">สิ่งที่ควรรู้สำหรับนักพัฒนาใหม่</a></li>
+    </ol>
+  </div>
+
+  <!-- ═══════════════════════════════════ SEC 1 ═══════════════════════════════════ -->
+  <h2 id="sec1">1. ภาพรวมของโปรเจกต์ (Project Overview)</h2>
+
+  <p>
+    <strong>Clover Project (Field Latex)</strong> คือระบบจัดการการรับซื้อน้ำยางพาราสำหรับ
+    <em>สหกรณ์กองทุนสวนยางบ้านบางบอนจำกัด</em> โดยรองรับการทำงาน 2 กลุ่มผู้ใช้หลัก:
+  </p>
+
+  <table>
+    <tr>
+      <th>กลุ่มผู้ใช้</th>
+      <th>บทบาท</th>
+      <th>การเข้าสู่ระบบ</th>
+    </tr>
+    <tr>
+      <td><strong>พนักงาน/ผู้ดูแลระบบ (Staff/Admin)</strong></td>
+      <td>จัดการสมาชิก ลูกจ้าง สัญญาจ้าง รับซื้อน้ำยาง เบิกเงิน</td>
+      <td>Username + Password ผ่านหน้า <code>/login</code></td>
+    </tr>
+    <tr>
+      <td><strong>สมาชิก (Member)</strong></td>
+      <td>ดูประวัติการขายน้ำยางและยอดเงินสะสมของตนเอง</td>
+      <td>เลขบัตรประชาชน + วันเกิด ผ่านหน้า <code>/member/login</code></td>
+    </tr>
+  </table>
+
+  <h3>เทคโนโลยีหลัก</h3>
+  <table>
+    <tr><th>หมวด</th><th>เทคโนโลยี</th><th>รายละเอียด</th></tr>
+    <tr><td>Framework</td><td>Next.js 16 (App Router)</td><td>ใช้ Server Components เป็นหลักสำหรับดึงข้อมูลฝั่งเซิร์ฟเวอร์</td></tr>
+    <tr><td>ภาษา</td><td>TypeScript</td><td>Type-safe ทั้ง Frontend และ Backend</td></tr>
+    <tr><td>Styling</td><td>Tailwind CSS</td><td>Utility-first CSS framework</td></tr>
+    <tr><td>ORM</td><td>Prisma</td><td>Object-Relational Mapping สำหรับจัดการฐานข้อมูล</td></tr>
+    <tr><td>Database</td><td>PostgreSQL</td><td>ฐานข้อมูลหลักผ่าน Supabase (ดูจาก directUrl ใน schema)</td></tr>
+    <tr><td>Font</td><td>Noto Sans Thai</td><td>ฟอนต์ภาษาไทยจาก Google Fonts</td></tr>
+  </table>
+
+  <!-- ═══════════════════════════════════ SEC 2 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec2">2. สถาปัตยกรรมระบบ (System Architecture)</h2>
+
+  <p>ระบบใช้สถาปัตยกรรมแบบ <strong>3 ชั้น (Three-Tier Architecture)</strong> ภายใน Next.js Monolith:</p>
+
+  <div class="diagram">
+┌───────────────────────────────────────────────────────┐
+│                  PRESENTATION LAYER                   │
+│  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐  │
+│  │ Server Page │  │ Client Page │  │  UI Comps    │  │
+│  │ (page.tsx)  │──│ (*Client.tsx)│──│ (Modal,Table)│  │
+│  └──────┬──────┘  └──────┬──────┘  └──────────────┘  │
+│         │                │                            │
+├─────────┼────────────────┼────────────────────────────┤
+│         │     BUSINESS LOGIC LAYER                    │
+│         │                │                            │
+│  ┌──────▼──────┐  ┌──────▼──────┐  ┌──────────────┐  │
+│  │ Direct Call │  │  API Routes │  │ Activity Log │  │
+│  │ (SSR fetch) │  │ (/api/*)    │──│ (audit trail)│  │
+│  └──────┬──────┘  └──────┬──────┘  └──────────────┘  │
+│         │                │                            │
+├─────────┼────────────────┼────────────────────────────┤
+│         │       DATA ACCESS LAYER                     │
+│         │                │                            │
+│  ┌──────▼────────────────▼──────┐                     │
+│  │     lib/data/*.ts            │                     │
+│  │  (Prisma queries, serialize) │                     │
+│  └──────────────┬───────────────┘                     │
+│                 │                                     │
+│  ┌──────────────▼───────────────┐                     │
+│  │   Prisma Client (lib/prisma) │                     │
+│  └──────────────┬───────────────┘                     │
+│                 │                                     │
+│  ┌──────────────▼───────────────┐                     │
+│  │       PostgreSQL DB          │                     │
+│  └──────────────────────────────┘                     │
+└───────────────────────────────────────────────────────┘
+  </div>
+
+  <h3>Data Flow ที่สำคัญ 2 รูปแบบ</h3>
+  <table>
+    <tr>
+      <th>รูปแบบ</th>
+      <th>ใช้ตอนไหน</th>
+      <th>ตัวอย่าง</th>
+    </tr>
+    <tr>
+      <td><span class="badge">SSR Direct Call</span></td>
+      <td>โหลดข้อมูลครั้งแรกเมื่อเปิดหน้า (Server Component เรียก <code>lib/data/*.ts</code> โดยตรง)</td>
+      <td><code>page.tsx</code> → <code>getMembers()</code></td>
+    </tr>
+    <tr>
+      <td><span class="badge blue">Client-side API</span></td>
+      <td>การ CRUD จากฝั่ง Client (กดปุ่ม สร้าง แก้ไข ลบ) ผ่าน <code>fetch()</code> ไปยัง API Routes</td>
+      <td><code>*PageClient.tsx</code> → <code>fetch('/api/members')</code></td>
+    </tr>
+  </table>
+
+  <!-- ═══════════════════════════════════ SEC 3 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec3">3. โครงสร้างไฟล์และโฟลเดอร์</h2>
+
+  <pre><code>Clover Project/
+├── app/
+│   ├── layout.tsx                  # Root Layout (ฟอนต์, metadata)
+│   ├── globals.css                 # Global styles + print styles
+│   ├── login/page.tsx              # หน้า Login สำหรับ Staff
+│   │
+│   ├── (app)/                      # Route Group สำหรับหน้า Staff (มี Sidebar)
+│   │   ├── layout.tsx              # Layout ที่มี Sidebar + Session check
+│   │   ├── page.tsx                # Redirect ไปยัง /members
+│   │   ├── members/                # ระบบจัดการสมาชิก
+│   │   ├── employees/              # ระบบจัดการลูกจ้าง
+│   │   ├── contracts/              # ระบบสัญญาจ้าง
+│   │   ├── purchases/              # ระบบรับซื้อน้ำยาง
+│   │   ├── withdrawals/            # ระบบเบิกเงิน
+│   │   ├── users/                  # จัดการผู้ใช้งาน (Admin)
+│   │   ├── audit-log/              # ประวัติการใช้งาน
+│   │   └── performance/purchases/  # ประวัติการรับซื้อ (รายงาน)
+│   │
+│   ├── member/                     # Route Group สำหรับหน้าสมาชิก
+│   │   ├── login/page.tsx          # หน้า Login สำหรับ Member
+│   │   └── dashboard/              # หน้า Dashboard ของสมาชิก
+│   │
+│   └── api/                        # API Routes (REST)
+│       ├── auth/                   # Login/Logout (Staff)
+│       ├── member-auth/            # Login/Logout (Member)
+│       ├── members/                # CRUD สมาชิก
+│       ├── employees/              # CRUD ลูกจ้าง
+│       ├── contracts/              # CRUD สัญญาจ้าง
+│       ├── purchases/              # สร้างรายการรับซื้อ + Lookup
+│       ├── withdrawals/            # สร้างรายการเบิกเงิน + Lookup
+│       ├── users/                  # CRUD ผู้ใช้งาน (Staff)
+│       ├── audit-log/              # ดึงประวัติการใช้งาน
+│       └── postal-code/            # ค้นหาที่อยู่จากรหัสไปรษณีย์
+│
+├── components/
+│   ├── ui/                         # Shared UI Components
+│   │   ├── Badge.tsx, Button.tsx, ConfirmDialog.tsx
+│   │   ├── Input.tsx, Modal.tsx, PageHeader.tsx
+│   │   ├── Pagination.tsx, PasswordInput.tsx
+│   │   ├── ResetButton.tsx, Select.tsx
+│   │   ├── Spinner.tsx, Table.tsx
+│   │   └── ... (12 components)
+│   ├── hooks/                      # Custom React Hooks
+│   │   ├── useMemberLookup.ts
+│   │   ├── usePostalCodeLookup.ts
+│   │   └── useSellerLookup.ts
+│   ├── layout/                     # Layout Components
+│   │   ├── Sidebar.tsx
+│   │   └── MemberHeader.tsx
+│   ├── members/                    # Domain Components: สมาชิก
+│   ├── employees/                  # Domain Components: ลูกจ้าง
+│   ├── contracts/                  # Domain Components: สัญญาจ้าง
+│   ├── purchases/                  # Domain Components: รับซื้อน้ำยาง
+│   ├── withdrawals/                # Domain Components: เบิกเงิน
+│   ├── users/                      # Domain Components: ผู้ใช้งาน
+│   └── audit-log/                  # Domain Components: ประวัติ
+│
+├── lib/
+│   ├── prisma.ts                   # Prisma Client Singleton
+│   ├── auth.ts                     # Password hash/verify (scrypt)
+│   ├── session.ts                  # Staff Session (Cookie)
+│   ├── session-core.ts             # Staff Session Logic (HMAC)
+│   ├── member-session.ts           # Member Session (Cookie)
+│   ├── member-session-core.ts      # Member Session Logic (derived HMAC)
+│   ├── activity-log.ts             # Audit Log Helper
+│   ├── api-error.ts                # API Error Handler
+│   ├── format.ts                   # Date/Currency formatters
+│   ├── image.ts                    # Image resize utility
+│   ├── validate.ts                 # Validation helpers
+│   ├── thai-address.ts             # Thai postal code lookup
+│   ├── types.ts                    # Shared TypeScript types
+│   └── data/
+│       ├── members.ts              # Member queries
+│       ├── employees.ts            # Employee queries
+│       ├── contracts.ts            # Contract queries
+│       ├── purchases.ts            # Purchase queries + Seller lookup
+│       ├── withdrawals.ts          # Withdrawal queries + Member lookup
+│       ├── users.ts                # Staff/User queries
+│       └── audit-log.ts            # Audit log queries
+│
+├── prisma/
+│   └── schema.prisma               # Database schema
+│
+├── middleware.ts                    # Auth middleware (route protection)
+└── package.json</code></pre>
+
+  <!-- ═══════════════════════════════════ SEC 4 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec4">4. ฐานข้อมูลและ Schema (Database Layer)</h2>
+
+  <h3>4.1 Entity Relationship</h3>
+
+  <div class="diagram">
+┌──────────┐       ┌──────────┐       ┌───────────┐
+│  Member  │──1:N──│  MePair  │──N:1──│ Employee  │
+│──────────│       │──────────│       │───────────│
+│memberCode│       │ pairCode │       │empCode    │
+│walletBal.│       │memberShare│      │           │
+│dividendBal│      │empShare  │       └─────┬─────┘
+└────┬─────┘       └──────────┘             │
+     │                                      │
+     ├──1:N── Purchase ──N:1────────────────┘
+     │        (purchaseCode, rawWeightKg,
+     │         dryPercentage, totalAmount)
+     │
+     └──1:N── Withdrawal
+              (withdrawalCode, amount,
+               balanceBefore, balanceAfter)
+
+┌──────────┐       ┌──────────────┐
+│  Staff   │──1:N──│ ActivityLog  │
+│──────────│       │──────────────│
+│ username │       │   action     │
+│ password │       │ description  │
+│   role   │       │  actionTime  │
+└──────────┘       └──────────────┘
+  </div>
+
+  <h3>4.2 ตารางหลักในฐานข้อมูล</h3>
+  <table>
+    <tr><th>Model</th><th>คำอธิบาย</th><th>ฟิลด์สำคัญ</th></tr>
+    <tr>
+      <td><code>Member</code></td>
+      <td>สมาชิกเจ้าของสวนยาง</td>
+      <td><code>memberCode</code> (unique), <code>idCardNumber</code> (13 หลัก), <code>walletBalance</code> (Decimal 12,2), <code>dividendBalance</code>, <code>status</code></td>
+    </tr>
+    <tr>
+      <td><code>Employee</code></td>
+      <td>ลูกจ้างรับซื้อยางหน้างาน</td>
+      <td><code>employeeCode</code> (unique), <code>idCardNumber</code>, <code>status</code></td>
+    </tr>
+    <tr>
+      <td><code>MePair</code></td>
+      <td>สัญญาจับคู่ สมาชิก-ลูกจ้าง + สัดส่วนรายได้</td>
+      <td><code>pairCode</code>, <code>memberShare</code> + <code>employeeShare</code> = 100%, <code>contractStartDate</code>, <code>contractEndDate</code></td>
+    </tr>
+    <tr>
+      <td><code>Purchase</code></td>
+      <td>บันทึกการรับซื้อน้ำยาง</td>
+      <td><code>purchaseCode</code>, <code>rawWeightKg</code>, <code>dryPercentage</code>, <code>dryWeightKg</code>, <code>totalAmount</code>, <code>employeePayout</code>, <code>ownerPayout</code></td>
+    </tr>
+    <tr>
+      <td><code>Withdrawal</code></td>
+      <td>รายการเบิกเงินสะสม</td>
+      <td><code>withdrawalCode</code>, <code>amount</code>, <code>balanceBefore</code>, <code>balanceAfter</code></td>
+    </tr>
+    <tr>
+      <td><code>Staff</code></td>
+      <td>พนักงาน/ผู้ดูแลระบบ</td>
+      <td><code>staffCode</code>, <code>username</code> (unique), <code>email</code> (unique), <code>password</code> (hashed), <code>role</code> (STAFF/ADMIN)</td>
+    </tr>
+    <tr>
+      <td><code>ActivityLog</code></td>
+      <td>บันทึกกิจกรรม (Audit Trail)</td>
+      <td><code>staffId</code> (FK), <code>action</code> (Enum 20 ค่า), <code>targetType</code>, <code>description</code></td>
+    </tr>
+  </table>
+
+  <h3>4.3 Enum ที่ใช้ในระบบ</h3>
+  <table>
+    <tr><th>Enum</th><th>ค่า</th><th>ใช้กับ</th></tr>
+    <tr><td><code>StaffRole</code></td><td>STAFF, ADMIN</td><td>Staff.role</td></tr>
+    <tr><td><code>MemberStatus</code></td><td>Active, Inactive</td><td>Member.status</td></tr>
+    <tr><td><code>EmployeeStatus</code></td><td>Active, Inactive</td><td>Employee.status</td></tr>
+    <tr><td><code>PairStatus</code></td><td>Active, Inactive</td><td>MePair.status</td></tr>
+    <tr><td><code>ActionType</code></td><td>LOGIN, LOGOUT, CREATE_*, UPDATE_*, SUSPEND_*, DELETE_*, ...</td><td>ActivityLog.action</td></tr>
+    <tr><td><code>SellerType</code></td><td>MEMBER, EMPLOYEE</td><td>Purchase.sellerType</td></tr>
+  </table>
+
+  <h3>4.4 Prisma Client Singleton</h3>
+  <p>ไฟล์ <code>lib/prisma.ts</code> ใช้ Global Singleton Pattern เพื่อป้องกันการสร้าง Prisma Client ซ้ำหลายครั้งในโหมด Development (Hot Reload):</p>
+  <pre><code>const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
+export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}</code></pre>
+
+  <!-- ═══════════════════════════════════ SEC 5 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec5">5. รูปแบบการดึงข้อมูล (Data Fetching Patterns)</h2>
+
+  <h3>5.1 Pattern หลัก: Server-Side Direct Import</h3>
+  <p>ทุกหน้าเพจหลัก (<code>page.tsx</code>) เป็น <strong>Server Component</strong> ที่เรียก Data Access Layer โดยตรง:</p>
+  <pre><code>// app/(app)/members/page.tsx
+import { getMembers } from "@/lib/data/members";
+
+export default async function MembersPage() {
+  const members = await getMembers();
+  return &lt;MembersPageClient initialMembers={members} /&gt;;
+}</code></pre>
+
+  <div class="callout">
+    <strong>💡 ข้อสังเกต — Hybrid Rendering Pattern</strong>
+    ข้อมูลเริ่มต้นถูกดึงที่ Server (ไม่ต้อง Loading State ครั้งแรก) จากนั้นส่งเป็น props ให้ Client Component เพื่อจัดการ State, Filtering, CRUD ต่อ
+  </div>
+
+  <h3>5.2 Data Serialization Pattern</h3>
+  <p>ทุกไฟล์ใน <code>lib/data/*.ts</code> มีฟังก์ชัน <code>serialize()</code> เพื่อแปลง Prisma Object → Plain TypeScript Object:</p>
+
+  <table>
+    <tr><th>Prisma Type</th><th>Serialized Type</th><th>เหตุผล</th></tr>
+    <tr><td><code>Decimal</code></td><td><code>number</code></td><td>Prisma Decimal ส่งผ่าน JSON ไม่ได้ ต้องเรียก <code>.toNumber()</code></td></tr>
+    <tr><td><code>DateTime</code></td><td><code>string</code> (ISO)</td><td>Date object ส่งผ่าน Server→Client boundary ไม่ได้ ต้องเรียก <code>.toISOString()</code></td></tr>
+  </table>
+
+  <pre><code>// ตัวอย่างจาก lib/data/members.ts
+function serialize(member: PrismaMember): Member {
+  return {
+    ...member,
+    walletBalance: member.walletBalance.toNumber(),    // Decimal → number
+    dateOfBirth: member.dateOfBirth.toISOString(),      // Date → string
+    createdAt: member.createdAt.toISOString(),
+  };
+}</code></pre>
+
+  <h3>5.3 Auto-Generated Sequential Codes</h3>
+  <p>ทุก Entity มีการสร้างรหัสอัตโนมัติแบบ Sequential:</p>
+  <table>
+    <tr><th>Entity</th><th>Pattern</th><th>ตัวอย่าง</th><th>ฟังก์ชัน</th></tr>
+    <tr><td>Member</td><td><code>M-XXXX</code></td><td>M-0001, M-0002</td><td><code>nextMemberCode()</code></td></tr>
+    <tr><td>Employee</td><td><code>E-XXXX</code></td><td>E-0001, E-0002</td><td><code>nextEmployeeCode()</code></td></tr>
+    <tr><td>Contract</td><td><code>C-XXXX</code></td><td>C-0001, C-0002</td><td><code>nextPairCode()</code></td></tr>
+    <tr><td>Purchase</td><td><code>P-XXXX</code></td><td>P-0001, P-0002</td><td><code>nextPurchaseCode()</code></td></tr>
+    <tr><td>Withdrawal</td><td><code>W-XXXX</code></td><td>W-0001, W-0002</td><td><code>nextWithdrawalCode()</code></td></tr>
+    <tr><td>Staff</td><td><code>S-XXXX</code></td><td>S-0001, S-0002</td><td><code>nextStaffCode()</code></td></tr>
+  </table>
+
+  <p>วิธีการทำงาน: ดึงรหัสล่าสุดจาก DB → แปลงเป็นตัวเลข → +1 → pad เป็น 4 หลัก</p>
+
+  <h3>5.4 Performance Optimization: Selective Fields</h3>
+  <p>ฟังก์ชัน <code>getMembers()</code> และ <code>getEmployees()</code> ใช้ <code>select</code> แทน <code>findMany()</code> ทั้งหมด โดย <strong>ไม่ดึง <code>photoUrl</code></strong> เพื่อลดขนาด payload (รูปถ่ายเก็บเป็น Base64 Data URL ซึ่งมีขนาดใหญ่):</p>
+  <pre><code>// lib/data/members.ts — getMembers()
+const members = await prisma.member.findMany({
+  select: {
+    id: true, memberCode: true, firstName: true, ...
+    // ❌ ไม่มี photoUrl
+  },
+});</code></pre>
+  <p>เมื่อต้องการดูรูปถ่าย จะเรียก <code>getMember(id)</code> ที่ใช้ <code>findUnique()</code> เพื่อดึงข้อมูลครบทุกฟิลด์แทน</p>
+
+  <!-- ═══════════════════════════════════ SEC 6 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec6">6. ระบบ API Routes</h2>
+
+  <h3>6.1 ภาพรวม API Endpoints</h3>
+  <table>
+    <tr><th>Endpoint</th><th>Method</th><th>คำอธิบาย</th></tr>
+    <tr><td><code>/api/auth/login</code></td><td>POST</td><td>เข้าสู่ระบบ (Staff)</td></tr>
+    <tr><td><code>/api/auth/logout</code></td><td>POST</td><td>ออกจากระบบ (Staff)</td></tr>
+    <tr><td><code>/api/member-auth/login</code></td><td>POST</td><td>เข้าสู่ระบบ (Member)</td></tr>
+    <tr><td><code>/api/member-auth/logout</code></td><td>POST</td><td>ออกจากระบบ (Member)</td></tr>
+    <tr><td><code>/api/member-auth/force-logout</code></td><td>GET</td><td>บังคับออกจากระบบ (redirect)</td></tr>
+    <tr><td colspan="3" style="background:#f0fdf4;font-weight:600;">Resource CRUD</td></tr>
+    <tr><td><code>/api/members</code></td><td>GET, POST</td><td>ดึงรายการ / สร้างสมาชิกใหม่</td></tr>
+    <tr><td><code>/api/members/[id]</code></td><td>GET, PATCH, DELETE</td><td>ดึง / แก้ไข / ลบสมาชิก</td></tr>
+    <tr><td><code>/api/employees</code></td><td>GET, POST</td><td>ดึงรายการ / สร้างลูกจ้างใหม่</td></tr>
+    <tr><td><code>/api/employees/[id]</code></td><td>GET, PATCH, DELETE</td><td>ดึง / แก้ไข / ลบลูกจ้าง</td></tr>
+    <tr><td><code>/api/contracts</code></td><td>GET, POST</td><td>ดึงรายการ / สร้างสัญญาจ้างใหม่</td></tr>
+    <tr><td><code>/api/contracts/[id]</code></td><td>GET, PATCH, DELETE</td><td>ดึง / แก้ไข(ต่อสัญญา+ระงับ) / ลบ</td></tr>
+    <tr><td><code>/api/contracts/history</code></td><td>GET</td><td>ดึงประวัติสัดส่วนสัญญา</td></tr>
+    <tr><td><code>/api/purchases</code></td><td>GET, POST</td><td>ดึงรายการ / สร้างรายการรับซื้อ</td></tr>
+    <tr><td><code>/api/purchases/lookup/[code]</code></td><td>GET</td><td>ค้นหาผู้ขายจากรหัสสมาชิก/ลูกจ้าง</td></tr>
+    <tr><td><code>/api/withdrawals</code></td><td>GET, POST</td><td>ดึงรายการ / สร้างรายการเบิกเงิน</td></tr>
+    <tr><td><code>/api/withdrawals/lookup/[code]</code></td><td>GET</td><td>ค้นหาสมาชิกและยอดเงินสะสม</td></tr>
+    <tr><td><code>/api/users</code></td><td>GET, POST</td><td>ดึงรายการ / สร้างผู้ใช้งานใหม่</td></tr>
+    <tr><td><code>/api/users/[id]</code></td><td>GET, PATCH</td><td>ดึง / แก้ไขผู้ใช้งาน</td></tr>
+    <tr><td><code>/api/audit-log</code></td><td>GET</td><td>ดึงประวัติการใช้งาน (200 รายการล่าสุด)</td></tr>
+    <tr><td><code>/api/postal-code/[code]</code></td><td>GET</td><td>ค้นหาที่อยู่จากรหัสไปรษณีย์</td></tr>
+  </table>
+
+  <h3>6.2 API Pattern ที่ใช้ซ้ำกันทุก Route</h3>
+  <pre><code>// โครงสร้างมาตรฐานของทุก API Route
+export async function POST(request: NextRequest) {
+  try {
+    // 1. Parse body
+    const body = await request.json();
+
+    // 2. Validate required fields
+    const missing = requiredFields.filter(f => !body[f]);
+    if (missing.length) return NextResponse.json({ error: ... }, { status: 400 });
+
+    // 3. Business validation
+    if (!isValidIdCardNumber(body.idCardNumber)) { ... }
+
+    // 4. Call Data Layer
+    const result = await createSomething(body);
+
+    // 5. Log activity (Audit Trail)
+    await logActivity({ action: "CREATE_*", ... });
+
+    // 6. Return response
+    return NextResponse.json(result, { status: 201 });
+  } catch (error) {
+    return handleRouteError(error);  // Centralized error handler
+  }
+}</code></pre>
+
+  <h3>6.3 Error Handling</h3>
+  <p>ใช้ <code>handleRouteError()</code> จาก <code>lib/api-error.ts</code> เป็น Centralized Error Handler:</p>
+  <pre><code>export function handleRouteError(error: unknown) {
+  console.error(error);
+  const message = error instanceof Error ? error.message : "Internal server error";
+  return NextResponse.json({ error: message }, { status: 500 });
+}</code></pre>
+  <p>นอกจากนี้ยังมี <strong>Custom Error Classes</strong> สำหรับ Business Logic เฉพาะ:</p>
+  <ul>
+    <li><code>SellerLookupError</code> — ค้นหาผู้ขายไม่พบ (ใน purchases)</li>
+    <li><code>WithdrawalError</code> — ยอดเงินไม่เพียงพอ / ค้นหาสมาชิกไม่พบ (ใน withdrawals)</li>
+  </ul>
+
+  <!-- ═══════════════════════════════════ SEC 7 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec7">7. Business Logic — จุดสำคัญ</h2>
+
+  <h3>7.1 ระบบรับซื้อน้ำยาง (Purchase System) ⭐</h3>
+  <p>นี่คือ <strong>หัวใจสำคัญที่สุดของระบบ</strong> เพราะเกี่ยวข้องกับเงินและการคำนวณหลายขั้นตอน</p>
+
+  <h4>สูตรการคำนวณ:</h4>
+  <pre><code>น้ำหนักยางแห้ง (dryWeightKg) = น้ำหนักน้ำยางสด (rawWeightKg) × %เนื้อยางแห้ง (dryPercentage) / 100
+จำนวนเงินรวม  (totalAmount)  = น้ำหนักยางแห้ง × ราคากลาง (marketPrice)
+ส่วนแบ่งลูกจ้าง (employeePayout) = totalAmount × employeeShare / 100  (ปัดเศษ 2 ตำแหน่ง)
+ส่วนแบ่งเจ้าของ (ownerPayout)    = totalAmount - employeePayout  (คำนวณจากส่วนที่เหลือ เพื่อไม่ให้เกิดปัญหาเศษ)</code></pre>
+
+  <div class="callout warn">
+    <strong>⚠️ จุดสำคัญ — การปัดเศษ</strong>
+    ส่วนแบ่งของลูกจ้างถูกปัดเศษ 2 ตำแหน่งก่อน จากนั้นส่วนแบ่งเจ้าของสวนคำนวณจาก <code>totalAmount - employeePayout</code>
+    เพื่อรับประกันว่าสองส่วนรวมกันได้เท่ากับ totalAmount เสมอ
+  </div>
+
+  <h4>Seller Lookup Logic:</h4>
+  <p>ฟังก์ชัน <code>lookupSeller(code)</code> ค้นหาผู้ขายจากรหัสที่ป้อน โดยมีลำดับการค้นหา:</p>
+  <ol>
+    <li><strong>ค้นหาใน Member ก่อน</strong> — ถ้าเจอ ถือว่าเจ้าของสวนขายเอง (memberShare = 100%)</li>
+    <li><strong>ค้นหาใน Employee</strong> — ถ้าเจอ ค้นหา Active MePair เพื่อหาเจ้าของสวนและสัดส่วน</li>
+    <li><strong>ไม่เจอทั้งคู่</strong> — Throw Error</li>
+  </ol>
+
+  <h4>Transaction Atomicity:</h4>
+  <p>การสร้าง Purchase ใช้ <code>prisma.$transaction</code> เพื่อรับประกันว่า:</p>
+  <pre><code>const [purchase] = await prisma.$transaction([
+  prisma.purchase.create({ data: { ... } }),      // 1. สร้างรายการรับซื้อ
+  prisma.member.update({                           // 2. เพิ่มยอดเงินสะสมให้เจ้าของสวน
+    where: { id: seller.memberId },
+    data: { walletBalance: { increment: ownerPayout } },
+  }),
+]);</code></pre>
+
+  <h3>7.2 ระบบเบิกเงิน (Withdrawal System)</h3>
+  <p>คล้ายกับ Purchase แต่ทำงานย้อนกลับ:</p>
+  <pre><code>const [withdrawal] = await prisma.$transaction([
+  prisma.withdrawal.create({ data: { ... } }),    // 1. สร้างรายการเบิกเงิน
+  prisma.member.update({                           // 2. หักยอดเงินสะสม
+    where: { id: member.memberId },
+    data: { walletBalance: { decrement: input.amount } },
+  }),
+]);</code></pre>
+
+  <div class="callout">
+    <strong>💡 การตรวจสอบก่อนเบิก</strong>
+    <ul>
+      <li>ตรวจว่าสมาชิกมีอยู่และสถานะ Active</li>
+      <li>ตรวจว่ายอดเบิก > 0</li>
+      <li>ตรวจว่ายอดเบิก ≤ walletBalance (ยอดเงินสะสมต้องเพียงพอ)</li>
+    </ul>
+  </div>
+
+  <h3>7.3 ระบบสัญญาจ้าง (Contract System)</h3>
+
+  <h4>การสร้างสัญญาใหม่:</h4>
+  <ul>
+    <li>ตรวจสอบทั้ง Member และ Employee ต้องมีสถานะ Active</li>
+    <li>ตรวจสอบไม่ให้มีสัญญาที่ยังใช้งานอยู่ (<code>contractEndDate = null</code>) สำหรับคู่เดียวกัน</li>
+  </ul>
+
+  <h4>การต่อสัญญา (Renew):</h4>
+  <p>ใช้ <code>$transaction</code> เพื่อทำ 2 ขั้นตอนพร้อมกัน:</p>
+  <ol>
+    <li>ปิดสัญญาเดิม (set <code>contractEndDate = now</code>)</li>
+    <li>สร้างสัญญาใหม่ด้วยสัดส่วนที่เปลี่ยน + <code>contractStartDate = now</code></li>
+  </ol>
+
+  <h3>7.4 ระบบราคากลางน้ำยาง (Market Price Lock)</h3>
+  <p>หน้ารับซื้อน้ำยาง (<code>PurchasesPageClient</code>) มีฟีเจอร์ <strong>ล็อกราคากลาง</strong>:</p>
+  <ul>
+    <li>ราคากลางเก็บใน <code>localStorage</code> ด้วย key <code>purchases:lockedMarketPrice</code></li>
+    <li>เมื่อล็อกแล้ว ราคาจะใช้ซ้ำทุกครั้งที่บันทึกรายการใหม่ ไม่ต้องกรอกซ้ำ</li>
+    <li>ราคาจะถูกล็อกอัตโนมัติหลังจากบันทึกรายการรับซื้อสำเร็จ</li>
+  </ul>
+
+  <h3>7.5 ระบบ Audit Log (Activity Logging)</h3>
+  <p>ทุก API Route ที่ทำการเปลี่ยนแปลงข้อมูล จะเรียก <code>logActivity()</code> เพื่อบันทึกกิจกรรม:</p>
+  <pre><code>await logActivity({
+  action: "CREATE_PURCHASE",           // ActionType enum
+  targetType: "PURCHASE",              // TargetType enum
+  targetId: purchase.id,               // ID ของข้อมูลที่เปลี่ยนแปลง
+  description: `บันทึกรับซื้อน้ำยาง ...`,  // คำอธิบายภาษาไทย
+});</code></pre>
+  <p>ฟังก์ชัน <code>logActivity()</code> จะดึง Session ปัจจุบันเพื่อบันทึก <code>staffId</code> ของผู้กระทำ</p>
+
+  <!-- ═══════════════════════════════════ SEC 8 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec8">8. ระบบ Authentication & Session</h2>
+
+  <h3>8.1 ภาพรวม</h3>
+  <p>ระบบมี <strong>2 ระบบ Session แยกกัน</strong> สำหรับ Staff และ Member:</p>
+
+  <table>
+    <tr><th></th><th>Staff Session</th><th>Member Session</th></tr>
+    <tr><td>Cookie Name</td><td><code>session</code></td><td><code>member_session</code></td></tr>
+    <tr><td>TTL</td><td>7 วัน</td><td>7 วัน</td></tr>
+    <tr><td>HMAC Key</td><td><code>SESSION_SECRET</code> โดยตรง</td><td>Derived key: <code>HMAC(SESSION_SECRET, "member-session-v1")</code></td></tr>
+    <tr><td>Login Method</td><td>Username + Password</td><td>เลขบัตรประชาชน + วันเกิด (DDMMYYYY)</td></tr>
+    <tr><td>Payload</td><td><code>staffId, username, firstName, lastName, role, exp</code></td><td><code>type:"member", memberId, memberCode, firstName, lastName, exp</code></td></tr>
+  </table>
+
+  <h3>8.2 Session Encoding</h3>
+  <p>ใช้ <strong>HMAC-SHA256 Signed Token</strong> (ไม่ใช่ JWT) ในรูปแบบ <code>base64url(payload).signature</code>:</p>
+  <pre><code>function encodeSession(payload: SessionPayload): string {
+  const json = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const signature = crypto.createHmac("sha256", getSecret())
+    .update(json).digest("base64url");
+  return `${json}.${signature}`;
+}</code></pre>
+
+  <div class="callout">
+    <strong>💡 ความปลอดภัยที่น่าสนใจ</strong>
+    <ul>
+      <li>ใช้ <code>crypto.timingSafeEqual()</code> เพื่อเปรียบเทียบ Signature (ป้องกัน Timing Attack)</li>
+      <li>Member Session ใช้ Derived Key ที่ต่างจาก Staff Session ทำให้ Token ของ Member ไม่สามารถใช้เป็น Token ของ Staff ได้</li>
+      <li>ตรวจสอบ <code>exp</code> ทุกครั้งที่ decode เพื่อป้องกัน Token หมดอายุ</li>
+    </ul>
+  </div>
+
+  <h3>8.3 Password Hashing</h3>
+  <p>ใช้ <strong>scrypt</strong> (ไม่ใช่ bcrypt) จาก Node.js built-in <code>crypto</code> module:</p>
+  <pre><code>// lib/auth.ts
+export function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${hash}`;  // เก็บเป็น "salt:hash"
+}
+
+export function verifyPassword(password: string, stored: string): boolean {
+  const [salt, hash] = stored.split(":");
+  const candidate = crypto.scryptSync(password, salt, 64).toString("hex");
+  return crypto.timingSafeEqual(Buffer.from(candidate, "hex"), Buffer.from(hash, "hex"));
+}</code></pre>
+
+  <h3>8.4 Open Redirect Protection</h3>
+  <p>หน้า Login มีฟังก์ชัน <code>sanitizeNext()</code> ที่ตรวจสอบ <code>?next=</code> parameter อย่างรัดกุม:</p>
+  <ul>
+    <li>ตรวจสอบว่า URL เป็น same-origin</li>
+    <li>ตรวจสอบ protocol-relative URL (เช่น <code>//evil.com</code>)</li>
+    <li>ตรวจสอบว่า path เป็น "fixed point" ของ parser (ไม่ถูก normalize เป็น URL ที่ต่างออกไป)</li>
+  </ul>
+
+  <!-- ═══════════════════════════════════ SEC 9 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec9">9. คอมโพเนนต์ที่ใช้ซ้ำ (Shared Components)</h2>
+
+  <h3>9.1 UI Components (<code>components/ui/</code>)</h3>
+  <table>
+    <tr><th>Component</th><th>คำอธิบาย</th><th>ใช้โดย</th></tr>
+    <tr><td><code>Button</code></td><td>ปุ่มที่รองรับ 4 variants: primary, secondary, danger, ghost</td><td>ทุกหน้า</td></tr>
+    <tr><td><code>Input</code></td><td>Input field พร้อม Label, Error state</td><td>ทุกฟอร์ม</td></tr>
+    <tr><td><code>Textarea</code></td><td>Textarea สำหรับที่อยู่ (อยู่ในไฟล์เดียวกับ Input)</td><td>ฟอร์มสมาชิก/ลูกจ้าง</td></tr>
+    <tr><td><code>Select</code></td><td>Dropdown select พร้อม Label, Error state</td><td>ฟอร์มสัญญาจ้าง, ผู้ใช้งาน</td></tr>
+    <tr><td><code>Modal</code></td><td>Dialog แบบ Overlay พร้อม animation, ESC to close</td><td>ทุกฟอร์ม + ConfirmDialog</td></tr>
+    <tr><td><code>Table</code></td><td>ชุดคอมโพเนนต์ตาราง (Table, TableHead, TableBody, TableRow, TableCell, TableHeaderCell)</td><td>ทุกหน้ารายการ</td></tr>
+    <tr><td><code>Badge</code></td><td>แสดงสถานะ 3 โทน: success, neutral, danger</td><td>ตารางทุกหน้า</td></tr>
+    <tr><td><code>PageHeader</code></td><td>หัวข้อหน้าพร้อม description และ action button</td><td>ทุกหน้า</td></tr>
+    <tr><td><code>Pagination</code></td><td>ปุ่มเปลี่ยนหน้า ก่อนหน้า/ถัดไป</td><td>หน้าประวัติ, Audit Log</td></tr>
+    <tr><td><code>ConfirmDialog</code></td><td>Modal ยืนยันก่อนดำเนินการ</td><td>หน้ารับซื้อน้ำยาง</td></tr>
+    <tr><td><code>Spinner</code></td><td>Loading indicator (SVG animation)</td><td>Loading states ทุกหน้า</td></tr>
+    <tr><td><code>PasswordInput</code></td><td>Input + ปุ่มแสดง/ซ่อนรหัสผ่าน</td><td>หน้า Login</td></tr>
+    <tr><td><code>ResetButton</code></td><td>ปุ่มล้างตัวกรองวันที่</td><td>หน้าประวัติ, Audit Log</td></tr>
+  </table>
+
+  <h3>9.2 Domain Component Pattern (ใช้ซ้ำในทุกโมดูล)</h3>
+  <p>ทุกโมดูลมี Component ชุดเดียวกัน 4 ตัว:</p>
+
+  <table>
+    <tr><th>Pattern</th><th>ตัวอย่าง (Members)</th><th>ตัวอย่าง (Employees)</th><th>ตัวอย่าง (Contracts)</th></tr>
+    <tr>
+      <td><span class="badge">FormDialog</span><br/>ฟอร์ม CRUD 3 โหมด (add/view/edit)</td>
+      <td><code>MemberFormDialog</code></td>
+      <td><code>EmployeeFormDialog</code></td>
+      <td><code>ContractFormDialog</code></td>
+    </tr>
+    <tr>
+      <td><span class="badge">Table</span><br/>ตารางแสดงรายการ</td>
+      <td><code>MemberTable</code></td>
+      <td><code>EmployeeTable</code></td>
+      <td><code>ContractTable</code></td>
+    </tr>
+    <tr>
+      <td><span class="badge amber">SuspendConfirmDialog</span><br/>ยืนยันระงับ/เปิดใช้งาน</td>
+      <td><code>SuspendConfirmDialog</code></td>
+      <td><code>SuspendConfirmDialog</code></td>
+      <td><code>SuspendConfirmDialog</code></td>
+    </tr>
+    <tr>
+      <td><span class="badge red">DeleteConfirmDialog</span><br/>ยืนยันการลบ</td>
+      <td><code>DeleteConfirmDialog</code></td>
+      <td><code>DeleteConfirmDialog</code></td>
+      <td><code>DeleteConfirmDialog</code></td>
+    </tr>
+  </table>
+
+  <div class="callout">
+    <strong>💡 ข้อสังเกต — Pattern ที่เหมือนกัน</strong>
+    <p>SuspendConfirmDialog และ DeleteConfirmDialog ของแต่ละโมดูลมีโครงสร้างแทบจะเหมือนกัน 100% ต่างกันเฉพาะ Type ของข้อมูล (Member/Employee/Contract) และข้อความ
+    นักพัฒนาสามารถพิจารณา <strong>Refactor เป็น Generic Component</strong> เพื่อลด Code Duplication ในอนาคต</p>
+  </div>
+
+  <h3>9.3 Layout Components</h3>
+  <table>
+    <tr><th>Component</th><th>ตำแหน่ง</th><th>คำอธิบาย</th></tr>
+    <tr>
+      <td><code>Sidebar</code></td>
+      <td><code>components/layout/Sidebar.tsx</code></td>
+      <td>แถบเมนูด้านซ้ายสำหรับ Staff มี 3 กลุ่ม: Staff, Reports, Admin แสดงชื่อผู้ใช้และปุ่ม Logout</td>
+    </tr>
+    <tr>
+      <td><code>MemberHeader</code></td>
+      <td><code>components/layout/MemberHeader.tsx</code></td>
+      <td>แถบด้านบนสำหรับ Member Portal แสดงชื่อสมาชิกและปุ่ม Logout</td>
+    </tr>
+  </table>
+
+  <!-- ═══════════════════════════════════ SEC 10 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec10">10. Custom Hooks</h2>
+
+  <table>
+    <tr><th>Hook</th><th>ใช้กับ</th><th>การทำงาน</th></tr>
+    <tr>
+      <td><code>useSellerLookup(code)</code></td>
+      <td>หน้ารับซื้อน้ำยาง</td>
+      <td>
+        เรียก <code>/api/purchases/lookup/[code]</code> แบบ <strong>debounce 400ms</strong><br/>
+        คืนค่า <code>{ loading, error, data: SellerLookup }</code><br/>
+        ค้นหาผู้ขายจากรหัสสมาชิก (M-XXXX) หรือรหัสลูกจ้าง (E-XXXX)
+      </td>
+    </tr>
+    <tr>
+      <td><code>useMemberLookup(code)</code></td>
+      <td>หน้าเบิกเงิน</td>
+      <td>
+        เรียก <code>/api/withdrawals/lookup/[code]</code> แบบ <strong>debounce 400ms</strong><br/>
+        คืนค่า <code>{ loading, error, data: MemberLookup }</code><br/>
+        ค้นหาสมาชิกและยอดเงินสะสม
+      </td>
+    </tr>
+    <tr>
+      <td><code>usePostalCodeLookup(postalCode)</code></td>
+      <td>ฟอร์มสมาชิก/ลูกจ้าง</td>
+      <td>
+        เรียก <code>/api/postal-code/[code]</code> เมื่อเป็น 5 หลัก<br/>
+        คืนค่า <code>PostalCodeMatch[]</code> (อำเภอ, จังหวัด)<br/>
+        กรอกอำเภอ/จังหวัดอัตโนมัติเมื่อพิมพ์รหัสไปรษณีย์
+      </td>
+    </tr>
+  </table>
+
+  <p><strong>Pattern ร่วมกัน:</strong> ทุก Hook ใช้ <code>useEffect</code> + <code>fetch</code> + cancellation flag (<code>let cancelled = false</code>) เพื่อป้องกัน race condition เมื่อพิมพ์เร็ว</p>
+
+  <!-- ═══════════════════════════════════ SEC 11 ═══════════════════════════════════ -->
+  <h2 id="sec11">11. หน้าเพจและ Page Pattern</h2>
+
+  <h3>11.1 Route Groups</h3>
+  <table>
+    <tr><th>Route Group</th><th>Layout</th><th>ผู้ใช้</th></tr>
+    <tr><td><code>(app)</code></td><td>Sidebar + main content</td><td>Staff / Admin</td></tr>
+    <tr><td><code>member</code></td><td>MemberHeader + main content</td><td>สมาชิก (Member)</td></tr>
+    <tr><td><code>login</code></td><td>ไม่มี Sidebar/Header (standalone)</td><td>Guest → Staff</td></tr>
+    <tr><td><code>member/login</code></td><td>ไม่มี Sidebar/Header (standalone)</td><td>Guest → Member</td></tr>
+  </table>
+
+  <h3>11.2 Page Architecture Pattern</h3>
+  <p>ทุกหน้าใช้รูปแบบเดียวกัน: <strong>Server Page → Client Page</strong></p>
+
+  <div class="diagram">
+page.tsx (Server Component)
+  ├── ดึงข้อมูลจาก lib/data/*.ts
+  └── ส่งเป็น props ให้ ↓
+
+*PageClient.tsx (Client Component — "use client")
+  ├── State Management (useState)
+  ├── Search / Filter (useMemo)
+  ├── CRUD handlers (fetch → API Routes)
+  ├── Dialog state management
+  └── Render: PageHeader + Search + Table + Dialogs
+  </div>
+
+  <h3>11.3 Loading States</h3>
+  <p>ทุก Route ใน <code>(app)</code> มี <code>loading.tsx</code> ที่แสดง <code>Spinner</code> Component ขณะรอ Server Component โหลดข้อมูล (Next.js Streaming/Suspense)</p>
+
+  <!-- ═══════════════════════════════════ SEC 12 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec12">12. ระบบความปลอดภัย (Security)</h2>
+
+  <table>
+    <tr><th>มาตรการ</th><th>รายละเอียด</th><th>ตำแหน่งโค้ด</th></tr>
+    <tr>
+      <td><span class="badge">Password Hashing</span></td>
+      <td>ใช้ <code>scrypt</code> (64 bytes) + random salt (16 bytes) + <code>timingSafeEqual</code></td>
+      <td><code>lib/auth.ts</code></td>
+    </tr>
+    <tr>
+      <td><span class="badge">Session Security</span></td>
+      <td>HMAC-SHA256 signed cookies, HttpOnly, Secure (production), SameSite=Lax, 7-day expiry</td>
+      <td><code>lib/session.ts</code>, <code>lib/session-core.ts</code></td>
+    </tr>
+    <tr>
+      <td><span class="badge">Key Separation</span></td>
+      <td>Member session ใช้ Derived Key (<code>HMAC(secret, "member-session-v1")</code>) ป้องกัน cross-session forgery</td>
+      <td><code>lib/member-session-core.ts</code></td>
+    </tr>
+    <tr>
+      <td><span class="badge">Open Redirect Protection</span></td>
+      <td>ฟังก์ชัน <code>sanitizeNext()</code> ตรวจสอบ same-origin, protocol-relative, fixed-point</td>
+      <td><code>app/login/page.tsx</code></td>
+    </tr>
+    <tr>
+      <td><span class="badge">Input Validation</span></td>
+      <td>ตรวจสอบ เลขบัตรประชาชน (13 หลัก), เบอร์โทร (10 หลัก), required fields</td>
+      <td><code>lib/validate.ts</code> + API Routes</td>
+    </tr>
+    <tr>
+      <td><span class="badge">Soft Delete Pattern</span></td>
+      <td>ต้องระงับ (Inactive) ก่อนลบ เพื่อป้องกันการลบข้อมูลที่ยังมีการใช้งาน</td>
+      <td>API Routes ทุก DELETE endpoint</td>
+    </tr>
+    <tr>
+      <td><span class="badge">FK Constraint Handling</span></td>
+      <td>จับ Prisma error <code>P2003</code> (Foreign key constraint) เมื่อลบข้อมูลที่มีข้อมูลอ้างอิง</td>
+      <td><code>api/members/[id]</code>, <code>api/employees/[id]</code></td>
+    </tr>
+    <tr>
+      <td><span class="badge">Unique Constraint Handling</span></td>
+      <td>จับ Prisma error <code>P2002</code> (Unique constraint) เมื่อสร้าง/แก้ไขข้อมูลซ้ำ</td>
+      <td><code>api/users/[id]</code>, <code>api/users/route.ts</code></td>
+    </tr>
+    <tr>
+      <td><span class="badge">Audit Trail</span></td>
+      <td>บันทึกทุกการกระทำสำคัญ (Login, CRUD, Status change) พร้อม staffId</td>
+      <td><code>lib/activity-log.ts</code></td>
+    </tr>
+    <tr>
+      <td><span class="badge">Account Status Check</span></td>
+      <td>ตรวจสอบ <code>status === "Active"</code> ทั้ง Staff และ Member ก่อนอนุญาตให้ Login</td>
+      <td>API Login routes</td>
+    </tr>
+    <tr>
+      <td><span class="badge">Image Optimization</span></td>
+      <td>Resize รูปภาพเป็น max 480px + JPEG quality 82% ก่อนอัปโหลดเพื่อลด payload</td>
+      <td><code>lib/image.ts</code></td>
+    </tr>
+  </table>
+
+  <!-- ═══════════════════════════════════ SEC 13 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec13">13. สิ่งที่ควรรู้สำหรับนักพัฒนาใหม่</h2>
+
+  <h3>13.1 สิ่งที่ต้องตั้งค่า (Environment Variables)</h3>
+  <table>
+    <tr><th>ตัวแปร</th><th>คำอธิบาย</th></tr>
+    <tr><td><code>DATABASE_URL</code></td><td>Connection string สำหรับ PostgreSQL (ผ่าน connection pooler)</td></tr>
+    <tr><td><code>DIRECT_URL</code></td><td>Direct connection string (สำหรับ Prisma migrate)</td></tr>
+    <tr><td><code>SESSION_SECRET</code></td><td>Secret key สำหรับ HMAC session signing (ต้องเป็นค่าที่ซับซ้อน)</td></tr>
+  </table>
+
+  <h3>13.2 กฎเกณฑ์สำคัญที่ต้องจำ</h3>
+  <ol>
+    <li><strong>memberShare + employeeShare ต้องรวมกันเป็น 100</strong> — ตรวจสอบที่ App Layer (ไม่มี DB constraint)</li>
+    <li><strong>ต้องระงับก่อนลบ</strong> — ลบได้เฉพาะ Entity ที่มีสถานะ Inactive</li>
+    <li><strong>ห้ามมีสัญญาซ้ำ</strong> — คู่ Member-Employee เดียวกัน มีสัญญา Active ได้แค่ 1 ฉบับ</li>
+    <li><strong>Decimal → Number</strong> — ทุกครั้งที่ดึงข้อมูลจาก Prisma ต้อง <code>.toNumber()</code></li>
+    <li><strong>Date → ISO string</strong> — ทุก DateTime ต้อง <code>.toISOString()</code> ก่อนส่งให้ Client</li>
+    <li><strong>photoUrl ไม่ถูกดึงในหน้า List</strong> — ดึงเฉพาะเมื่อดู/แก้ไขข้อมูลรายบุคคล</li>
+  </ol>
+
+  <h3>13.3 Flow ที่ต้องระวัง</h3>
+
+  <h4>🔴 การรับซื้อน้ำยาง:</h4>
+  <ol>
+    <li>พิมพ์รหัสผู้ขาย → Hook <code>useSellerLookup</code> ค้นหาและแสดงชื่อ + สัดส่วน</li>
+    <li>กรอกน้ำหนัก + %เนื้อยางแห้ง → คำนวณ realtime ที่ Client</li>
+    <li>กดยืนยัน → เปิด ConfirmDialog → ส่ง POST ไปที่ API</li>
+    <li>API สร้าง Purchase + <strong>เพิ่มเงินเข้ากระเป๋า Member</strong> ใน Transaction เดียว</li>
+    <li>แสดง Receipt (ซ่อนปกติ แสดงเมื่อสั่งพิมพ์) → กด "พิมพ์ใบเสร็จ" → <code>window.print()</code></li>
+  </ol>
+
+  <h4>🔴 การเบิกเงิน:</h4>
+  <ol>
+    <li>พิมพ์รหัสสมาชิก → Hook <code>useMemberLookup</code> ค้นหาและแสดงยอดเงินสะสม</li>
+    <li>กรอกยอดเบิก → API ตรวจสอบว่ายอดเงินเพียงพอ</li>
+    <li>API สร้าง Withdrawal + <strong>หักเงินจากกระเป๋า Member</strong> ใน Transaction เดียว</li>
+  </ol>
+
+  <h3>13.4 Print System</h3>
+  <p>ใบเสร็จ (Receipt) ใช้ CSS <code>@media print</code>:</p>
+  <ul>
+    <li>ซ่อนทุกอย่างด้วย <code>visibility: hidden</code></li>
+    <li>แสดงเฉพาะ <code>.receipt-print-area</code></li>
+    <li>Receipt component ปกติมี <code>class="hidden print:block"</code></li>
+  </ul>
+
+  <h3>13.5 Thai Address Autocomplete</h3>
+  <p>ใช้ Library <code>thai-address-database</code> ค้นหาอำเภอ/จังหวัดจากรหัสไปรษณีย์:</p>
+  <ul>
+    <li>API <code>/api/postal-code/[code]</code> ค้นหา server-side</li>
+    <li>Hook <code>usePostalCodeLookup</code> เรียก API แล้วกรอกอำเภอ/จังหวัดอัตโนมัติในฟอร์ม</li>
+  </ul>
+
+  <h3>13.6 สรุปจำนวนไฟล์ในโปรเจกต์</h3>
+  <table>
+    <tr><th>หมวด</th><th>จำนวนไฟล์ (โดยประมาณ)</th></tr>
+    <tr><td>Pages (<code>page.tsx</code>)</td><td>~12 ไฟล์</td></tr>
+    <tr><td>Client Pages (<code>*PageClient.tsx</code>)</td><td>~8 ไฟล์</td></tr>
+    <tr><td>API Routes (<code>route.ts</code>)</td><td>~16 ไฟล์</td></tr>
+    <tr><td>UI Components (<code>components/ui/</code>)</td><td>~12 ไฟล์</td></tr>
+    <tr><td>Domain Components</td><td>~20 ไฟล์</td></tr>
+    <tr><td>Custom Hooks</td><td>3 ไฟล์</td></tr>
+    <tr><td>Lib / Data Layer</td><td>~14 ไฟล์</td></tr>
+    <tr><td>Prisma Schema</td><td>1 ไฟล์</td></tr>
+    <tr><td><strong>รวมทั้งหมด</strong></td><td><strong>~86 ไฟล์</strong></td></tr>
+  </table>
+
+  <!-- ═══════════════════════════════════ FOOTER ═══════════════════════════════════ -->
+  <div class="report-footer">
+    <p>— จบรายงาน —</p>
+    <p>รายงานนี้สร้างจากการวิเคราะห์โค้ดอัตโนมัติ โดย AI Code Analysis</p>
+    <p>Clover Project — Field Latex | ระบบจัดการการรับซื้อน้ำยางพารา</p>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════ PRINT BUTTON (ไม่แสดงเมื่อพิมพ์) ═══════════════════════ -->
+<div class="no-print" style="text-align:center; margin-top:2rem;">
+  <button onclick="window.print()" style="
+    background: #059669;
+    color: #fff;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s;
+  " onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
+    📄 พิมพ์เป็น PDF (Ctrl+P)
+  </button>
+  <p style="margin-top:.75rem; color:#94a3b8; font-size:.85rem;">
+    กดปุ่มด้านบน หรือ Ctrl+P แล้วเลือก "Save as PDF" เพื่อบันทึกเป็นไฟล์ PDF
+  </p>
+</div>
+
+</body>
+</html>

@@ -154,6 +154,13 @@ export interface SellerOwnerOption {
   employeeShare: number;
 }
 
+// One pickable seller for the purchase form's member/employee combobox.
+export interface SellerOption {
+  code: string;
+  name: string;
+  kind: "member" | "employee";
+}
+
 export interface SellerLookup {
   sellerCode: string;
   sellerType: SellerType;
@@ -217,6 +224,76 @@ export interface Withdrawal {
 export interface WithdrawalInput {
   memberCode: string;
   amount: number;
+}
+
+export interface MemberProfile {
+  id: string;
+  memberCode: string;
+  firstName: string;
+  lastName: string;
+  photoUrl: string | null;
+  gardenName: string | null;
+  walletBalance: number;
+  dividendBalance: number;
+}
+
+export interface DailyMarketPrice {
+  price: number;
+  recordDate: string;
+}
+
+export interface MemberSalesSummary {
+  monthlySalesAmount: number;
+  yearlyRawWeightKg: number;
+}
+
+export type FinanceEntryType = "PURCHASE" | "WITHDRAWAL";
+
+export interface FinanceEntry {
+  id: string;
+  // Thai calendar day the money moved, as YYYY-MM-DD.
+  date: string;
+  type: FinanceEntryType;
+  code: string;
+  // Signed against the member's wallet: positive credits it, negative debits it.
+  amount: number;
+  // Set only on PURCHASE rows an employee delivered and was paid a share on.
+  // `amount` above is still just the member's own wallet credit; these record
+  // what the employee received on the spot, for the member's visibility.
+  deliveredByName?: string;
+  employeePayout?: number;
+}
+
+// One purchase row, flattened with the seller member's name/code, for the
+// fresh-latex purchase performance report.
+export interface PurchaseSummaryRow {
+  id: string;
+  purchaseCode: string;
+  // Business day the purchase was recorded for, ISO (UTC midnight).
+  recordDate: string;
+  // Wall-clock moment the bill was entered, ISO.
+  createdAt: string;
+  memberCode: string;
+  memberName: string;
+  rawWeightKg: number;
+  dryPercentage: number;
+  dryWeightKg: number;
+  marketPrice: number;
+  totalAmount: number;
+}
+
+export interface DividendMemberRow {
+  memberId: string;
+  memberCode: string;
+  memberName: string;
+}
+
+// Everything the dividend calculator needs: the member roster plus every
+// purchase's dry weight tagged with its Buddhist-calendar year, so the client
+// can re-total per member for whichever year the user picks.
+export interface DividendData {
+  members: DividendMemberRow[];
+  purchases: { memberId: string; dryWeightKg: number; buddhistYear: number }[];
 }
 
 export interface AuditLogEntry {

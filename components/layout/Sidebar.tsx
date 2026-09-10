@@ -93,6 +93,16 @@ const navGroups: NavGroupWithRoles[] = [
         href: "/performance/purchases",
         icon: <Icon path="M3 3v18h18M8 17V10M13 17V6M18 17v-4" />,
       },
+      {
+        label: "ผลประกอบการรับซื้อน้ำยาง",
+        href: "/performance/purchase-summary",
+        icon: <Icon path="M3 3v18h18M7 15l3-4 3 3 5-7" />,
+      },
+      {
+        label: "คำนวณเงินปันผล",
+        href: "/dividends",
+        icon: <Icon path="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />,
+      },
     ],
   },
   {

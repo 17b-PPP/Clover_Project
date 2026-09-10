@@ -1,20 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { MemberSalesTable } from "@/components/member/MemberSalesTable";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
-import { PurchaseHistoryTable } from "@/components/purchases/PurchaseHistoryTable";
 import type { Purchase } from "@/lib/types";
 
 const PAGE_SIZE = 10;
 
-interface MemberDashboardClientProps {
+interface MemberSalesPageClientProps {
   purchases: Purchase[];
 }
 
-export function MemberDashboardClient({
+export function MemberSalesPageClient({
   purchases,
-}: MemberDashboardClientProps) {
+}: MemberSalesPageClientProps) {
   const [page, setPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(purchases.length / PAGE_SIZE));
@@ -26,14 +26,11 @@ export function MemberDashboardClient({
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
       <PageHeader
-        title="ประวัติการขายน้ำยาง"
-        description="ดูประวัติการขายน้ำยางพาราของคุณ"
+        title="ประวัติการขาย"
+        description="ประวัติการขายน้ำยางพาราของคุณ พร้อมใบเสร็จรับเงินของแต่ละรายการ"
       />
 
-      <PurchaseHistoryTable
-        purchases={pagedPurchases}
-        sellerNameKey="deliveredByName"
-      />
+      <MemberSalesTable purchases={pagedPurchases} />
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
     </div>
   );

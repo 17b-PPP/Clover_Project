@@ -110,6 +110,11 @@ const navGroups: NavGroupWithRoles[] = [
         icon: <Icon path="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 20a7.5 7.5 0 0 1 15 0" />,
       },
       {
+        label: "ราคากลางประจำวัน",
+        href: "/reference-price",
+        icon: <Icon path="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />,
+      },
+      {
         label: "ประวัติการใช้งาน",
         href: "/audit-log",
         icon: <Icon path="M12 8v4l3 2M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9Z" />,

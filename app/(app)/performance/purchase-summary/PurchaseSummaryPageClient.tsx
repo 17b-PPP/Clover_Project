@@ -7,6 +7,10 @@ import { Pagination } from "@/components/ui/Pagination";
 import { ResetButton } from "@/components/ui/ResetButton";
 import { StatCard } from "@/components/ui/StatCard";
 import { RecentPurchasesTable } from "@/components/performance/RecentPurchasesTable";
+import {
+  PurchaseTrendChart,
+  type PurchaseTrendPoint,
+} from "@/components/performance/PurchaseTrendChart";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import type { PurchaseSummaryRow } from "@/lib/types";
 
@@ -60,6 +64,24 @@ export function PurchaseSummaryPageClient({
       billCount: filtered.length,
       memberCount: new Set(filtered.map((r) => r.memberCode)).size,
     };
+  }, [filtered]);
+
+  const dailyTrend = useMemo<PurchaseTrendPoint[]>(() => {
+    const byDay = new Map<string, PurchaseTrendPoint>();
+    for (const row of filtered) {
+      const day = row.recordDate.slice(0, 10);
+      const existing = byDay.get(day);
+      if (existing) {
+        existing.totalRawWeightKg += row.rawWeightKg;
+      } else {
+        byDay.set(day, {
+          day,
+          totalRawWeightKg: row.rawWeightKg,
+          price: row.marketPrice,
+        });
+      }
+    }
+    return [...byDay.values()].sort((a, b) => a.day.localeCompare(b.day));
   }, [filtered]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -147,6 +169,13 @@ export function PurchaseSummaryPageClient({
           value={formatCurrency(summary.totalAmount)}
           hint="มูลค่ารับซื้อทั้งหมด"
         />
+      </section>
+
+      <section className="mb-8">
+        <h2 className="mb-4 text-base font-semibold text-slate-900">
+          แนวโน้มรายวัน
+        </h2>
+        <PurchaseTrendChart data={dailyTrend} />
       </section>
 
       <section>

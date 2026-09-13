@@ -44,8 +44,10 @@ function currentThaiPeriod(): { year: number; month: number } {
   return { year, month };
 }
 
-// The cooperative buys at one reference price per day, so the most recently
-// recorded purchase carries the price members are quoted today.
+// Deliberately derives the quoted price from the last recorded purchase, NOT
+// from the newer admin-set ReferencePrice table — the two can disagree (e.g.
+// an admin sets tomorrow's price before any purchase is entered), and
+// reconciling them here was an explicit out-of-scope decision, not an oversight.
 export const getDailyMarketPrice = cache(
   async (): Promise<DailyMarketPrice | null> => {
     const latest = await prisma.purchase.findFirst({

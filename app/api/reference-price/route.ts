@@ -12,9 +12,15 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    if (body.price <= 0) {
+    if (Number.isNaN(new Date(body.date).getTime())) {
       return NextResponse.json(
-        { error: "ราคากลางต้องมากกว่า 0" },
+        { error: "รูปแบบวันที่ไม่ถูกต้อง" },
+        { status: 400 }
+      );
+    }
+    if (typeof body.price !== "number" || body.price <= 0) {
+      return NextResponse.json(
+        { error: "ราคากลางต้องเป็นตัวเลขที่มากกว่า 0" },
         { status: 400 }
       );
     }

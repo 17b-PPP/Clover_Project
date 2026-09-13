@@ -15,8 +15,17 @@ import {
 import { formatDateTimeThai, formatDateUtc, formatNumber } from "@/lib/format";
 import type { ReferencePriceEntry } from "@/lib/types";
 
+const bangkokDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Bangkok",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+// Admins think in Bangkok days, so the form defaults to today's Bangkok
+// date rather than the UTC date.
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return bangkokDateFormatter.format(new Date());
 }
 
 interface ReferencePricePageClientProps {

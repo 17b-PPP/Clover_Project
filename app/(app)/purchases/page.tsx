@@ -4,8 +4,21 @@ import { getReferencePriceForDate } from "@/lib/data/reference-price";
 import type { SellerOption } from "@/lib/types";
 import { PurchasesPageClient } from "./PurchasesPageClient";
 
+const bangkokDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Bangkok",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+// Reference prices are set by the admin thinking in Bangkok days, so the
+// lookup key must be today's Bangkok date, not the UTC date.
+function bangkokToday(): string {
+  return bangkokDateFormatter.format(new Date());
+}
+
 export default async function PurchasesPage() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = bangkokToday();
   const [members, employees, referencePrice] = await Promise.all([
     getMemberOptions(),
     getEmployeeOptions(),

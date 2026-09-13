@@ -6,7 +6,14 @@ import {
   decodeMemberSession,
 } from "@/lib/member-session-core";
 
-const ADMIN_ONLY_PATHS = ["/users", "/audit-log", "/api/users", "/api/audit-log"];
+const ADMIN_ONLY_PATHS = [
+  "/users",
+  "/audit-log",
+  "/reference-price",
+  "/api/users",
+  "/api/audit-log",
+  "/api/reference-price",
+];
 
 function isAdminOnlyPath(pathname: string): boolean {
   return ADMIN_ONLY_PATHS.some(

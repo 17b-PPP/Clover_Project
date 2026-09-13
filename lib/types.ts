@@ -304,3 +304,12 @@ export interface AuditLogEntry {
   action: string;
   details: string;
 }
+
+export interface ReferencePriceEntry {
+  id: string;
+  // Business day this price applies to, ISO (UTC midnight) — same convention
+  // as Purchase.recordDate.
+  date: string;
+  price: number;
+  updatedAt: string;
+}

@@ -257,3 +257,16 @@ model ActivityLog {
   @@index([actionTime])
   @@index([targetType, targetId])
 }
+
+// ==========================================
+// REFERENCE PRICE (ราคากลางประจำวัน กำหนดโดยผู้ดูแลระบบ)
+// หนึ่งวันมีได้ราคาเดียว — บันทึกซ้ำวันเดิมคือการแก้ไขราคาของวันนั้น
+// ==========================================
+
+model ReferencePrice {
+  id        String   @id @default(cuid())
+  date      DateTime @unique
+  price     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

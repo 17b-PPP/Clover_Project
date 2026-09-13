@@ -89,11 +89,6 @@ const navGroups: NavGroupWithRoles[] = [
     label: "Reports",
     items: [
       {
-        label: "ประวัติการรับซื้อน้ำยาง",
-        href: "/performance/purchases",
-        icon: <Icon path="M3 3v18h18M8 17V10M13 17V6M18 17v-4" />,
-      },
-      {
         label: "ผลประกอบการรับซื้อน้ำยาง",
         href: "/performance/purchase-summary",
         icon: <Icon path="M3 3v18h18M7 15l3-4 3 3 5-7" />,

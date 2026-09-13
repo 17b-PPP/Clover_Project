@@ -1,12 +1,15 @@
 import { getEmployeeOptions } from "@/lib/data/employees";
 import { getMemberOptions } from "@/lib/data/members";
+import { getReferencePriceForDate } from "@/lib/data/reference-price";
 import type { SellerOption } from "@/lib/types";
 import { PurchasesPageClient } from "./PurchasesPageClient";
 
 export default async function PurchasesPage() {
-  const [members, employees] = await Promise.all([
+  const today = new Date().toISOString().slice(0, 10);
+  const [members, employees, referencePrice] = await Promise.all([
     getMemberOptions(),
     getEmployeeOptions(),
+    getReferencePriceForDate(today),
   ]);
 
   const sellerOptions: SellerOption[] = [
@@ -26,5 +29,10 @@ export default async function PurchasesPage() {
       })),
   ];
 
-  return <PurchasesPageClient sellerOptions={sellerOptions} />;
+  return (
+    <PurchasesPageClient
+      sellerOptions={sellerOptions}
+      initialMarketPrice={referencePrice ? String(referencePrice.price) : null}
+    />
+  );
 }

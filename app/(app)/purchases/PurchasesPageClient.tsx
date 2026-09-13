@@ -21,10 +21,12 @@ const LOCKED_PRICE_STORAGE_KEY = "purchases:lockedMarketPrice";
 
 interface PurchasesPageClientProps {
   sellerOptions: SellerOption[];
+  initialMarketPrice: string | null;
 }
 
 export function PurchasesPageClient({
   sellerOptions,
+  initialMarketPrice,
 }: PurchasesPageClientProps) {
   const [recordDate] = useState(todayIso());
   const [marketPrice, setMarketPrice] = useState("");
@@ -72,13 +74,15 @@ export function PurchasesPageClient({
         if (raw) {
           setMarketPrice(raw);
           setPriceLocked(true);
+        } else if (initialMarketPrice) {
+          setMarketPrice(initialMarketPrice);
         }
       } catch {
-        // localStorage unavailable — ignore
+        if (initialMarketPrice) setMarketPrice(initialMarketPrice);
       }
       setPriceHydrated(true);
     });
-  }, []);
+  }, [initialMarketPrice]);
 
   useEffect(() => {
     if (!priceHydrated) return;

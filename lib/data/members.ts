@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { Member as PrismaMember } from "@prisma/client";
 import type { Member, MemberInput, MemberOption } from "@/lib/types";
@@ -99,6 +100,33 @@ export async function getMember(id: string): Promise<Member | undefined> {
   return member ? serialize(member) : undefined;
 }
 
+// phone has no DB-level unique constraint, so duplicates must be checked
+// at the app layer before create/update.
+export async function memberPhoneExists(
+  phone: string,
+  excludeId?: string
+): Promise<boolean> {
+  const existing = await prisma.member.findFirst({
+    where: { phone, ...(excludeId ? { id: { not: excludeId } } : {}) },
+    select: { id: true },
+  });
+  return existing !== null;
+}
+
+// idCardNumber is DB-unique too, but checked here as well so a request that
+// duplicates both fields can report both at once instead of stopping at
+// whichever error the database happens to throw first.
+export async function memberIdCardNumberExists(
+  idCardNumber: string,
+  excludeId?: string
+): Promise<boolean> {
+  const existing = await prisma.member.findFirst({
+    where: { idCardNumber, ...(excludeId ? { id: { not: excludeId } } : {}) },
+    select: { id: true },
+  });
+  return existing !== null;
+}
+
 export async function createMember(input: MemberInput): Promise<Member> {
   const memberCode = await nextMemberCode();
   const member = await prisma.member.create({
@@ -135,8 +163,14 @@ export async function updateMember(
       },
     });
     return serialize(member);
-  } catch {
-    return undefined;
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return undefined;
+    }
+    throw error;
   }
 }
 
@@ -150,8 +184,14 @@ export async function setMemberStatus(
       data: { status },
     });
     return serialize(member);
-  } catch {
-    return undefined;
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return undefined;
+    }
+    throw error;
   }
 }
 

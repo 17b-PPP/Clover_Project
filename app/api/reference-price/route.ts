@@ -1,6 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { upsertReferencePrice } from "@/lib/data/reference-price";
+import {
+  getReferencePriceForDate,
+  upsertReferencePrice,
+} from "@/lib/data/reference-price";
 import { handleRouteError } from "@/lib/api-error";
+
+// Lets the purchase page poll for the current day's reference price, so an
+// admin edit propagates there live without depending on the padlock state.
+export async function GET(request: NextRequest) {
+  try {
+    const date = request.nextUrl.searchParams.get("date");
+    if (!date || Number.isNaN(new Date(date).getTime())) {
+      return NextResponse.json(
+        { error: "กรุณาระบุวันที่ให้ถูกต้อง" },
+        { status: 400 }
+      );
+    }
+    const entry = await getReferencePriceForDate(date);
+    return NextResponse.json({ price: entry?.price ?? null });
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {

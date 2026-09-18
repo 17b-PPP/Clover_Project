@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { Employee as PrismaEmployee } from "@prisma/client";
 import type { Employee, EmployeeInput, EmployeeOption } from "@/lib/types";
@@ -90,6 +91,33 @@ export async function getEmployee(id: string): Promise<Employee | undefined> {
   return employee ? serialize(employee) : undefined;
 }
 
+// phone has no DB-level unique constraint, so duplicates must be checked
+// at the app layer before create/update.
+export async function employeePhoneExists(
+  phone: string,
+  excludeId?: string
+): Promise<boolean> {
+  const existing = await prisma.employee.findFirst({
+    where: { phone, ...(excludeId ? { id: { not: excludeId } } : {}) },
+    select: { id: true },
+  });
+  return existing !== null;
+}
+
+// idCardNumber is DB-unique too, but checked here as well so a request that
+// duplicates both fields can report both at once instead of stopping at
+// whichever error the database happens to throw first.
+export async function employeeIdCardNumberExists(
+  idCardNumber: string,
+  excludeId?: string
+): Promise<boolean> {
+  const existing = await prisma.employee.findFirst({
+    where: { idCardNumber, ...(excludeId ? { id: { not: excludeId } } : {}) },
+    select: { id: true },
+  });
+  return existing !== null;
+}
+
 export async function createEmployee(input: EmployeeInput): Promise<Employee> {
   const employeeCode = await nextEmployeeCode();
   const employee = await prisma.employee.create({
@@ -125,8 +153,14 @@ export async function updateEmployee(
       },
     });
     return serialize(employee);
-  } catch {
-    return undefined;
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return undefined;
+    }
+    throw error;
   }
 }
 
@@ -140,8 +174,14 @@ export async function setEmployeeStatus(
       data: { status },
     });
     return serialize(employee);
-  } catch {
-    return undefined;
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return undefined;
+    }
+    throw error;
   }
 }
 

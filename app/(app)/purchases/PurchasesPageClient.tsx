@@ -17,7 +17,22 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-const LOCKED_PRICE_STORAGE_KEY = "purchases:lockedMarketPrice";
+const bangkokDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Bangkok",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+// Reference prices are keyed by Bangkok day (see reference-price page), so
+// an override saved from here must use the same day key.
+function bangkokToday(): string {
+  return bangkokDateFormatter.format(new Date());
+}
+
+// How often to poll for the current reference price while this page is
+// open, so an admin's edit shows up here without a manual refresh.
+const REFERENCE_PRICE_POLL_MS = 15000;
 
 interface PurchasesPageClientProps {
   sellerOptions: SellerOption[];
@@ -29,8 +44,9 @@ export function PurchasesPageClient({
   initialMarketPrice,
 }: PurchasesPageClientProps) {
   const [recordDate] = useState(todayIso());
-  const [marketPrice, setMarketPrice] = useState("");
-  const [priceLocked, setPriceLocked] = useState(false);
+  const [marketPrice, setMarketPrice] = useState(initialMarketPrice ?? "");
+  const [priceLocked, setPriceLocked] = useState(true);
+  const [priceEditedManually, setPriceEditedManually] = useState(false);
   const [sellerCode, setSellerCode] = useState("");
   const [rawWeightKg, setRawWeightKg] = useState("");
   const [dryPercentage, setDryPercentage] = useState("");
@@ -65,37 +81,36 @@ export function PurchasesPageClient({
     [sellerOptions]
   );
 
-  const [priceHydrated, setPriceHydrated] = useState(false);
-
+  // Keeps the field in sync with whatever the admin currently has saved for
+  // today, regardless of the padlock — the padlock only guards against
+  // accidental manual edits, it doesn't freeze which price is shown. A
+  // manual override (priceEditedManually) or an already-saved purchase
+  // (locked) stops the sync so it doesn't fight the user or rewrite history.
   useEffect(() => {
-    Promise.resolve().then(() => {
+    if (priceEditedManually || locked) return;
+
+    let cancelled = false;
+
+    async function syncPrice() {
       try {
-        const raw = localStorage.getItem(LOCKED_PRICE_STORAGE_KEY);
-        if (raw) {
-          setMarketPrice(raw);
-          setPriceLocked(true);
-        } else if (initialMarketPrice) {
-          setMarketPrice(initialMarketPrice);
-        }
+        const res = await fetch(
+          `/api/reference-price?date=${bangkokToday()}`
+        );
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as { price: number | null };
+        if (data.price !== null) setMarketPrice(String(data.price));
       } catch {
-        if (initialMarketPrice) setMarketPrice(initialMarketPrice);
+        // Network hiccup — the next poll tick will retry.
       }
-      setPriceHydrated(true);
-    });
-  }, [initialMarketPrice]);
-
-  useEffect(() => {
-    if (!priceHydrated) return;
-    try {
-      if (priceLocked) {
-        localStorage.setItem(LOCKED_PRICE_STORAGE_KEY, marketPrice);
-      } else {
-        localStorage.removeItem(LOCKED_PRICE_STORAGE_KEY);
-      }
-    } catch {
-      // localStorage unavailable — ignore
     }
-  }, [priceHydrated, priceLocked, marketPrice]);
+
+    syncPrice();
+    const interval = setInterval(syncPrice, REFERENCE_PRICE_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [priceEditedManually, locked]);
 
   const dryWeightKg = useMemo(() => {
     const raw = Number(rawWeightKg);
@@ -111,13 +126,14 @@ export function PurchasesPageClient({
   }, [marketPrice, dryWeightKg]);
 
   function resetForm() {
-    if (!priceLocked) setMarketPrice("");
+    setPriceLocked(true);
     setSellerCode("");
     setSelectedMemberId("");
     setRawWeightKg("");
     setDryPercentage("");
     setSaved(null);
     setFormError(null);
+    setPriceEditedManually(false);
   }
 
   function openConfirm() {
@@ -149,6 +165,21 @@ export function PurchasesPageClient({
   async function submitPurchase() {
     setSubmitting(true);
     try {
+      if (priceEditedManually) {
+        try {
+          await fetch("/api/reference-price", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              date: bangkokToday(),
+              price: Number(marketPrice),
+            }),
+          });
+        } catch {
+          // Best-effort sync — a failure here shouldn't block the purchase.
+        }
+      }
+
       const res = await fetch("/api/purchases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -204,7 +235,10 @@ export function PurchasesPageClient({
                 step="0.01"
                 value={marketPrice}
                 disabled={priceLocked || locked}
-                onChange={(e) => setMarketPrice(e.target.value)}
+                onChange={(e) => {
+                  setMarketPrice(e.target.value);
+                  setPriceEditedManually(true);
+                }}
                 placeholder="0.0"
                 className="w-full border-none bg-transparent p-0 text-right text-sm font-semibold text-emerald-800 focus:outline-none focus:ring-0 disabled:text-emerald-700"
               />

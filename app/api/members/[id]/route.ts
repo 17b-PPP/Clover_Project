@@ -3,11 +3,17 @@ import { Prisma } from "@prisma/client";
 import {
   deleteMember,
   getMember,
+  memberIdCardNumberExists,
+  memberPhoneExists,
   setMemberStatus,
   updateMember,
 } from "@/lib/data/members";
 import { handleRouteError } from "@/lib/api-error";
-import { isValidIdCardNumber, isValidPhone } from "@/lib/validate";
+import {
+  duplicateFieldsMessage,
+  isValidIdCardNumber,
+  isValidPhone,
+} from "@/lib/validate";
 import { logActivity } from "@/lib/activity-log";
 import type { MemberInput, MemberStatus } from "@/lib/types";
 
@@ -66,8 +72,31 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         { status: 400 }
       );
     }
+    const duplicateMessage = duplicateFieldsMessage(
+      body.idCardNumber
+        ? await memberIdCardNumberExists(body.idCardNumber, id)
+        : false,
+      body.phone ? await memberPhoneExists(body.phone, id) : false
+    );
+    if (duplicateMessage) {
+      return NextResponse.json({ error: duplicateMessage }, { status: 409 });
+    }
 
-    const updated = await updateMember(id, body);
+    let updated;
+    try {
+      updated = await updateMember(id, body);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        return NextResponse.json(
+          { error: "เลขบัตรประชาชนนี้มีอยู่ในระบบแล้ว กรุณาตรวจสอบและแก้ไข" },
+          { status: 409 }
+        );
+      }
+      throw error;
+    }
     if (!updated) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
     }

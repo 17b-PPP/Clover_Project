@@ -2,12 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import {
   deleteEmployee,
+  employeeIdCardNumberExists,
+  employeePhoneExists,
   getEmployee,
   setEmployeeStatus,
   updateEmployee,
 } from "@/lib/data/employees";
 import { handleRouteError } from "@/lib/api-error";
-import { isValidIdCardNumber, isValidPhone } from "@/lib/validate";
+import {
+  duplicateFieldsMessage,
+  isValidIdCardNumber,
+  isValidPhone,
+} from "@/lib/validate";
 import { logActivity } from "@/lib/activity-log";
 import type { EmployeeInput, EmployeeStatus } from "@/lib/types";
 
@@ -69,8 +75,31 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         { status: 400 }
       );
     }
+    const duplicateMessage = duplicateFieldsMessage(
+      body.idCardNumber
+        ? await employeeIdCardNumberExists(body.idCardNumber, id)
+        : false,
+      body.phone ? await employeePhoneExists(body.phone, id) : false
+    );
+    if (duplicateMessage) {
+      return NextResponse.json({ error: duplicateMessage }, { status: 409 });
+    }
 
-    const updated = await updateEmployee(id, body);
+    let updated;
+    try {
+      updated = await updateEmployee(id, body);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        return NextResponse.json(
+          { error: "เลขบัตรประชาชนนี้มีอยู่ในระบบแล้ว กรุณาตรวจสอบและแก้ไข" },
+          { status: 409 }
+        );
+      }
+      throw error;
+    }
     if (!updated) {
       return NextResponse.json(
         { error: "Employee not found" },

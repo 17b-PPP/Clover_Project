@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createEmployee, getEmployees } from "@/lib/data/employees";
+import { Prisma } from "@prisma/client";
+import {
+  createEmployee,
+  employeeIdCardNumberExists,
+  employeePhoneExists,
+  getEmployees,
+} from "@/lib/data/employees";
 import { handleRouteError } from "@/lib/api-error";
-import { isValidIdCardNumber, isValidPhone } from "@/lib/validate";
+import {
+  duplicateFieldsMessage,
+  isValidIdCardNumber,
+  isValidPhone,
+} from "@/lib/validate";
 import { logActivity } from "@/lib/activity-log";
 import type { EmployeeInput } from "@/lib/types";
 
@@ -48,19 +58,40 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    const duplicateMessage = duplicateFieldsMessage(
+      await employeeIdCardNumberExists(body.idCardNumber!),
+      await employeePhoneExists(body.phone!)
+    );
+    if (duplicateMessage) {
+      return NextResponse.json({ error: duplicateMessage }, { status: 409 });
+    }
 
-    const employee = await createEmployee({
-      firstName: body.firstName!,
-      lastName: body.lastName!,
-      idCardNumber: body.idCardNumber!,
-      dateOfBirth: body.dateOfBirth!,
-      phone: body.phone!,
-      address: body.address!,
-      district: body.district!,
-      province: body.province!,
-      postalCode: body.postalCode!,
-      photoUrl: body.photoUrl ?? null,
-    });
+    let employee;
+    try {
+      employee = await createEmployee({
+        firstName: body.firstName!,
+        lastName: body.lastName!,
+        idCardNumber: body.idCardNumber!,
+        dateOfBirth: body.dateOfBirth!,
+        phone: body.phone!,
+        address: body.address!,
+        district: body.district!,
+        province: body.province!,
+        postalCode: body.postalCode!,
+        photoUrl: body.photoUrl ?? null,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        return NextResponse.json(
+          { error: "เลขบัตรประชาชนนี้มีอยู่ในระบบแล้ว กรุณาตรวจสอบและแก้ไข" },
+          { status: 409 }
+        );
+      }
+      throw error;
+    }
 
     await logActivity({
       action: "CREATE_EMPLOYEE",

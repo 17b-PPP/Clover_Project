@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createMember, getMembers } from "@/lib/data/members";
+import { Prisma } from "@prisma/client";
+import {
+  createMember,
+  getMembers,
+  memberIdCardNumberExists,
+  memberPhoneExists,
+} from "@/lib/data/members";
 import { handleRouteError } from "@/lib/api-error";
-import { isValidIdCardNumber, isValidPhone } from "@/lib/validate";
+import {
+  duplicateFieldsMessage,
+  isValidIdCardNumber,
+  isValidPhone,
+} from "@/lib/validate";
 import { logActivity } from "@/lib/activity-log";
 import type { MemberInput } from "@/lib/types";
 
@@ -48,20 +58,41 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    const duplicateMessage = duplicateFieldsMessage(
+      await memberIdCardNumberExists(body.idCardNumber!),
+      await memberPhoneExists(body.phone!)
+    );
+    if (duplicateMessage) {
+      return NextResponse.json({ error: duplicateMessage }, { status: 409 });
+    }
 
-    const member = await createMember({
-      firstName: body.firstName!,
-      lastName: body.lastName!,
-      idCardNumber: body.idCardNumber!,
-      dateOfBirth: body.dateOfBirth!,
-      phone: body.phone!,
-      address: body.address!,
-      district: body.district!,
-      province: body.province!,
-      postalCode: body.postalCode!,
-      photoUrl: body.photoUrl ?? null,
-      gardenName: body.gardenName ?? null,
-    });
+    let member;
+    try {
+      member = await createMember({
+        firstName: body.firstName!,
+        lastName: body.lastName!,
+        idCardNumber: body.idCardNumber!,
+        dateOfBirth: body.dateOfBirth!,
+        phone: body.phone!,
+        address: body.address!,
+        district: body.district!,
+        province: body.province!,
+        postalCode: body.postalCode!,
+        photoUrl: body.photoUrl ?? null,
+        gardenName: body.gardenName ?? null,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        return NextResponse.json(
+          { error: "เลขบัตรประชาชนนี้มีอยู่ในระบบแล้ว กรุณาตรวจสอบและแก้ไข" },
+          { status: 409 }
+        );
+      }
+      throw error;
+    }
 
     await logActivity({
       action: "CREATE_MEMBER",

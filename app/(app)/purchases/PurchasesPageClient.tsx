@@ -181,7 +181,7 @@ export function PurchasesPageClient({
   return (
     <div className="mx-auto max-w-5xl px-8 py-10">
       <PageHeader
-        title="ระบบรับซื้อน้ำยาง"
+        title="การจัดการรับซื้อน้ำยาง"
         description="บันทึกข้อมูลการรับซื้อน้ำยางพารา คำนวณจำนวนเงิน และพิมพ์ใบเสร็จ"
         action={<LiveClock />}
       />

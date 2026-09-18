@@ -13,6 +13,21 @@ import type { DividendData } from "@/lib/types";
 
 const PAGE_SIZE = 10;
 
+const MONTH_NAMES = [
+  "มกราคม",
+  "กุมภาพันธ์",
+  "มีนาคม",
+  "เมษายน",
+  "พฤษภาคม",
+  "มิถุนายน",
+  "กรกฎาคม",
+  "สิงหาคม",
+  "กันยายน",
+  "ตุลาคม",
+  "พฤศจิกายน",
+  "ธันวาคม",
+];
+
 interface DividendsPageClientProps {
   data: DividendData;
 }
@@ -26,6 +41,8 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
   }, [data.purchases]);
 
   const [year, setYear] = useState(years[0]);
+  // 0 = every month in the year.
+  const [month, setMonth] = useState(0);
   const [rateInput, setRateInput] = useState("");
   const [appliedRate, setAppliedRate] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,13 +52,14 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
     const map = new Map<string, number>();
     for (const purchase of data.purchases) {
       if (purchase.buddhistYear !== year) continue;
+      if (month !== 0 && purchase.month !== month) continue;
       map.set(
         purchase.memberId,
         (map.get(purchase.memberId) ?? 0) + purchase.dryWeightKg
       );
     }
     return map;
-  }, [data.purchases, year]);
+  }, [data.purchases, year, month]);
 
   const totalDryWeight = useMemo(
     () => [...dryWeightByMember.values()].reduce((sum, w) => sum + w, 0),
@@ -80,7 +98,7 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
       <PageHeader
-        title="ระบบคำนวณเงินปันผล"
+        title="การจัดการคำนวณเงินปันผล"
         description="คำนวณเงินปันผลของสมาชิกจากน้ำหนักน้ำยางแห้งรวมในแต่ละปี"
       />
 
@@ -104,6 +122,22 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
               </option>
             ))}
           </Select>
+          <Select
+            label="ประจำเดือน"
+            value={month}
+            onChange={(e) => {
+              setMonth(Number(e.target.value));
+              setPage(1);
+            }}
+            className="w-44"
+          >
+            <option value={0}>ทั้งปี</option>
+            {MONTH_NAMES.map((name, i) => (
+              <option key={name} value={i + 1}>
+                {name}
+              </option>
+            ))}
+          </Select>
           <Input
             label="กำหนดอัตราเงินปันผล (บาท/กก.)"
             type="number"
@@ -121,11 +155,16 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
       </form>
 
-      <section className="mb-8 grid gap-4 sm:grid-cols-3">
+      <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="น้ำหนักยางแห้งรวม"
+          value={`${formatNumber(totalDryWeight)} กก.`}
+          hint={`ประจำ${month === 0 ? "ปี" : `เดือน${MONTH_NAMES[month - 1]}`} ${year}`}
+        />
         <StatCard
           label="มูลค่าเงินปันผลรวม"
           value={totalDividend === null ? "-" : formatCurrency(totalDividend)}
-          hint={`ประจำปี ${year}`}
+          hint={`ประจำ${month === 0 ? "ปี" : `เดือน${MONTH_NAMES[month - 1]}`} ${year}`}
         />
         <StatCard
           label="อัตราเงินปันผล"

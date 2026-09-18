@@ -157,7 +157,7 @@ export function MembersPageClient({ initialMembers }: MembersPageClientProps) {
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
       <PageHeader
-        title="ระบบสมาชิก"
+        title="การจัดการสมาชิก"
         description="จัดการข้อมูลสมาชิกผู้ขายน้ำยางพารา"
         action={
           <Button variant="primary" onClick={openAddForm}>

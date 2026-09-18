@@ -33,6 +33,7 @@ export async function getDividendData(): Promise<DividendData> {
       memberId: purchase.memberId,
       dryWeightKg: purchase.dryWeightKg.toNumber(),
       buddhistYear: buddhistYearOf(purchase.recordDate),
+      month: purchase.recordDate.getUTCMonth() + 1,
     })),
   };
 }

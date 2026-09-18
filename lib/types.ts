@@ -293,7 +293,13 @@ export interface DividendMemberRow {
 // can re-total per member for whichever year the user picks.
 export interface DividendData {
   members: DividendMemberRow[];
-  purchases: { memberId: string; dryWeightKg: number; buddhistYear: number }[];
+  purchases: {
+    memberId: string;
+    dryWeightKg: number;
+    buddhistYear: number;
+    // Calendar month (1-12) the purchase's recordDate falls in.
+    month: number;
+  }[];
 }
 
 export interface AuditLogEntry {
@@ -312,4 +318,13 @@ export interface ReferencePriceEntry {
   date: string;
   price: number;
   updatedAt: string;
+}
+
+// One save action against a business day's reference price — insert-only, so
+// re-saving the same day keeps the prior entries instead of overwriting them.
+export interface ReferencePriceLogEntry {
+  id: string;
+  date: string;
+  price: number;
+  recordedAt: string;
 }

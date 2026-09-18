@@ -25,8 +25,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const entry = await upsertReferencePrice(body.date, body.price);
-    return NextResponse.json(entry, { status: 200 });
+    const { entry, log } = await upsertReferencePrice(body.date, body.price);
+    return NextResponse.json({ ...entry, log }, { status: 200 });
   } catch (error) {
     return handleRouteError(error);
   }

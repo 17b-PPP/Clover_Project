@@ -10,7 +10,7 @@ const notoSansThai = Noto_Sans_Thai({
 
 export const metadata: Metadata = {
   title: "Field Latex Project",
-  description: "ระบบจัดการการรับซื้อน้ำยางพารา สำหรับพนักงาน",
+  description: "การจัดการการรับซื้อน้ำยางพารา สำหรับพนักงาน",
 };
 
 export default function RootLayout({

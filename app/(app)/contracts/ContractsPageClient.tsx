@@ -167,7 +167,7 @@ export function ContractsPageClient({
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
       <PageHeader
-        title="ระบบสัญญาจ้าง"
+        title="การจัดการสัญญาจ้าง"
         description="จัดการการจับคู่ระหว่างสมาชิกและลูกจ้าง พร้อมสัดส่วนแบ่งรายได้"
         action={
           <Button variant="primary" onClick={openAddForm}>

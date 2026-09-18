@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
@@ -12,39 +13,74 @@ import {
   type PurchaseTrendPoint,
 } from "@/components/performance/PurchaseTrendChart";
 import { formatCurrency, formatNumber } from "@/lib/format";
-import type { PurchaseSummaryRow } from "@/lib/types";
+import type { PurchaseSummaryRow, Withdrawal } from "@/lib/types";
 
 const PAGE_SIZE = 10;
 
 interface PurchaseSummaryPageClientProps {
   rows: PurchaseSummaryRow[];
+  withdrawals: Withdrawal[];
 }
 
 export function PurchaseSummaryPageClient({
   rows,
+  withdrawals,
 }: PurchaseSummaryPageClientProps) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  const [prevRange, setPrevRange] = useState({ dateFrom, dateTo });
-  if (prevRange.dateFrom !== dateFrom || prevRange.dateTo !== dateTo) {
-    setPrevRange({ dateFrom, dateTo });
+  const [prevRange, setPrevRange] = useState({ dateFrom, dateTo, search });
+  if (
+    prevRange.dateFrom !== dateFrom ||
+    prevRange.dateTo !== dateTo ||
+    prevRange.search !== search
+  ) {
+    setPrevRange({ dateFrom, dateTo, search });
     setPage(1);
   }
 
+  const memberOptions = useMemo<ComboboxOption[]>(() => {
+    const byCode = new Map<string, string>();
+    for (const row of rows) {
+      if (!byCode.has(row.memberCode)) byCode.set(row.memberCode, row.memberName);
+    }
+    return [...byCode.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([code, name]) => ({ value: code, label: `${code} · ${name}` }));
+  }, [rows]);
+
   const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
     return rows.filter((row) => {
       const day = row.recordDate.slice(0, 10);
       const matchesFrom = !dateFrom || day >= dateFrom;
       const matchesTo = !dateTo || day <= dateTo;
+      const matchesSearch =
+        !term ||
+        row.memberName.toLowerCase().includes(term) ||
+        row.memberCode.toLowerCase().includes(term);
+      return matchesFrom && matchesTo && matchesSearch;
+    });
+  }, [rows, dateFrom, dateTo, search]);
+
+  // Withdrawals aren't tied to a business day like purchases, so they're
+  // matched against the same date window using the day they were made.
+  const withdrawalsInRange = useMemo(() => {
+    return withdrawals.filter((w) => {
+      const day = w.createdAt.slice(0, 10);
+      const matchesFrom = !dateFrom || day >= dateFrom;
+      const matchesTo = !dateTo || day <= dateTo;
       return matchesFrom && matchesTo;
     });
-  }, [rows, dateFrom, dateTo]);
+  }, [withdrawals, dateFrom, dateTo]);
 
   const summary = useMemo(() => {
     const totalRawWeightKg = filtered.reduce((sum, r) => sum + r.rawWeightKg, 0);
+    const totalDryWeightKg = filtered.reduce((sum, r) => sum + r.dryWeightKg, 0);
     const totalAmount = filtered.reduce((sum, r) => sum + r.totalAmount, 0);
+    const totalWithdrawn = withdrawalsInRange.reduce((sum, w) => sum + w.amount, 0);
 
     const priceByDay = new Map<string, number>();
     for (const row of filtered) {
@@ -59,12 +95,15 @@ export function PurchaseSummaryPageClient({
 
     return {
       totalRawWeightKg,
+      totalDryWeightKg,
       totalAmount,
+      totalWithdrawn,
+      netAmount: totalAmount - totalWithdrawn,
       avgDailyPrice,
       billCount: filtered.length,
       memberCount: new Set(filtered.map((r) => r.memberCode)).size,
     };
-  }, [filtered]);
+  }, [filtered, withdrawalsInRange]);
 
   const dailyTrend = useMemo<PurchaseTrendPoint[]>(() => {
     const byDay = new Map<string, PurchaseTrendPoint>();
@@ -134,20 +173,40 @@ export function PurchaseSummaryPageClient({
           value={dateTo}
           onChange={(e) => setDateTo(e.target.value)}
         />
+        <div className="w-64">
+          <Combobox
+            label="ค้นหาชื่อ/รหัสสมาชิก"
+            options={memberOptions}
+            value={search}
+            onChange={setSearch}
+            placeholder="พิมพ์ชื่อหรือรหัสสมาชิก"
+            emptyMessage="ไม่พบสมาชิกที่ตรงกัน"
+          />
+        </div>
         <ResetButton
-          disabled={!dateFrom && !dateTo}
+          disabled={!dateFrom && !dateTo && !search}
           onClick={() => {
             setDateFrom("");
             setDateTo("");
+            setSearch("");
           }}
         />
       </div>
 
-      <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <StatCard
           label="ปริมาณการรับซื้อรวม"
           value={`${formatNumber(summary.totalRawWeightKg)} กก.`}
           hint="น้ำหนักน้ำยางสดรวมทั้งช่วง"
+        />
+        <StatCard
+          label="ปริมาณน้ำยางแห้งรวม"
+          value={`${formatNumber(summary.totalDryWeightKg)} กก.`}
+          hint={
+            search
+              ? `น้ำหนักยางแห้งของ "${search}"`
+              : "น้ำหนักยางแห้งรวมทั้งช่วง"
+          }
         />
         <StatCard
           label="ราคาเฉลี่ยรับซื้อรายวัน"
@@ -167,7 +226,17 @@ export function PurchaseSummaryPageClient({
         <StatCard
           label="ยอดเงินรวม"
           value={formatCurrency(summary.totalAmount)}
-          hint="มูลค่ารับซื้อทั้งหมด"
+          hint="มูลค่ารับซื้อทั้งหมด (ก่อนหักเบิกเงิน)"
+        />
+        <StatCard
+          label="ยอดเบิกเงินในช่วงนี้"
+          value={formatCurrency(summary.totalWithdrawn)}
+          hint="ยอดที่สมาชิกเบิกเงินสะสมออกไป"
+        />
+        <StatCard
+          label="ยอดเงินคงเหลือสุทธิ"
+          value={formatCurrency(summary.netAmount)}
+          hint="ยอดเงินรวม หักด้วยยอดเบิกเงินแล้ว"
         />
       </section>
 

@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { formatDateTimeThai, formatDateUtc, formatNumber } from "@/lib/format";
-import type { ReferencePriceEntry } from "@/lib/types";
+import type { ReferencePriceEntry, ReferencePriceLogEntry } from "@/lib/types";
 
 const bangkokDateFormatter = new Intl.DateTimeFormat("en-CA", {
   timeZone: "Asia/Bangkok",
@@ -30,12 +30,15 @@ function todayIso(): string {
 
 interface ReferencePricePageClientProps {
   initialHistory: ReferencePriceEntry[];
+  initialLog: ReferencePriceLogEntry[];
 }
 
 export function ReferencePricePageClient({
   initialHistory,
+  initialLog,
 }: ReferencePricePageClientProps) {
   const [history, setHistory] = useState<ReferencePriceEntry[]>(initialHistory);
+  const [log, setLog] = useState<ReferencePriceLogEntry[]>(initialLog);
   const [date, setDate] = useState(todayIso());
   const [price, setPrice] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -68,7 +71,9 @@ export function ReferencePricePageClient({
       if (!res.ok) {
         throw new Error(data.error ?? "ไม่สามารถบันทึกราคากลางได้");
       }
-      const saved = data as ReferencePriceEntry;
+      const { log: logEntry, ...saved } = data as ReferencePriceEntry & {
+        log: ReferencePriceLogEntry;
+      };
       setHistory((prev) => {
         const withoutSameDay = prev.filter(
           (row) => row.date.slice(0, 10) !== saved.date.slice(0, 10)
@@ -77,6 +82,7 @@ export function ReferencePricePageClient({
           b.date.localeCompare(a.date)
         );
       });
+      setLog((prev) => [logEntry, ...prev]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
     } finally {
@@ -147,6 +153,34 @@ export function ReferencePricePageClient({
                     แก้ไข
                   </button>
                 </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      <h2 className="mb-4 mt-10 text-base font-semibold text-slate-900">
+        ประวัติการบันทึกราคา
+      </h2>
+      {log.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white py-16 text-center text-sm text-slate-500">
+          ยังไม่มีประวัติการบันทึกราคา
+        </div>
+      ) : (
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableHeaderCell align="center">วันที่ของราคา</TableHeaderCell>
+              <TableHeaderCell align="center">ราคาที่บันทึก (บาท/กก.)</TableHeaderCell>
+              <TableHeaderCell align="center">บันทึกเมื่อ</TableHeaderCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {log.map((entry) => (
+              <TableRow key={entry.id}>
+                <TableCell>{formatDateUtc(entry.date)}</TableCell>
+                <TableCell>{formatNumber(entry.price)}</TableCell>
+                <TableCell>{formatDateTimeThai(entry.recordedAt)}</TableCell>
               </TableRow>
             ))}
           </TableBody>

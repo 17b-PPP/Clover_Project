@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { Combobox, type ComboboxOption } from "@/components/ui/Combobox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -10,7 +11,13 @@ import { WithdrawalReceipt } from "@/components/withdrawals/WithdrawalReceipt";
 import { useMemberLookup } from "@/components/hooks/useMemberLookup";
 import type { Withdrawal } from "@/lib/types";
 
-export function WithdrawalsPageClient() {
+interface WithdrawalsPageClientProps {
+  memberOptions: ComboboxOption[];
+}
+
+export function WithdrawalsPageClient({
+  memberOptions,
+}: WithdrawalsPageClientProps) {
   const [memberCode, setMemberCode] = useState("");
   const [amount, setAmount] = useState("");
 
@@ -21,6 +28,10 @@ export function WithdrawalsPageClient() {
 
   const member = useMemberLookup(memberCode);
   const locked = saved !== null;
+
+  // After saving, show the balance the withdrawal actually left behind
+  // instead of the pre-withdrawal figure still cached in the lookup.
+  const displayedBalance = saved ? saved.balanceAfter : member.data?.walletBalance;
 
   function resetForm() {
     setMemberCode("");
@@ -76,7 +87,7 @@ export function WithdrawalsPageClient() {
   return (
     <div className="mx-auto max-w-3xl px-8 py-10">
       <PageHeader
-        title="ระบบเบิกเงิน"
+        title="การจัดการเบิกเงิน"
         description="เบิกเงินจากยอดเงินสะสมของสมาชิก และพิมพ์ใบเสร็จ"
         action={<LiveClock />}
       />
@@ -86,51 +97,36 @@ export function WithdrawalsPageClient() {
           ยืนยันตัวตนสมาชิก
         </h2>
         <div className="grid grid-cols-2 gap-6">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-slate-700">
-              รหัสสมาชิก
-            </label>
-            <div
-              className={`flex items-center gap-2 rounded-lg border px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-emerald-600 ${
-                member.error ? "border-red-400" : "border-slate-300"
-              }`}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.75}
-                className="h-4 w-4 shrink-0 text-slate-400"
-              >
-                <path d="M12 11a3 3 0 0 0-3 3v1M12 11a3 3 0 0 1 3 3v1M12 4a7 7 0 0 0-7 7v3a9 9 0 0 0 4 7.5M12 4a7 7 0 0 1 7 7v3a9 9 0 0 1-4 7.5M12 11v9" />
-              </svg>
-              <input
-                type="text"
-                value={memberCode}
-                disabled={locked}
-                onChange={(e) => setMemberCode(e.target.value)}
-                placeholder="เช่น M-0001"
-                className="w-full border-none bg-transparent p-0 text-sm text-slate-900 focus:outline-none focus:ring-0"
-              />
-            </div>
+          <div>
+            <Combobox
+              label="รหัสสมาชิก"
+              options={memberOptions}
+              value={memberCode}
+              onChange={setMemberCode}
+              disabled={locked}
+              placeholder="พิมพ์ชื่อหรือรหัสสมาชิก"
+              error={member.error ?? undefined}
+              emptyMessage="ไม่พบสมาชิกที่ตรงกัน"
+            />
             {member.loading && (
-              <span className="text-xs text-slate-400">กำลังค้นหา...</span>
-            )}
-            {member.error && (
-              <span className="text-xs text-red-600">{member.error}</span>
+              <span className="mt-1 block text-xs text-slate-400">
+                กำลังค้นหา...
+              </span>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-slate-700">
-              ยอดเงินที่มีสะสม
+              {saved ? "ยอดเงินคงเหลือหลังเบิก" : "ยอดเงินที่มีสะสม"}
             </label>
             <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 shadow-sm">
               <span className="text-xs font-medium text-emerald-700">
                 บาท
               </span>
               <span className="text-sm font-semibold text-emerald-800">
-                {member.data ? member.data.walletBalance.toFixed(2) : "0.00"}
+                {displayedBalance !== undefined
+                  ? displayedBalance.toFixed(2)
+                  : "0.00"}
               </span>
             </div>
           </div>

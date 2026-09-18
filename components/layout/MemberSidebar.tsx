@@ -78,7 +78,7 @@ export function MemberSidebar({ profile }: MemberSidebarProps) {
           <p className="text-sm font-semibold leading-tight text-slate-900">
             สหกรณ์กองทุนสวนยางบ้านบางบอน
           </p>
-          <p className="text-xs text-slate-500">ระบบสมาชิก</p>
+          <p className="text-xs text-slate-500">การจัดการสมาชิก</p>
         </div>
       </div>
 

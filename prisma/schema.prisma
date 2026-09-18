@@ -270,3 +270,17 @@ model ReferencePrice {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// ==========================================
+// REFERENCE PRICE HISTORY (ประวัติการบันทึกราคากลาง)
+// บันทึกทุกครั้งที่มีการบันทึก/แก้ไขราคา — insert-only, ไม่มีการลบหรือแก้ไข
+// ==========================================
+
+model ReferencePriceHistory {
+  id         String   @id @default(cuid())
+  date       DateTime
+  price      Decimal  @db.Decimal(10, 2)
+  recordedAt DateTime @default(now())
+
+  @@index([date])
+}

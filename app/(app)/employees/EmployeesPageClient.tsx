@@ -161,7 +161,7 @@ export function EmployeesPageClient({
   return (
     <div className="mx-auto max-w-6xl px-8 py-10">
       <PageHeader
-        title="ระบบลูกจ้าง"
+        title="การจัดการลูกจ้าง"
         description="จัดการข้อมูลลูกจ้าง"
         action={
           <Button variant="primary" onClick={openAddForm}>

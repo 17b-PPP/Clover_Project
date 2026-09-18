@@ -9,10 +9,8 @@ import {
 const ADMIN_ONLY_PATHS = [
   "/users",
   "/audit-log",
-  "/reference-price",
   "/api/users",
   "/api/audit-log",
-  "/api/reference-price",
 ];
 
 function isAdminOnlyPath(pathname: string): boolean {

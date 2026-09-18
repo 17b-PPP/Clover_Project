@@ -59,22 +59,22 @@ const navGroups: NavGroupWithRoles[] = [
     label: "Staff",
     items: [
       {
-        label: "ระบบรับซื้อน้ำยาง",
+        label: "การจัดการรับซื้อน้ำยาง",
         href: "/purchases",
         icon: <Icon path="M12 2v6M8 6l4-4 4 4M6 10h12l-1.5 10.5a2 2 0 0 1-2 1.5h-5a2 2 0 0 1-2-1.5L6 10Z" />,
       },
       {
-        label: "ระบบเบิกเงิน",
+        label: "การจัดการเบิกเงิน",
         href: "/withdrawals",
         icon: <Icon path="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />,
       },
       {
-        label: "ระบบสมาชิก",
+        label: "การจัดการสมาชิก",
         href: "/members",
         icon: <Icon path="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />,
       },
       {
-        label: "ระบบลูกจ้าง",
+        label: "การจัดการลูกจ้าง",
         href: "/employees",
         icon: <Icon path="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />,
       },
@@ -82,6 +82,11 @@ const navGroups: NavGroupWithRoles[] = [
         label: "สัญญาจ้าง",
         href: "/contracts",
         icon: <Icon path="M9 12h6M9 16h6M9 8h1M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />,
+      },
+      {
+        label: "ราคากลางประจำวัน",
+        href: "/reference-price",
+        icon: <Icon path="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />,
       },
     ],
   },
@@ -108,11 +113,6 @@ const navGroups: NavGroupWithRoles[] = [
         label: "ตรวจสอบสิทธิ์ผู้ใช้งาน",
         href: "/users",
         icon: <Icon path="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 20a7.5 7.5 0 0 1 15 0" />,
-      },
-      {
-        label: "ราคากลางประจำวัน",
-        href: "/reference-price",
-        icon: <Icon path="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />,
       },
       {
         label: "ประวัติการใช้งาน",
@@ -163,7 +163,7 @@ export function Sidebar({
           <p className="text-sm font-semibold leading-tight text-slate-900">
             สหกรณ์กองทุนสวนยางบ้านบางบอน
           </p>
-          <p className="text-xs text-slate-500">ระบบจัดการรับซื้อน้ำยางพารา</p>
+          <p className="text-xs text-slate-500">การจัดการรับซื้อน้ำยางพารา</p>
         </div>
       </div>
       <nav className="flex-1 space-y-4 px-3 py-4">

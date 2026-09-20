@@ -44,6 +44,16 @@ export function TableRow({ children }: { children: ReactNode }) {
   return <tr className="transition-colors hover:bg-slate-50">{children}</tr>;
 }
 
-export function TableCell({ children }: { children: ReactNode }) {
-  return <td className="px-4 py-3 text-slate-700">{children}</td>;
+export function TableCell({
+  children,
+  align = "left",
+}: {
+  children: ReactNode;
+  align?: keyof typeof headerAlignClasses;
+}) {
+  return (
+    <td className={`px-4 py-3 text-slate-700 ${headerAlignClasses[align]}`}>
+      {children}
+    </td>
+  );
 }

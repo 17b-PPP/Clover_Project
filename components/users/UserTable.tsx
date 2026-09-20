@@ -42,38 +42,38 @@ export function UserTable({
     <Table>
       <TableHead>
         <TableRow>
-          <TableHeaderCell>บทบาท</TableHeaderCell>
-          <TableHeaderCell>ชื่อ-นามสกุล</TableHeaderCell>
-          <TableHeaderCell>ชื่อผู้ใช้งาน</TableHeaderCell>
-          <TableHeaderCell>อีเมล</TableHeaderCell>
-          <TableHeaderCell>สถานะ</TableHeaderCell>
-          <TableHeaderCell>จัดการ</TableHeaderCell>
+          <TableHeaderCell align="center">บทบาท</TableHeaderCell>
+          <TableHeaderCell align="center">ชื่อ-นามสกุล</TableHeaderCell>
+          <TableHeaderCell align="center">ชื่อผู้ใช้งาน</TableHeaderCell>
+          <TableHeaderCell align="center">อีเมล</TableHeaderCell>
+          <TableHeaderCell align="center">สถานะ</TableHeaderCell>
+          <TableHeaderCell align="center">จัดการ</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
         {users.map((user) => (
           <TableRow key={user.id}>
-            <TableCell>
+            <TableCell align="center">
               <Badge tone={user.role === "ADMIN" ? "success" : "neutral"}>
                 {roleLabel[user.role]}
               </Badge>
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               <span className="font-medium text-slate-900">
                 {user.firstName} {user.lastName}
               </span>
             </TableCell>
-            <TableCell>{user.username}</TableCell>
-            <TableCell>{user.email}</TableCell>
-            <TableCell>
+            <TableCell align="center">{user.username}</TableCell>
+            <TableCell align="center">{user.email}</TableCell>
+            <TableCell align="center">
               {user.status === "Active" ? (
                 <Badge tone="success">ใช้งานอยู่</Badge>
               ) : (
                 <Badge tone="danger">ถูกระงับ</Badge>
               )}
             </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
+            <TableCell align="center">
+              <div className="flex items-center justify-center gap-2">
                 <Button variant="ghost" onClick={() => onView(user)}>
                   ดูข้อมูล
                 </Button>

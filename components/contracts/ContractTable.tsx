@@ -39,12 +39,12 @@ export function ContractTable({
     <Table>
       <TableHead>
         <TableRow>
-          <TableHeaderCell>รหัสจับคู่</TableHeaderCell>
-          <TableHeaderCell>เจ้าของสวน</TableHeaderCell>
-          <TableHeaderCell>ลูกจ้าง</TableHeaderCell>
-          <TableHeaderCell>สัดส่วน</TableHeaderCell>
-          <TableHeaderCell>สถานะ</TableHeaderCell>
-          <TableHeaderCell>จัดการ</TableHeaderCell>
+          <TableHeaderCell align="center">รหัสจับคู่</TableHeaderCell>
+          <TableHeaderCell align="center">เจ้าของสวน</TableHeaderCell>
+          <TableHeaderCell align="center">ลูกจ้าง</TableHeaderCell>
+          <TableHeaderCell align="center">สัดส่วน</TableHeaderCell>
+          <TableHeaderCell align="center">สถานะ</TableHeaderCell>
+          <TableHeaderCell align="center">จัดการ</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -55,22 +55,22 @@ export function ContractTable({
 
           return (
             <TableRow key={contract.id}>
-              <TableCell>
+              <TableCell align="center">
                 <span className="font-medium text-slate-900">
                   {contract.pairCode}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell align="center">
                 {contract.member.firstName} {contract.member.lastName}
               </TableCell>
-              <TableCell>
+              <TableCell align="center">
                 {contract.employee.firstName} {contract.employee.lastName}
               </TableCell>
-              <TableCell>
+              <TableCell align="center">
                 {contract.memberShare}% / {contract.employeeShare}%
               </TableCell>
-              <TableCell>
-                <div className="flex flex-wrap gap-1.5">
+              <TableCell align="center">
+                <div className="flex flex-wrap justify-center gap-1.5">
                   {isExpired ? (
                     <Badge tone="neutral">สิ้นสุดสัญญาแล้ว</Badge>
                   ) : contract.status === "Active" ? (
@@ -80,8 +80,8 @@ export function ContractTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
+              <TableCell align="center">
+                <div className="flex items-center justify-center gap-2">
                   <Button variant="ghost" onClick={() => onView(contract)}>
                     ดูข้อมูล
                   </Button>

@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/Table";
 import { formatDateTimeThai, formatDateUtc, formatNumber } from "@/lib/format";
-import type { ReferencePriceEntry, ReferencePriceLogEntry } from "@/lib/types";
+import type { ReferencePriceLogEntry } from "@/lib/types";
 
 const bangkokDateFormatter = new Intl.DateTimeFormat("en-CA", {
   timeZone: "Asia/Bangkok",
@@ -29,26 +29,17 @@ function todayIso(): string {
 }
 
 interface ReferencePricePageClientProps {
-  initialHistory: ReferencePriceEntry[];
   initialLog: ReferencePriceLogEntry[];
 }
 
 export function ReferencePricePageClient({
-  initialHistory,
   initialLog,
 }: ReferencePricePageClientProps) {
-  const [history, setHistory] = useState<ReferencePriceEntry[]>(initialHistory);
   const [log, setLog] = useState<ReferencePriceLogEntry[]>(initialLog);
   const [date, setDate] = useState(todayIso());
   const [price, setPrice] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  function loadRowIntoForm(entry: ReferencePriceEntry) {
-    setDate(entry.date.slice(0, 10));
-    setPrice(String(entry.price));
-    setError(null);
-  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -71,17 +62,7 @@ export function ReferencePricePageClient({
       if (!res.ok) {
         throw new Error(data.error ?? "ไม่สามารถบันทึกราคากลางได้");
       }
-      const { log: logEntry, ...saved } = data as ReferencePriceEntry & {
-        log: ReferencePriceLogEntry;
-      };
-      setHistory((prev) => {
-        const withoutSameDay = prev.filter(
-          (row) => row.date.slice(0, 10) !== saved.date.slice(0, 10)
-        );
-        return [saved, ...withoutSameDay].sort((a, b) =>
-          b.date.localeCompare(a.date)
-        );
-      });
+      const { log: logEntry } = data as { log: ReferencePriceLogEntry };
       setLog((prev) => [logEntry, ...prev]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
@@ -124,41 +105,6 @@ export function ReferencePricePageClient({
         {error && <p className="w-full text-sm text-red-600">{error}</p>}
       </form>
 
-      {history.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white py-16 text-center text-sm text-slate-500">
-          ยังไม่มีการกำหนดราคากลาง
-        </div>
-      ) : (
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableHeaderCell align="center">วันที่</TableHeaderCell>
-              <TableHeaderCell align="center">ราคากลาง (บาท/กก.)</TableHeaderCell>
-              <TableHeaderCell align="center">แก้ไขล่าสุดเมื่อ</TableHeaderCell>
-              <TableHeaderCell align="center">{null}</TableHeaderCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {history.map((entry) => (
-              <TableRow key={entry.id}>
-                <TableCell>{formatDateUtc(entry.date)}</TableCell>
-                <TableCell>{formatNumber(entry.price)}</TableCell>
-                <TableCell>{formatDateTimeThai(entry.updatedAt)}</TableCell>
-                <TableCell>
-                  <button
-                    type="button"
-                    onClick={() => loadRowIntoForm(entry)}
-                    className="text-sm font-medium text-emerald-700 hover:underline"
-                  >
-                    แก้ไข
-                  </button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
-
       <h2 className="mb-4 mt-10 text-base font-semibold text-slate-900">
         ประวัติการบันทึกราคา
       </h2>
@@ -178,9 +124,11 @@ export function ReferencePricePageClient({
           <TableBody>
             {log.map((entry) => (
               <TableRow key={entry.id}>
-                <TableCell>{formatDateUtc(entry.date)}</TableCell>
-                <TableCell>{formatNumber(entry.price)}</TableCell>
-                <TableCell>{formatDateTimeThai(entry.recordedAt)}</TableCell>
+                <TableCell align="center">{formatDateUtc(entry.date)}</TableCell>
+                <TableCell align="center">{formatNumber(entry.price)}</TableCell>
+                <TableCell align="center">
+                  {formatDateTimeThai(entry.recordedAt)}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

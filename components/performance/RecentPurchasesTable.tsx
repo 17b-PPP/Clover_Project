@@ -38,7 +38,7 @@ export function RecentPurchasesTable({ rows }: RecentPurchasesTableProps) {
       <TableBody>
         {rows.map((row) => (
           <TableRow key={row.id}>
-            <TableCell>
+            <TableCell align="center">
               <span className="whitespace-nowrap text-slate-500">
                 {formatDateUtc(row.recordDate)}
               </span>
@@ -46,20 +46,20 @@ export function RecentPurchasesTable({ rows }: RecentPurchasesTableProps) {
                 {formatTimeThai(row.createdAt)} น.
               </span>
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               <span className="font-medium text-slate-900">{row.memberName}</span>
             </TableCell>
-            <TableCell>{row.memberCode}</TableCell>
-            <TableCell>
+            <TableCell align="center">{row.memberCode}</TableCell>
+            <TableCell align="center">
               <span className="tabular-nums">{formatNumber(row.rawWeightKg)}</span>
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               <span className="tabular-nums">{formatNumber(row.dryPercentage)}</span>
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               <span className="tabular-nums">{formatNumber(row.marketPrice)}</span>
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               <span className="tabular-nums">{formatCurrency(row.totalAmount)}</span>
             </TableCell>
           </TableRow>

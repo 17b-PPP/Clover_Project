@@ -37,32 +37,32 @@ export function EmployeeTable({
     <Table>
       <TableHead>
         <TableRow>
-          <TableHeaderCell>รหัสลูกจ้าง</TableHeaderCell>
-          <TableHeaderCell>ชื่อ-นามสกุล</TableHeaderCell>
-          <TableHeaderCell>สถานะ</TableHeaderCell>
-          <TableHeaderCell>จัดการ</TableHeaderCell>
+          <TableHeaderCell align="center">รหัสลูกจ้าง</TableHeaderCell>
+          <TableHeaderCell align="center">ชื่อ-นามสกุล</TableHeaderCell>
+          <TableHeaderCell align="center">สถานะ</TableHeaderCell>
+          <TableHeaderCell align="center">จัดการ</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
         {employees.map((employee) => (
           <TableRow key={employee.id}>
-            <TableCell>
+            <TableCell align="center">
               <span className="font-medium text-slate-900">
                 {employee.employeeCode}
               </span>
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               {employee.firstName} {employee.lastName}
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               {employee.status === "Active" ? (
                 <Badge tone="success">ใช้งานอยู่</Badge>
               ) : (
                 <Badge tone="danger">ถูกระงับ</Badge>
               )}
             </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
+            <TableCell align="center">
+              <div className="flex items-center justify-center gap-2">
                 <Button variant="ghost" onClick={() => onView(employee)}>
                   ดูข้อมูล
                 </Button>

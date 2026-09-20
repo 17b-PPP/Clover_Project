@@ -43,23 +43,23 @@ export function AuditLogTable({ entries }: AuditLogTableProps) {
       <TableBody>
         {entries.map((entry) => (
           <TableRow key={entry.id}>
-            <TableCell>
+            <TableCell align="center">
               <span className="whitespace-nowrap text-slate-500">
                 {formatDateTime(entry.timestamp)}
               </span>
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               <span className="font-medium text-slate-900">
                 {entry.username}
               </span>
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               <Badge tone={entry.role === "ADMIN" ? "success" : "neutral"}>
                 {roleLabel[entry.role]}
               </Badge>
             </TableCell>
-            <TableCell>{entry.action}</TableCell>
-            <TableCell>
+            <TableCell align="center">{entry.action}</TableCell>
+            <TableCell align="center">
               <DetailsCell text={entry.details} />
             </TableCell>
           </TableRow>

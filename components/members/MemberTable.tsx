@@ -38,40 +38,40 @@ export function MemberTable({
     <Table>
       <TableHead>
         <TableRow>
-          <TableHeaderCell>รหัสสมาชิก</TableHeaderCell>
-          <TableHeaderCell>ชื่อ-นามสกุล</TableHeaderCell>
-          <TableHeaderCell>เลขบัตรประชาชน</TableHeaderCell>
-          <TableHeaderCell>ยอดเงินสะสม</TableHeaderCell>
-          <TableHeaderCell>สถานะ</TableHeaderCell>
-          <TableHeaderCell>จัดการ</TableHeaderCell>
+          <TableHeaderCell align="center">รหัสสมาชิก</TableHeaderCell>
+          <TableHeaderCell align="center">ชื่อ-นามสกุล</TableHeaderCell>
+          <TableHeaderCell align="center">เลขบัตรประชาชน</TableHeaderCell>
+          <TableHeaderCell align="center">ยอดเงินสะสม</TableHeaderCell>
+          <TableHeaderCell align="center">สถานะ</TableHeaderCell>
+          <TableHeaderCell align="center">จัดการ</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
         {members.map((member) => (
           <TableRow key={member.id}>
-            <TableCell>
+            <TableCell align="center">
               <span className="font-medium text-slate-900">
                 {member.memberCode}
               </span>
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               {member.firstName} {member.lastName}
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               <span className="font-mono text-slate-600">
                 {member.idCardNumber}
               </span>
             </TableCell>
-            <TableCell>{formatCurrency(member.walletBalance)}</TableCell>
-            <TableCell>
+            <TableCell align="center">{formatCurrency(member.walletBalance)}</TableCell>
+            <TableCell align="center">
               {member.status === "Active" ? (
                 <Badge tone="success">ใช้งานอยู่</Badge>
               ) : (
                 <Badge tone="danger">ถูกระงับ</Badge>
               )}
             </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
+            <TableCell align="center">
+              <div className="flex items-center justify-center gap-2">
                 <Button variant="ghost" onClick={() => onView(member)}>
                   ดูข้อมูล
                 </Button>

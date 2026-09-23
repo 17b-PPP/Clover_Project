@@ -280,6 +280,12 @@ export interface PurchaseSummaryRow {
   dryWeightKg: number;
   marketPrice: number;
   totalAmount: number;
+  // Carried along so the table can render the same receipt as /member/sales.
+  sellerCode: string;
+  deliveredByName: string;
+  ownerName: string;
+  employeePayout: number;
+  ownerPayout: number;
 }
 
 export interface DividendMemberRow {
@@ -300,6 +306,29 @@ export interface DividendData {
     // Calendar month (1-12) the purchase's recordDate falls in.
     month: number;
   }[];
+}
+
+export interface DividendPaymentInput {
+  buddhistYear: number;
+  // 0 = pay the whole year, 1-12 = pay a single month.
+  month: number;
+  rate: number;
+}
+
+export interface DividendPayment {
+  id: string;
+  dividendCode: string;
+  memberId: string;
+  memberCode: string;
+  memberName: string;
+  buddhistYear: number;
+  month: number | null;
+  rate: number;
+  dryWeightKg: number;
+  amount: number;
+  balanceBefore: number;
+  balanceAfter: number;
+  createdAt: string;
 }
 
 export interface AuditLogEntry {

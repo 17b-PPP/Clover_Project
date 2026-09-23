@@ -44,17 +44,17 @@ export function DividendTable({ rows, rate }: DividendTableProps) {
       <TableBody>
         {rows.map((row) => (
           <TableRow key={row.memberId}>
-            <TableCell>
+            <TableCell align="center">
               <span className="font-medium text-slate-900">{row.memberName}</span>
             </TableCell>
-            <TableCell>{row.memberCode}</TableCell>
-            <TableCell>
+            <TableCell align="center">{row.memberCode}</TableCell>
+            <TableCell align="center">
               <span className="tabular-nums">{formatNumber(row.dryWeightKg)}</span>
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               <span className="tabular-nums">{formatNumber(rate)}</span>
             </TableCell>
-            <TableCell>
+            <TableCell align="center">
               <span className="font-medium tabular-nums text-emerald-700">
                 {formatCurrency(row.amount)}
               </span>

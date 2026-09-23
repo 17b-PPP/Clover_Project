@@ -1,5 +1,23 @@
 import type { Purchase } from "@/lib/types";
 
+// Only what the receipt actually renders — lets both the full Purchase type
+// and the leaner PurchaseSummaryRow (performance page) feed this component.
+type ReceiptPurchase = Pick<
+  Purchase,
+  | "purchaseCode"
+  | "sellerCode"
+  | "deliveredByName"
+  | "ownerName"
+  | "recordDate"
+  | "createdAt"
+  | "rawWeightKg"
+  | "dryPercentage"
+  | "dryWeightKg"
+  | "totalAmount"
+  | "employeePayout"
+  | "ownerPayout"
+>;
+
 const ORG_NAME = "สหกรณ์กองทุนสวนยางบ้านบางบอนจำกัด";
 
 const THAI_MONTHS = [
@@ -32,7 +50,7 @@ function receiptNumber(purchaseCode: string): string {
 }
 
 interface PurchaseReceiptProps {
-  purchase: Purchase;
+  purchase: ReceiptPurchase;
   // The member portal previews a past receipt on screen inside a dialog; every
   // other caller renders it purely as print output, hidden until printed.
   onScreen?: boolean;

@@ -32,7 +32,7 @@ export async function getReferencePriceHistory(): Promise<ReferencePriceEntry[]>
 
 // Every save action ever made against a reference price, newest first —
 // unlike ReferencePrice (one row per day, latest value only), this keeps
-// every value a day has ever been set to.
+// every value a day has ever been set to. The page paginates it client-side.
 export async function getReferencePriceLog(): Promise<ReferencePriceLogEntry[]> {
   const rows = await prisma.referencePriceHistory.findMany({
     orderBy: { recordedAt: "desc" },

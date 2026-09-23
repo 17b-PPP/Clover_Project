@@ -4,6 +4,8 @@ import {
   upsertReferencePrice,
 } from "@/lib/data/reference-price";
 import { handleRouteError } from "@/lib/api-error";
+import { logActivity } from "@/lib/activity-log";
+import { formatDateUtc } from "@/lib/format";
 
 // Lets the purchase page poll for the current day's reference price, so an
 // admin edit propagates there live without depending on the padlock state.
@@ -47,6 +49,14 @@ export async function POST(request: NextRequest) {
     }
 
     const { entry, log } = await upsertReferencePrice(body.date, body.price);
+
+    await logActivity({
+      action: "UPDATE_REFERENCE_PRICE",
+      targetType: "REFERENCE_PRICE",
+      targetId: entry.id,
+      description: `บันทึกราคากลางประจำวันที่ ${formatDateUtc(entry.date)} เป็น ${entry.price} บาท/กก.`,
+    });
+
     return NextResponse.json({ ...entry, log }, { status: 200 });
   } catch (error) {
     return handleRouteError(error);

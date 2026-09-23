@@ -18,6 +18,11 @@ export async function getPurchaseSummaryRows(): Promise<PurchaseSummaryRow[]> {
       dryWeightKg: true,
       marketPrice: true,
       totalAmount: true,
+      sellerCode: true,
+      deliveredByName: true,
+      ownerName: true,
+      employeePayout: true,
+      ownerPayout: true,
       member: {
         select: { memberCode: true, firstName: true, lastName: true },
       },
@@ -36,5 +41,10 @@ export async function getPurchaseSummaryRows(): Promise<PurchaseSummaryRow[]> {
     dryWeightKg: purchase.dryWeightKg.toNumber(),
     marketPrice: purchase.marketPrice.toNumber(),
     totalAmount: purchase.totalAmount.toNumber(),
+    sellerCode: purchase.sellerCode,
+    deliveredByName: purchase.deliveredByName,
+    ownerName: purchase.ownerName,
+    employeePayout: purchase.employeePayout.toNumber(),
+    ownerPayout: purchase.ownerPayout.toNumber(),
   }));
 }

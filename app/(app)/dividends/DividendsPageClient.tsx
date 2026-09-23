@@ -2,6 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
@@ -47,6 +48,9 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
   const [appliedRate, setAppliedRate] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [paid, setPaid] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
 
   const dryWeightByMember = useMemo(() => {
     const map = new Map<string, number>();
@@ -89,6 +93,26 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
     setError(null);
     setAppliedRate(value);
     setPage(1);
+    setPaid(false);
+    setPayError(null);
+  }
+
+  async function handlePayDividend() {
+    setPayError(null);
+    try {
+      const res = await fetch("/api/dividends", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ buddhistYear: year, month, rate: appliedRate }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ?? "ไม่สามารถจ่ายเงินปันผลได้");
+      }
+      setPaid(true);
+    } catch (error) {
+      setPayError(error instanceof Error ? error.message : "เกิดข้อผิดพลาด");
+    }
   }
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
@@ -198,9 +222,35 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
               totalPages={totalPages}
               onPageChange={setPage}
             />
+            <div className="mt-6 flex items-center justify-end gap-3">
+              {paid && (
+                <span className="text-sm font-medium text-emerald-700">
+                  จ่ายเงินปันผลเรียบร้อยแล้ว
+                </span>
+              )}
+              <Button
+                type="button"
+                variant="primary"
+                disabled={paid}
+                onClick={() => setConfirmOpen(true)}
+              >
+                จ่ายปันผล
+              </Button>
+            </div>
+            {payError && (
+              <p className="mt-3 text-right text-sm text-red-600">{payError}</p>
+            )}
           </>
         )}
       </section>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="ยืนยันการทำรายการ"
+        message="ท่านต้องการยืนยันการทำรายการหรือไม่ เมื่อยืนยันปันผลจะถูกบวกเพิ่มในยอดเงินสะสมของสมาชิก"
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handlePayDividend}
+      />
     </div>
   );
 }

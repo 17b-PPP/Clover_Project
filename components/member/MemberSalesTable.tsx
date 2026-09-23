@@ -80,7 +80,24 @@ export function MemberSalesTable({ purchases }: MemberSalesTableProps) {
                 </span>
               </TableCell>
               <TableCell>
-                <Button variant="ghost" onClick={() => setReceipt(purchase)}>
+                <Button
+                  variant="secondary"
+                  className="gap-1.5 px-3 py-1.5 text-xs"
+                  onClick={() => setReceipt(purchase)}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.75}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-3.5 w-3.5"
+                  >
+                    <path d="M6 3h9l3 3v15H6z" />
+                    <path d="M15 3v4h4" />
+                    <path d="M9 13h6M9 17h6" />
+                  </svg>
                   ใบเสร็จ
                 </Button>
               </TableCell>

@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Pagination } from "@/components/ui/Pagination";
 import {
   Table,
   TableBody,
@@ -14,6 +15,8 @@ import {
 } from "@/components/ui/Table";
 import { formatDateTimeThai, formatDateUtc, formatNumber } from "@/lib/format";
 import type { ReferencePriceLogEntry } from "@/lib/types";
+
+const PAGE_SIZE = 10;
 
 const bangkokDateFormatter = new Intl.DateTimeFormat("en-CA", {
   timeZone: "Asia/Bangkok",
@@ -40,6 +43,7 @@ export function ReferencePricePageClient({
   const [price, setPrice] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -64,6 +68,7 @@ export function ReferencePricePageClient({
       }
       const { log: logEntry } = data as { log: ReferencePriceLogEntry };
       setLog((prev) => [logEntry, ...prev]);
+      setPage(1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
     } finally {
@@ -113,26 +118,35 @@ export function ReferencePricePageClient({
           ยังไม่มีประวัติการบันทึกราคา
         </div>
       ) : (
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableHeaderCell align="center">วันที่ของราคา</TableHeaderCell>
-              <TableHeaderCell align="center">ราคาที่บันทึก (บาท/กก.)</TableHeaderCell>
-              <TableHeaderCell align="center">บันทึกเมื่อ</TableHeaderCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {log.map((entry) => (
-              <TableRow key={entry.id}>
-                <TableCell align="center">{formatDateUtc(entry.date)}</TableCell>
-                <TableCell align="center">{formatNumber(entry.price)}</TableCell>
-                <TableCell align="center">
-                  {formatDateTimeThai(entry.recordedAt)}
-                </TableCell>
+        <>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell align="center">วันที่ของราคา</TableHeaderCell>
+                <TableHeaderCell align="center">ราคาที่บันทึก (บาท/กก.)</TableHeaderCell>
+                <TableHeaderCell align="center">บันทึกเมื่อ</TableHeaderCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {log
+                .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+                .map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell align="center">{formatDateUtc(entry.date)}</TableCell>
+                    <TableCell align="center">{formatNumber(entry.price)}</TableCell>
+                    <TableCell align="center">
+                      {formatDateTimeThai(entry.recordedAt)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          <Pagination
+            page={page}
+            totalPages={Math.max(1, Math.ceil(log.length / PAGE_SIZE))}
+            onPageChange={setPage}
+          />
+        </>
       )}
     </div>
   );

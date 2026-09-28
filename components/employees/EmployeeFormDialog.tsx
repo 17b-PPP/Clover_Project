@@ -4,11 +4,12 @@ import { FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/Spinner";
 import { usePostalCodeLookup } from "@/components/hooks/usePostalCodeLookup";
 import { resizeImageToDataUrl } from "@/lib/image";
-import type { Employee, EmployeeInput } from "@/lib/types";
+import type { Contract, Employee, EmployeeInput } from "@/lib/types";
 
 export type EmployeeFormMode = "add" | "view" | "edit";
 
@@ -16,6 +17,7 @@ interface EmployeeFormDialogProps {
   open: boolean;
   mode: EmployeeFormMode;
   employee?: Employee | null;
+  contracts?: Contract[];
   loading?: boolean;
   onClose: () => void;
   onSubmit: (input: EmployeeInput) => Promise<void>;
@@ -45,6 +47,7 @@ export function EmployeeFormDialog({
   open,
   mode,
   employee,
+  contracts = [],
   loading = false,
   onClose,
   onSubmit,
@@ -288,6 +291,54 @@ export function EmployeeFormDialog({
             }))
           }
         />
+
+        {mode !== "add" && (
+          <div>
+            <p className="mb-2 text-sm font-medium text-slate-700">
+              สัดส่วนแบ่งรายได้ (สัญญาจ้าง)
+            </p>
+            {contracts.length === 0 ? (
+              <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2.5 text-sm text-slate-500">
+                ยังไม่มีสัญญาจ้างของลูกจ้างคนนี้
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {contracts.map((contract) => {
+                  const isExpired =
+                    contract.contractEndDate !== null &&
+                    new Date(contract.contractEndDate) <= new Date();
+                  return (
+                    <li
+                      key={contract.id}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2.5 text-sm"
+                    >
+                      <div>
+                        <p className="font-medium text-slate-900">
+                          {contract.member.firstName}{" "}
+                          {contract.member.lastName}{" "}
+                          <span className="font-normal text-slate-500">
+                            ({contract.member.code})
+                          </span>
+                        </p>
+                        <p className="text-slate-500">
+                          สมาชิก {contract.memberShare}% / ลูกจ้าง{" "}
+                          {contract.employeeShare}%
+                        </p>
+                      </div>
+                      {isExpired ? (
+                        <Badge tone="neutral">สิ้นสุดสัญญาแล้ว</Badge>
+                      ) : contract.status === "Active" ? (
+                        <Badge tone="success">ใช้งานอยู่</Badge>
+                      ) : (
+                        <Badge tone="danger">ถูกระงับ</Badge>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        )}
 
         {error && <p className="text-sm text-red-600">{error}</p>}
         </form>

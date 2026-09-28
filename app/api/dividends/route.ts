@@ -11,20 +11,19 @@ export async function POST(request: NextRequest) {
     if (
       body.buddhistYear === undefined ||
       body.buddhistYear === null ||
-      body.month === undefined ||
-      body.month === null ||
+      !body.periodLabel?.trim() ||
       body.rate === undefined ||
       body.rate === null
     ) {
       return NextResponse.json(
-        { error: "กรุณาระบุปี เดือน และอัตราเงินปันผลให้ครบถ้วน" },
+        { error: "กรุณาระบุปี ช่วงเวลา และอัตราเงินปันผลให้ครบถ้วน" },
         { status: 400 }
       );
     }
 
     const payments = await payDividend({
       buddhistYear: body.buddhistYear,
-      month: body.month,
+      periodLabel: body.periodLabel,
       rate: body.rate,
     });
 
@@ -32,9 +31,9 @@ export async function POST(request: NextRequest) {
     await logActivity({
       action: "CREATE_DIVIDEND",
       targetType: "DIVIDEND",
-      description: `จ่ายเงินปันผลประจำ${
-        body.month === 0 ? "ปี" : `เดือน ${body.month}`
-      } ${body.buddhistYear} อัตรา ${body.rate} บาท/กก. ให้สมาชิก ${
+      description: `จ่ายเงินปันผลประจำปี ${body.buddhistYear} (${
+        body.periodLabel
+      }) อัตรา ${body.rate} บาท/กก. ให้สมาชิก ${
         payments.length
       } ราย รวม ${totalAmount} บาท`,
     });

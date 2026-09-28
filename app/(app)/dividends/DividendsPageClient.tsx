@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input } from "@/components/ui/Input";
@@ -14,26 +15,12 @@ import type { DividendData } from "@/lib/types";
 
 const PAGE_SIZE = 10;
 
-const MONTH_NAMES = [
-  "มกราคม",
-  "กุมภาพันธ์",
-  "มีนาคม",
-  "เมษายน",
-  "พฤษภาคม",
-  "มิถุนายน",
-  "กรกฎาคม",
-  "สิงหาคม",
-  "กันยายน",
-  "ตุลาคม",
-  "พฤศจิกายน",
-  "ธันวาคม",
-];
-
 interface DividendsPageClientProps {
   data: DividendData;
 }
 
 export function DividendsPageClient({ data }: DividendsPageClientProps) {
+  const router = useRouter();
   const years = useMemo(() => {
     const currentBuddhistYear = new Date().getUTCFullYear() + 543;
     const set = new Set<number>([currentBuddhistYear]);
@@ -42,8 +29,7 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
   }, [data.purchases]);
 
   const [year, setYear] = useState(years[0]);
-  // 0 = every month in the year.
-  const [month, setMonth] = useState(0);
+  const [periodLabel, setPeriodLabel] = useState("");
   const [rateInput, setRateInput] = useState("");
   const [appliedRate, setAppliedRate] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -52,18 +38,19 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
   const [paid, setPaid] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
 
+  const yearAlreadyPaid = data.paidYears.includes(year);
+
   const dryWeightByMember = useMemo(() => {
     const map = new Map<string, number>();
     for (const purchase of data.purchases) {
       if (purchase.buddhistYear !== year) continue;
-      if (month !== 0 && purchase.month !== month) continue;
       map.set(
         purchase.memberId,
         (map.get(purchase.memberId) ?? 0) + purchase.dryWeightKg
       );
     }
     return map;
-  }, [data.purchases, year, month]);
+  }, [data.purchases, year]);
 
   const totalDryWeight = useMemo(
     () => [...dryWeightByMember.values()].reduce((sum, w) => sum + w, 0),
@@ -85,6 +72,10 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
 
   function handleApply(e: FormEvent) {
     e.preventDefault();
+    if (!periodLabel.trim()) {
+      setError("กรุณาระบุช่วงเวลาที่จ่ายปันผล");
+      return;
+    }
     const value = Number(rateInput);
     if (!rateInput.trim() || Number.isNaN(value) || value <= 0) {
       setError("กรุณากรอกอัตราเงินปันผลเป็นตัวเลขมากกว่า 0");
@@ -103,13 +94,18 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
       const res = await fetch("/api/dividends", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ buddhistYear: year, month, rate: appliedRate }),
+        body: JSON.stringify({
+          buddhistYear: year,
+          periodLabel,
+          rate: appliedRate,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error ?? "ไม่สามารถจ่ายเงินปันผลได้");
       }
       setPaid(true);
+      router.refresh();
     } catch (error) {
       setPayError(error instanceof Error ? error.message : "เกิดข้อผิดพลาด");
     }
@@ -146,22 +142,13 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
               </option>
             ))}
           </Select>
-          <Select
-            label="ประจำเดือน"
-            value={month}
-            onChange={(e) => {
-              setMonth(Number(e.target.value));
-              setPage(1);
-            }}
-            className="w-44"
-          >
-            <option value={0}>ทั้งปี</option>
-            {MONTH_NAMES.map((name, i) => (
-              <option key={name} value={i + 1}>
-                {name}
-              </option>
-            ))}
-          </Select>
+          <Input
+            label="ช่วงเวลาที่จ่ายปันผล"
+            value={periodLabel}
+            onChange={(e) => setPeriodLabel(e.target.value)}
+            placeholder="เช่น พฤษภาคม 2568 - มีนาคม 2569"
+            className="w-64"
+          />
           <Input
             label="กำหนดอัตราเงินปันผล (บาท/กก.)"
             type="number"
@@ -176,6 +163,12 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
             ตกลง
           </Button>
         </div>
+        {yearAlreadyPaid && (
+          <p className="mt-3 text-sm text-amber-600">
+            หมายเหตุ: ปันผลประจำปี {year} มีการจ่ายไปแล้ว ยังคำนวณดูตัวเลขได้ตามปกติ
+            แต่จะไม่สามารถกดจ่ายปันผลซ้ำสำหรับปีนี้ได้
+          </p>
+        )}
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
       </form>
 
@@ -183,12 +176,12 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
         <StatCard
           label="น้ำหนักยางแห้งรวม"
           value={`${formatNumber(totalDryWeight)} กก.`}
-          hint={`ประจำ${month === 0 ? "ปี" : `เดือน${MONTH_NAMES[month - 1]}`} ${year}`}
+          hint={`ประจำปี ${year}`}
         />
         <StatCard
           label="มูลค่าเงินปันผลรวม"
           value={totalDividend === null ? "-" : formatCurrency(totalDividend)}
-          hint={`ประจำ${month === 0 ? "ปี" : `เดือน${MONTH_NAMES[month - 1]}`} ${year}`}
+          hint={`ประจำปี ${year}`}
         />
         <StatCard
           label="อัตราเงินปันผล"
@@ -247,7 +240,7 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
       <ConfirmDialog
         open={confirmOpen}
         title="ยืนยันการทำรายการ"
-        message="ท่านต้องการยืนยันการทำรายการหรือไม่ เมื่อยืนยันปันผลจะถูกบวกเพิ่มในยอดเงินสะสมของสมาชิก"
+        message={`ท่านต้องการยืนยันการจ่ายเงินปันผลประจำปี ${year} หรือไม่ เมื่อยืนยันแล้วปันผลจะถูกบวกเพิ่มในยอดเงินสะสมของสมาชิกทันที และจะไม่สามารถแก้ไขหรือคำนวณปันผลปีนี้ซ้ำได้อีก`}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handlePayDividend}
       />

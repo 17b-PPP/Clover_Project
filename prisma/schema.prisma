@@ -254,8 +254,11 @@ model DividendPayment {
   memberCode    String
   memberName    String
   buddhistYear  Int
-  // null = จ่ายทั้งปี, 1-12 = จ่ายเฉพาะเดือน
+  // Legacy: null = จ่ายทั้งปี, 1-12 = จ่ายเฉพาะเดือน. No longer written —
+  // periodLabel replaced it — kept so old rows still deserialize.
   month         Int?
+  // ข้อความอธิบายช่วงเวลาที่จ่ายปันผล เช่น "พฤษภาคม 2568 - มีนาคม 2569"
+  periodLabel   String?
   rate          Decimal  @db.Decimal(10, 2)
   dryWeightKg   Decimal  @db.Decimal(10, 2)
   amount        Decimal  @db.Decimal(12, 2)

@@ -11,14 +11,16 @@ import {
 } from "@/components/employees/EmployeeFormDialog";
 import { SuspendConfirmDialog } from "@/components/employees/SuspendConfirmDialog";
 import { DeleteConfirmDialog } from "@/components/employees/DeleteConfirmDialog";
-import type { Employee, EmployeeInput } from "@/lib/types";
+import type { Contract, Employee, EmployeeInput } from "@/lib/types";
 
 interface EmployeesPageClientProps {
   initialEmployees: Employee[];
+  contracts: Contract[];
 }
 
 export function EmployeesPageClient({
   initialEmployees,
+  contracts,
 }: EmployeesPageClientProps) {
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
   const [search, setSearch] = useState("");
@@ -192,6 +194,11 @@ export function EmployeesPageClient({
         open={formOpen}
         mode={formMode}
         employee={selectedEmployee}
+        contracts={
+          selectedEmployee
+            ? contracts.filter((c) => c.employee.id === selectedEmployee.id)
+            : []
+        }
         loading={formLoading}
         onClose={() => setFormOpen(false)}
         onSubmit={handleFormSubmit}

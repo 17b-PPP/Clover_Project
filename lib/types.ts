@@ -244,7 +244,26 @@ export interface DailyMarketPrice {
 
 export interface MemberSalesSummary {
   monthlySalesAmount: number;
-  yearlyRawWeightKg: number;
+}
+
+// One calendar (Buddhist) year's worth of weight totals, used to populate the
+// dashboard's year selector without a round trip per year switch.
+export interface MemberYearlySummary {
+  year: number;
+  rawWeightKg: number;
+  dryWeightKg: number;
+}
+
+// The employee currently contracted to deliver this member's latex, per an
+// active MePair — a member may have none (sells their own latex) or more
+// than one over time, so the portal gets the full list.
+export interface MemberEmployeeInfo {
+  employeeCode: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  memberShare: number;
+  employeeShare: number;
 }
 
 export type FinanceEntryType = "PURCHASE" | "WITHDRAWAL";
@@ -294,24 +313,26 @@ export interface DividendMemberRow {
   memberName: string;
 }
 
-// Everything the dividend calculator needs: the member roster plus every
-// purchase's dry weight tagged with its Buddhist-calendar year, so the client
-// can re-total per member for whichever year the user picks.
+// Everything the dividend calculator needs: the member roster, every
+// purchase's dry weight tagged with its Buddhist-calendar year (so the client
+// can re-total per member for whichever year the user picks), and which years
+// have already been paid out (so the UI can lock them before the user tries).
 export interface DividendData {
   members: DividendMemberRow[];
   purchases: {
     memberId: string;
     dryWeightKg: number;
     buddhistYear: number;
-    // Calendar month (1-12) the purchase's recordDate falls in.
-    month: number;
   }[];
+  paidYears: number[];
 }
 
 export interface DividendPaymentInput {
   buddhistYear: number;
-  // 0 = pay the whole year, 1-12 = pay a single month.
-  month: number;
+  // Free-text description of the period this payout covers, e.g.
+  // "พฤษภาคม 2568 - มีนาคม 2569" — the co-op's dividend year doesn't always
+  // line up with the calendar year the purchases are grouped by.
+  periodLabel: string;
   rate: number;
 }
 
@@ -322,7 +343,7 @@ export interface DividendPayment {
   memberCode: string;
   memberName: string;
   buddhistYear: number;
-  month: number | null;
+  periodLabel: string | null;
   rate: number;
   dryWeightKg: number;
   amount: number;

@@ -5,9 +5,15 @@ import { getMemberSession } from "@/lib/member-session";
 import type {
   DailyMarketPrice,
   FinanceEntry,
+  MemberEmployeeInfo,
   MemberProfile,
   MemberSalesSummary,
+  MemberYearlySummary,
 } from "@/lib/types";
+
+// How many past years the dashboard's year selector offers, in addition to
+// the current year.
+const YEARS_BACK = 4;
 
 export interface MemberPortalContext {
   memberId: string;
@@ -119,24 +125,78 @@ export async function getMemberSalesSummary(
   const { year, month } = currentThaiPeriod();
   const monthStart = new Date(Date.UTC(year, month - 1, 1));
   const nextMonthStart = new Date(Date.UTC(year, month, 1));
-  const yearStart = new Date(Date.UTC(year, 0, 1));
-  const nextYearStart = new Date(Date.UTC(year + 1, 0, 1));
 
-  const [monthly, yearly] = await Promise.all([
-    prisma.purchase.aggregate({
-      where: { memberId, recordDate: { gte: monthStart, lt: nextMonthStart } },
-      _sum: { totalAmount: true },
-    }),
-    prisma.purchase.aggregate({
-      where: { memberId, recordDate: { gte: yearStart, lt: nextYearStart } },
-      _sum: { rawWeightKg: true },
-    }),
-  ]);
+  const monthly = await prisma.purchase.aggregate({
+    where: { memberId, recordDate: { gte: monthStart, lt: nextMonthStart } },
+    _sum: { totalAmount: true },
+  });
 
   return {
     monthlySalesAmount: monthly._sum.totalAmount?.toNumber() ?? 0,
-    yearlyRawWeightKg: yearly._sum.rawWeightKg?.toNumber() ?? 0,
   };
+}
+
+// Weight totals for the current Buddhist year plus YEARS_BACK years before
+// it, so the dashboard's year selector can switch client-side with no
+// further round trip.
+export async function getMemberYearlySummaries(
+  memberId: string
+): Promise<MemberYearlySummary[]> {
+  const { year: currentAdYear } = currentThaiPeriod();
+  const currentBuddhistYear = currentAdYear + 543;
+  const buddhistYears = Array.from(
+    { length: YEARS_BACK + 1 },
+    (_, i) => currentBuddhistYear - i
+  );
+
+  return Promise.all(
+    buddhistYears.map(async (buddhistYear) => {
+      const adYear = buddhistYear - 543;
+      const yearStart = new Date(Date.UTC(adYear, 0, 1));
+      const nextYearStart = new Date(Date.UTC(adYear + 1, 0, 1));
+      const { _sum } = await prisma.purchase.aggregate({
+        where: { memberId, recordDate: { gte: yearStart, lt: nextYearStart } },
+        _sum: { rawWeightKg: true, dryWeightKg: true },
+      });
+      return {
+        year: buddhistYear,
+        rawWeightKg: _sum.rawWeightKg?.toNumber() ?? 0,
+        dryWeightKg: _sum.dryWeightKg?.toNumber() ?? 0,
+      };
+    })
+  );
+}
+
+// The employees currently under an active, unexpired contract to deliver this
+// member's latex (see MePair) — shown on the portal so the member can see who
+// is authorized to sell on their behalf and at what revenue split.
+export async function getMemberEmployeeInfo(
+  memberId: string
+): Promise<MemberEmployeeInfo[]> {
+  const pairs = await prisma.mePair.findMany({
+    where: { memberId, status: "Active" },
+    select: {
+      memberShare: true,
+      employeeShare: true,
+      contractEndDate: true,
+      employee: {
+        select: { employeeCode: true, firstName: true, lastName: true, phone: true },
+      },
+    },
+    orderBy: { contractStartDate: "desc" },
+  });
+
+  const now = new Date();
+  return pairs
+    .filter((pair) => !pair.contractEndDate || pair.contractEndDate > now)
+    .map((pair) => ({
+      employeeCode: pair.employee.employeeCode,
+      firstName: pair.employee.firstName,
+      lastName: pair.employee.lastName,
+      phone: pair.employee.phone,
+      memberShare: pair.memberShare.toNumber(),
+      employeeShare: pair.employeeShare.toNumber(),
+    }));
 }
 
 // A member's money moves in exactly two ways: a latex sale credits their share

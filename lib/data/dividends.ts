@@ -23,7 +23,7 @@ function serializePayment(payment: PrismaDividendPayment): DividendPayment {
     memberCode: payment.memberCode,
     memberName: payment.memberName,
     buddhistYear: payment.buddhistYear,
-    month: payment.month,
+    periodLabel: payment.periodLabel,
     rate: payment.rate.toNumber(),
     dryWeightKg: payment.dryWeightKg.toNumber(),
     amount: payment.amount.toNumber(),
@@ -42,18 +42,22 @@ async function nextDividendCode(): Promise<string> {
   return `D-${String((Number.isNaN(n) ? 0 : n) + 1).padStart(4, "0")}`;
 }
 
-// Feeds the dividend calculator: the full member roster plus every purchase's
-// dry weight tagged with its Buddhist year. The client totals dry weight per
-// member for the selected year and multiplies by the rate the user enters —
-// nothing is persisted.
+// Feeds the dividend calculator: the full member roster, every purchase's
+// dry weight tagged with its Buddhist year, and which years already have a
+// payout on record. The client totals dry weight per member for the selected
+// year and multiplies by the rate the user enters — nothing is persisted.
 export async function getDividendData(): Promise<DividendData> {
-  const [members, purchases] = await Promise.all([
+  const [members, purchases, paidYearRows] = await Promise.all([
     prisma.member.findMany({
       select: { id: true, memberCode: true, firstName: true, lastName: true },
       orderBy: { memberCode: "asc" },
     }),
     prisma.purchase.findMany({
       select: { memberId: true, dryWeightKg: true, recordDate: true },
+    }),
+    prisma.dividendPayment.findMany({
+      select: { buddhistYear: true },
+      distinct: ["buddhistYear"],
     }),
   ]);
 
@@ -67,21 +71,36 @@ export async function getDividendData(): Promise<DividendData> {
       memberId: purchase.memberId,
       dryWeightKg: purchase.dryWeightKg.toNumber(),
       buddhistYear: buddhistYearOf(purchase.recordDate),
-      month: purchase.recordDate.getUTCMonth() + 1,
     })),
+    paidYears: paidYearRows.map((row) => row.buddhistYear),
   };
 }
 
-// Pays out dividends for one year (or one month within it) at the given
-// rate: recomputes each member's dry weight server-side (never trusts the
-// client's totals), then in a single transaction credits both walletBalance
-// (the withdrawable "ยอดเงินสะสม") and dividendBalance, and inserts one
-// insert-only history row per member paid.
+// Pays out dividends for one Buddhist year at the given rate: recomputes each
+// member's dry weight server-side (never trusts the client's totals), then in
+// a single transaction credits both walletBalance (the withdrawable
+// "ยอดเงินสะสม") and dividendBalance, and inserts one insert-only history row
+// per member paid. A year can only be paid once — re-running the calculation
+// for a year that already has a payment would double-credit every member's
+// balance, so it's rejected outright rather than left to the UI to prevent.
 export async function payDividend(
   input: DividendPaymentInput
 ): Promise<DividendPayment[]> {
   if (!input.rate || input.rate <= 0) {
     throw new DividendError("กรุณากรอกอัตราเงินปันผลเป็นตัวเลขมากกว่า 0");
+  }
+  if (!input.periodLabel?.trim()) {
+    throw new DividendError("กรุณาระบุช่วงเวลาที่จ่ายปันผล");
+  }
+
+  const alreadyPaid = await prisma.dividendPayment.findFirst({
+    where: { buddhistYear: input.buddhistYear },
+    select: { id: true },
+  });
+  if (alreadyPaid) {
+    throw new DividendError(
+      `ปันผลประจำปี ${input.buddhistYear} ถูกคำนวณและจ่ายไปแล้ว ไม่สามารถคำนวณซ้ำได้`
+    );
   }
 
   const purchases = await prisma.purchase.findMany({
@@ -91,9 +110,6 @@ export async function payDividend(
   const dryWeightByMember = new Map<string, number>();
   for (const purchase of purchases) {
     if (buddhistYearOf(purchase.recordDate) !== input.buddhistYear) continue;
-    if (input.month !== 0 && purchase.recordDate.getUTCMonth() + 1 !== input.month) {
-      continue;
-    }
     const memberId = purchase.memberId;
     dryWeightByMember.set(
       memberId,
@@ -131,7 +147,7 @@ export async function payDividend(
           memberCode: member.memberCode,
           memberName: `${member.firstName} ${member.lastName}`,
           buddhistYear: input.buddhistYear,
-          month: input.month === 0 ? null : input.month,
+          periodLabel: input.periodLabel.trim(),
           rate: input.rate,
           dryWeightKg,
           amount,

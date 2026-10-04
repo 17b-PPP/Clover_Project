@@ -25,17 +25,13 @@ function DetailLines({ entry }: { entry: FinanceEntry }) {
   if (entry.type === "PURCHASE") {
     return (
       <>
-        <p className="tabular-nums">
-          น้ำยางสด {formatNumber(entry.rawWeightKg ?? 0)} กก. · DRC{" "}
-          {formatNumber(entry.dryPercentage ?? 0)}%
-        </p>
         <p className="text-xs tabular-nums text-slate-500">
-          ราคา {formatNumber(entry.marketPrice ?? 0)} บาท/กก.
+          ขายน้ำยางสด ยอดรวม {formatNumber(entry.totalAmount ?? 0)} บาท
         </p>
         {entry.deliveredByName && (
-          <p className="text-xs tabular-nums text-slate-500">
-            ขายโดยลูกจ้าง: {entry.deliveredByName} (หักจ่าย{" "}
-            {formatNumber(entry.employeePayout ?? 0)} บาท)
+          <p className="text-xs tabular-nums text-red-600">
+            แบ่งจ่ายให้ลูกจ้าง {entry.deliveredByName}{" "}
+            {formatNumber(entry.employeePayout ?? 0)} บาท
           </p>
         )}
       </>
@@ -43,24 +39,20 @@ function DetailLines({ entry }: { entry: FinanceEntry }) {
   }
   if (entry.type === "DIVIDEND") {
     return (
-      <>
-        <p>ปันผลประจำปี {entry.buddhistYear}</p>
-        {entry.periodLabel && (
-          <p className="text-xs text-slate-500">
-            ช่วงเวลา {entry.periodLabel}
-          </p>
-        )}
-        <p className="text-xs tabular-nums text-slate-500">
-          ยางแห้ง {formatNumber(entry.dryWeightKg ?? 0)} กก. × อัตรา{" "}
-          {formatNumber(entry.rate ?? 0)} บาท/กก.
-        </p>
-      </>
+      <p className="tabular-nums">
+        อัตรา {formatNumber(entry.rate ?? 0)} บาท/กก.
+      </p>
     );
   }
   return (
-    <p className="tabular-nums">
-      คงเหลือหลังเบิก {formatNumber(entry.balanceAfter ?? 0)} บาท
-    </p>
+    <>
+      <p className="text-xs tabular-nums text-slate-500">
+        เบิกเงิน {formatNumber(Math.abs(entry.amount))} บาท
+      </p>
+      <p className="text-xs tabular-nums text-slate-500">
+        คงเหลือหลังเบิก {formatNumber(entry.balanceAfter ?? 0)} บาท
+      </p>
+    </>
   );
 }
 

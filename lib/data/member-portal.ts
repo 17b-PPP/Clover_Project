@@ -164,21 +164,30 @@ export async function getMemberYearlySummaries(
         recordDate: { gte: yearStart, lt: nextYearStart },
       };
 
-      const [{ _sum }, employeePurchases] = await Promise.all([
+      const [{ _sum }, employeePurchases, withdrawnTotal] = await Promise.all([
         prisma.purchase.aggregate({
           where,
           _sum: { rawWeightKg: true, dryWeightKg: true, totalAmount: true },
         }),
         prisma.purchase.findMany({
           where: { ...where, sellerType: "EMPLOYEE" },
-          select: { employeeId: true, deliveredByName: true, totalAmount: true },
+          select: { employeeId: true, deliveredByName: true, employeePayout: true },
+        }),
+        prisma.withdrawal.aggregate({
+          where: {
+            memberId,
+            createdAt: { gte: yearStart, lt: nextYearStart },
+          },
+          _sum: { amount: true },
         }),
       ]);
 
+      // Each employee's amount is their actual payout share, not the full
+      // sale value — the rest of totalAmount credits the member's wallet.
       const salesByEmployee = new Map<string, MemberEmployeeSale>();
       for (const purchase of employeePurchases) {
         if (!purchase.employeeId) continue;
-        const amount = purchase.totalAmount.toNumber();
+        const amount = purchase.employeePayout.toNumber();
         const existing = salesByEmployee.get(purchase.employeeId);
         if (existing) {
           existing.amount += amount;
@@ -198,6 +207,7 @@ export async function getMemberYearlySummaries(
         employeeSales: [...salesByEmployee.values()].sort(
           (a, b) => b.amount - a.amount
         ),
+        withdrawnAmount: withdrawnTotal._sum.amount?.toNumber() ?? 0,
       };
     })
   );
@@ -250,6 +260,7 @@ export async function getMemberFinanceHistory(
         purchaseCode: true,
         recordDate: true,
         ownerPayout: true,
+        totalAmount: true,
         sellerType: true,
         deliveredByName: true,
         employeePayout: true,
@@ -304,6 +315,7 @@ export async function getMemberFinanceHistory(
         employeePayout: employeeDelivered
           ? purchase.employeePayout.toNumber()
           : undefined,
+        totalAmount: purchase.totalAmount.toNumber(),
         rawWeightKg: purchase.rawWeightKg.toNumber(),
         dryPercentage: purchase.dryPercentage.toNumber(),
         marketPrice: purchase.marketPrice.toNumber(),

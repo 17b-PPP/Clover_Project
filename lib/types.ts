@@ -261,6 +261,7 @@ export interface MemberYearlySummary {
   dryWeightKg: number;
   totalAmount: number;
   employeeSales: MemberEmployeeSale[];
+  withdrawnAmount: number;
 }
 
 // The employee currently contracted to deliver this member's latex, per an
@@ -290,6 +291,9 @@ export interface FinanceEntry {
   // what the employee received on the spot, for the member's visibility.
   deliveredByName?: string;
   employeePayout?: number;
+  // The full sale value before the employee's cut was split out — shown
+  // alongside employeePayout so the split is unambiguous.
+  totalAmount?: number;
   // PURCHASE rows: what was weighed and the price it was bought at.
   rawWeightKg?: number;
   dryPercentage?: number;

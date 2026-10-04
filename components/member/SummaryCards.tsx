@@ -61,6 +61,7 @@ function useYearSelector(
     dryWeightKg: 0,
     totalAmount: 0,
     employeeSales: [],
+    withdrawnAmount: 0,
   };
 
   const selector = (
@@ -90,6 +91,7 @@ export function SummaryCards({
   const rawWeight = useYearSelector(yearlySummaries, "เลือกปีน้ำหนักน้ำยาง");
   const dryWeight = useYearSelector(yearlySummaries, "เลือกปีน้ำยางแห้ง");
   const salesAmount = useYearSelector(yearlySummaries, "เลือกปียอดขาย");
+  const withdrawn = useYearSelector(yearlySummaries, "เลือกปียอดเบิกเงิน");
 
   return (
     <>
@@ -98,18 +100,6 @@ export function SummaryCards({
         value={formatNumber(monthlySalesAmount)}
         hint="ยอดขายน้ำยางรวมของเดือนนี้"
         icon="M3 3v18h18M8 17V10M13 17V6M18 17v-4"
-      />
-      <SummaryCard
-        label="น้ำหนักรวม"
-        value={`${formatNumber(rawWeight.selected.rawWeightKg)} กก.`}
-        hint={`น้ำหนักน้ำยางที่ส่งขายรวมทั้งปี ${rawWeight.year}`}
-        selector={rawWeight.selector}
-      />
-      <SummaryCard
-        label="น้ำยางแห้งรวม"
-        value={`${formatNumber(dryWeight.selected.dryWeightKg)} กก.`}
-        hint={`น้ำหนักน้ำยางแห้งที่ส่งขายรวมทั้งปี ${dryWeight.year}`}
-        selector={dryWeight.selector}
       />
       <SummaryCard
         label="ยอดขายรวมทั้งปี (บาท)"
@@ -122,13 +112,24 @@ export function SummaryCards({
         value={
           salesAmount.selected.employeeSales.length > 0 ? (
             <span className="flex flex-col gap-1">
+              <span className="flex items-baseline justify-between gap-2 text-base font-semibold text-slate-900">
+                <span>รวมทั้งหมด</span>
+                <span className="shrink-0 tabular-nums">
+                  {formatNumber(
+                    salesAmount.selected.employeeSales.reduce(
+                      (sum, sale) => sum + sale.amount,
+                      0
+                    )
+                  )}
+                </span>
+              </span>
               {salesAmount.selected.employeeSales.map((sale) => (
                 <span
                   key={sale.name}
-                  className="flex items-baseline justify-between gap-2 text-base"
+                  className="flex items-baseline justify-between gap-2 text-sm"
                 >
-                  <span className="truncate text-slate-700">{sale.name}</span>
-                  <span className="shrink-0 tabular-nums">
+                  <span className="truncate text-slate-600">{sale.name}</span>
+                  <span className="shrink-0 tabular-nums text-slate-600">
                     {formatNumber(sale.amount)}
                   </span>
                 </span>
@@ -138,7 +139,26 @@ export function SummaryCards({
             "—"
           )
         }
-        hint={`ยอดขายที่ลูกจ้างส่งแทนปี ${salesAmount.year}`}
+        hint={`ส่วนแบ่งที่จ่ายให้ลูกจ้างแต่ละคนปี ${salesAmount.year}`}
+        selector={salesAmount.selector}
+      />
+      <SummaryCard
+        label="ยอดเงินที่เบิกไปแล้ว (บาท)"
+        value={formatNumber(withdrawn.selected.withdrawnAmount)}
+        hint={`ยอดเงินที่เบิกออกจากยอดสะสมปี ${withdrawn.year}`}
+        selector={withdrawn.selector}
+      />
+      <SummaryCard
+        label="น้ำหนักรวม (กิโลกรัม)"
+        value={formatNumber(rawWeight.selected.rawWeightKg)}
+        hint={`น้ำหนักน้ำยางที่ส่งขายรวมทั้งปี ${rawWeight.year}`}
+        selector={rawWeight.selector}
+      />
+      <SummaryCard
+        label="น้ำยางแห้งรวม (กิโลกรัม)"
+        value={formatNumber(dryWeight.selected.dryWeightKg)}
+        hint={`น้ำหนักน้ำยางแห้งที่ส่งขายรวมทั้งปี ${dryWeight.year}`}
+        selector={dryWeight.selector}
       />
     </>
   );

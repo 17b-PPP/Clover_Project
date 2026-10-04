@@ -38,10 +38,12 @@ export function MemberSalesTable({ purchases }: MemberSalesTableProps) {
             <TableHeaderCell align="center" className="w-[13%]">
               วัน/เดือน/ปี
             </TableHeaderCell>
-            <TableHeaderCell align="center" className="w-[13%]">
-              น้ำหนักน้ำยาง (กก.)
+            <TableHeaderCell align="center" className="w-[17%]">
+              {/* Same box as the detail cells below so the header starts
+                  where the text starts. */}
+              <div className="mx-auto w-32 pl-3 text-left">รายละเอียด</div>
             </TableHeaderCell>
-            <TableHeaderCell align="center" className="w-[19%]">
+            <TableHeaderCell align="center" className="w-[15%]">
               {/* Same box as the name cells below so the header starts where
                   the names start. */}
               <div className="mx-auto w-36 pl-3 text-left">ขายน้ำยางโดย</div>
@@ -69,9 +71,17 @@ export function MemberSalesTable({ purchases }: MemberSalesTableProps) {
                 </span>
               </TableCell>
               <TableCell align="center">
-                <span className="tabular-nums">
-                  {formatNumber(purchase.rawWeightKg)}
-                </span>
+                <div className="mx-auto w-32 text-left">
+                  <p className="text-xs tabular-nums">
+                    น้ำยางสด {formatNumber(purchase.rawWeightKg)} กก.
+                  </p>
+                  <p className="text-xs tabular-nums text-slate-500">
+                    ยางแห้ง {formatNumber(purchase.dryWeightKg)} กก.
+                  </p>
+                  <p className="text-xs tabular-nums text-slate-500">
+                    ราคา {formatNumber(purchase.marketPrice)} บาท/กก.
+                  </p>
+                </div>
               </TableCell>
               <TableCell align="center">
                 {/* Fixed-width box centered under the header, names

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { formatCurrency, formatNumber } from "@/lib/format";
+import { formatNumber } from "@/lib/format";
 import type { MemberYearlySummary } from "@/lib/types";
 
 interface SummaryCardProps {
   label: string;
-  value: string;
+  value: ReactNode;
   hint: string;
   icon?: string;
   selector?: ReactNode;
@@ -59,6 +59,8 @@ function useYearSelector(
     year,
     rawWeightKg: 0,
     dryWeightKg: 0,
+    totalAmount: 0,
+    employeeSales: [],
   };
 
   const selector = (
@@ -87,12 +89,13 @@ export function SummaryCards({
 }: SummaryCardsProps) {
   const rawWeight = useYearSelector(yearlySummaries, "เลือกปีน้ำหนักน้ำยาง");
   const dryWeight = useYearSelector(yearlySummaries, "เลือกปีน้ำยางแห้ง");
+  const salesAmount = useYearSelector(yearlySummaries, "เลือกปียอดขาย");
 
   return (
     <>
       <SummaryCard
-        label="ยอดขายรายเดือน"
-        value={formatCurrency(monthlySalesAmount)}
+        label="ยอดขายรายเดือน (บาท)"
+        value={formatNumber(monthlySalesAmount)}
         hint="ยอดขายน้ำยางรวมของเดือนนี้"
         icon="M3 3v18h18M8 17V10M13 17V6M18 17v-4"
       />
@@ -107,6 +110,35 @@ export function SummaryCards({
         value={`${formatNumber(dryWeight.selected.dryWeightKg)} กก.`}
         hint={`น้ำหนักน้ำยางแห้งที่ส่งขายรวมทั้งปี ${dryWeight.year}`}
         selector={dryWeight.selector}
+      />
+      <SummaryCard
+        label="ยอดขายรวมทั้งปี (บาท)"
+        value={formatNumber(salesAmount.selected.totalAmount)}
+        hint={`ยอดขายน้ำยางรวมทั้งปี ${salesAmount.year}`}
+        selector={salesAmount.selector}
+      />
+      <SummaryCard
+        label="ยอดขายของลูกจ้าง (บาท)"
+        value={
+          salesAmount.selected.employeeSales.length > 0 ? (
+            <span className="flex flex-col gap-1">
+              {salesAmount.selected.employeeSales.map((sale) => (
+                <span
+                  key={sale.name}
+                  className="flex items-baseline justify-between gap-2 text-base"
+                >
+                  <span className="truncate text-slate-700">{sale.name}</span>
+                  <span className="shrink-0 tabular-nums">
+                    {formatNumber(sale.amount)}
+                  </span>
+                </span>
+              ))}
+            </span>
+          ) : (
+            "—"
+          )
+        }
+        hint={`ยอดขายที่ลูกจ้างส่งแทนปี ${salesAmount.year}`}
       />
     </>
   );

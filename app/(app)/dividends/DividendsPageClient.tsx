@@ -5,11 +5,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input } from "@/components/ui/Input";
-import {
-  MonthRangePicker,
-  formatThaiMonth,
-  type MonthRange,
-} from "@/components/ui/MonthPicker";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { Select } from "@/components/ui/Select";
@@ -20,6 +15,10 @@ import { formatCurrency, formatNumber } from "@/lib/format";
 import type { DividendData } from "@/lib/types";
 
 const PAGE_SIZE = 10;
+// Dividends are always settled over the same fixed accounting period each
+// year, so this is shown as a static label next to the year field rather
+// than something staff pick or type in.
+const DIVIDEND_PERIOD_LABEL = "พฤษภาคม - มีนาคม";
 
 interface DividendsPageClientProps {
   data: DividendData;
@@ -35,9 +34,7 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
   }, [data.purchases]);
 
   const [year, setYear] = useState(years[0]);
-  const [period, setPeriod] = useState<MonthRange>({ start: null, end: null });
-  // Snapshot of the period at the time "ตกลง" was pressed, so editing the
-  // pickers afterwards can't change what gets paid without recalculating.
+  // Snapshot of the period at the time "ตกลง" was pressed.
   const [appliedPeriodLabel, setAppliedPeriodLabel] = useState("");
   const [rateInput, setRateInput] = useState("");
   const [appliedRate, setAppliedRate] = useState<number | null>(null);
@@ -81,11 +78,6 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
 
   function handleApply(e: FormEvent) {
     e.preventDefault();
-    const { start, end } = period;
-    if (!start || !end) {
-      setError("กรุณาเลือกเดือนเริ่มต้นและเดือนสิ้นสุดของช่วงเวลาที่จ่ายปันผล");
-      return;
-    }
     const value = Number(rateInput);
     if (!rateInput.trim() || Number.isNaN(value) || value <= 0) {
       setError("กรุณากรอกอัตราเงินปันผลเป็นตัวเลขมากกว่า 0");
@@ -93,9 +85,7 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
     }
     setError(null);
     setAppliedRate(value);
-    setAppliedPeriodLabel(
-      `${formatThaiMonth(start)} - ${formatThaiMonth(end)}`
-    );
+    setAppliedPeriodLabel(DIVIDEND_PERIOD_LABEL);
     setPage(1);
     setPaid(false);
     setPayError(null);
@@ -140,27 +130,23 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
         className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <div className="flex flex-wrap items-end gap-4">
-          <Select
-            label="ประจำปี"
-            value={year}
-            onChange={(e) => {
-              setYear(Number(e.target.value));
-              setPage(1);
-            }}
-            className="w-40"
-          >
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </Select>
-          <MonthRangePicker
-            label="ช่วงเวลาที่จ่ายปันผล"
-            value={period}
-            onChange={setPeriod}
-            className="w-80"
-          />
+          <div className="w-64">
+            <Select
+              label="ประจำปี (เดือนพฤษภาคม-เดือนมีนาคม)"
+              value={year}
+              onChange={(e) => {
+                setYear(Number(e.target.value));
+                setPage(1);
+              }}
+              className="w-full"
+            >
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </Select>
+          </div>
           <Input
             label="กำหนดอัตราเงินปันผล (บาท/กก.)"
             type="number"
@@ -188,7 +174,7 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
         <StatCard
           label="น้ำหนักยางแห้งรวม"
           value={`${formatNumber(totalDryWeight)} กก.`}
-          hint={`ประจำปี ${year}`}
+          hint={`ประจำปี (เดือนพฤษภาคม-เดือนมีนาคม) ${year}`}
         />
         <StatCard
           label="มูลค่าเงินปันผลรวม"

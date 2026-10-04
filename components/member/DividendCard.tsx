@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatCurrency } from "@/lib/format";
+import { formatNumber } from "@/lib/format";
 
 // How many past years the selector offers. There is no per-year dividend data
 // stored yet, so past years render a placeholder — the selector is in place for
@@ -25,7 +25,7 @@ export function DividendCard({ dividendBalance }: DividendCardProps) {
     <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          ยอดเงินปันผลประจำปี
+          ยอดเงินปันผลประจำปี (บาท)
         </p>
         <select
           value={year}
@@ -41,7 +41,7 @@ export function DividendCard({ dividendBalance }: DividendCardProps) {
         </select>
       </div>
       <p className="mt-3 text-2xl font-semibold tabular-nums text-slate-900">
-        {isCurrentYear ? formatCurrency(dividendBalance) : "—"}
+        {isCurrentYear ? formatNumber(dividendBalance) : "—"}
       </p>
       <p className="mt-1 text-xs text-slate-500">
         {isCurrentYear

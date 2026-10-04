@@ -6,6 +6,7 @@ import type {
   DailyMarketPrice,
   FinanceEntry,
   MemberEmployeeInfo,
+  MemberEmployeeSale,
   MemberProfile,
   MemberSalesSummary,
   MemberYearlySummary,
@@ -158,14 +159,45 @@ export async function getMemberYearlySummaries(
       const adYear = buddhistYear - 543;
       const yearStart = new Date(Date.UTC(adYear, 0, 1));
       const nextYearStart = new Date(Date.UTC(adYear + 1, 0, 1));
-      const { _sum } = await prisma.purchase.aggregate({
-        where: { memberId, recordDate: { gte: yearStart, lt: nextYearStart } },
-        _sum: { rawWeightKg: true, dryWeightKg: true },
-      });
+      const where = {
+        memberId,
+        recordDate: { gte: yearStart, lt: nextYearStart },
+      };
+
+      const [{ _sum }, employeePurchases] = await Promise.all([
+        prisma.purchase.aggregate({
+          where,
+          _sum: { rawWeightKg: true, dryWeightKg: true, totalAmount: true },
+        }),
+        prisma.purchase.findMany({
+          where: { ...where, sellerType: "EMPLOYEE" },
+          select: { employeeId: true, deliveredByName: true, totalAmount: true },
+        }),
+      ]);
+
+      const salesByEmployee = new Map<string, MemberEmployeeSale>();
+      for (const purchase of employeePurchases) {
+        if (!purchase.employeeId) continue;
+        const amount = purchase.totalAmount.toNumber();
+        const existing = salesByEmployee.get(purchase.employeeId);
+        if (existing) {
+          existing.amount += amount;
+        } else {
+          salesByEmployee.set(purchase.employeeId, {
+            name: purchase.deliveredByName,
+            amount,
+          });
+        }
+      }
+
       return {
         year: buddhistYear,
         rawWeightKg: _sum.rawWeightKg?.toNumber() ?? 0,
         dryWeightKg: _sum.dryWeightKg?.toNumber() ?? 0,
+        totalAmount: _sum.totalAmount?.toNumber() ?? 0,
+        employeeSales: [...salesByEmployee.values()].sort(
+          (a, b) => b.amount - a.amount
+        ),
       };
     })
   );

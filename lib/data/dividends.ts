@@ -44,11 +44,12 @@ async function nextDividendCode(): Promise<string> {
 }
 
 // Feeds the dividend calculator: the full member roster, every purchase's
-// dry weight tagged with its Buddhist year, and which years already have a
-// payout on record. The client totals dry weight per member for the selected
-// year and multiplies by the rate the user enters — nothing is persisted.
+// dry weight tagged with its Buddhist year, and every payment already made
+// (for the payout history, and to lock years that were paid). The client
+// totals dry weight per member for the selected year and multiplies by the
+// rate the user enters — nothing is persisted until "จ่ายปันผล".
 export async function getDividendData(): Promise<DividendData> {
-  const [members, purchases, paidYearRows] = await Promise.all([
+  const [members, purchases, payments] = await Promise.all([
     prisma.member.findMany({
       select: { id: true, memberCode: true, firstName: true, lastName: true },
       orderBy: { memberCode: "asc" },
@@ -57,8 +58,7 @@ export async function getDividendData(): Promise<DividendData> {
       select: { memberId: true, dryWeightKg: true, recordDate: true },
     }),
     prisma.dividendPayment.findMany({
-      select: { buddhistYear: true },
-      distinct: ["buddhistYear"],
+      orderBy: [{ createdAt: "desc" }, { dividendCode: "asc" }],
     }),
   ]);
 
@@ -73,7 +73,8 @@ export async function getDividendData(): Promise<DividendData> {
       dryWeightKg: purchase.dryWeightKg.toNumber(),
       buddhistYear: buddhistYearOf(purchase.recordDate),
     })),
-    paidYears: paidYearRows.map((row) => row.buddhistYear),
+    paidYears: [...new Set(payments.map((payment) => payment.buddhistYear))],
+    payments: payments.map(serializePayment),
   };
 }
 

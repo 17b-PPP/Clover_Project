@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { Select } from "@/components/ui/Select";
 import { StatCard } from "@/components/ui/StatCard";
+import { DividendHistory } from "@/components/dividends/DividendHistory";
 import { DividendTable, type DividendRow } from "@/components/dividends/DividendTable";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import type { DividendData } from "@/lib/types";
@@ -255,6 +256,8 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
           </>
         )}
       </section>
+
+      <DividendHistory payments={data.payments} />
 
       <ConfirmDialog
         open={confirmOpen}

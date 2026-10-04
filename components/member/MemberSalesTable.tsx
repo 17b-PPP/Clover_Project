@@ -35,51 +35,71 @@ export function MemberSalesTable({ purchases }: MemberSalesTableProps) {
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeaderCell align="center">วัน/เดือน/ปี</TableHeaderCell>
-            <TableHeaderCell align="center">น้ำหนักน้ำยาง (กก.)</TableHeaderCell>
-            <TableHeaderCell align="center">ขายน้ำยางโดย</TableHeaderCell>
-            <TableHeaderCell align="center">จำนวนเงินรวม (บาท)</TableHeaderCell>
-            <TableHeaderCell align="center">หักจ่ายลูกจ้าง</TableHeaderCell>
-            <TableHeaderCell align="center">ยอดเข้ากระเป๋าเงิน</TableHeaderCell>
-            <TableHeaderCell align="center">ใบเสร็จ</TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[13%]">
+              วัน/เดือน/ปี
+            </TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[13%]">
+              น้ำหนักน้ำยาง (กก.)
+            </TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[19%]">
+              {/* Same box as the name cells below so the header starts where
+                  the names start. */}
+              <div className="mx-auto w-36 pl-3 text-left">ขายน้ำยางโดย</div>
+            </TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[14%]">
+              จำนวนเงินรวม (บาท)
+            </TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[13%]">
+              หักจ่ายลูกจ้าง (บาท)
+            </TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[15%]">
+              ยอดเข้ากระเป๋าเงิน (บาท)
+            </TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[13%]">
+              ใบเสร็จ
+            </TableHeaderCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {purchases.map((purchase) => (
             <TableRow key={purchase.id}>
-              <TableCell>
+              <TableCell align="center">
                 <span className="whitespace-nowrap text-slate-500">
                   {formatDateUtc(purchase.recordDate)}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell align="center">
                 <span className="tabular-nums">
                   {formatNumber(purchase.rawWeightKg)}
                 </span>
               </TableCell>
-              <TableCell>
-                <span className="font-medium text-slate-900">
+              <TableCell align="center">
+                {/* Fixed-width box centered under the header, names
+                    left-aligned inside it so every first letter lines up. */}
+                <div className="mx-auto w-36 whitespace-nowrap text-left font-medium text-slate-900">
                   {purchase.deliveredByName}
-                </span>
+                </div>
               </TableCell>
-              <TableCell>
+              <TableCell align="center">
                 <span className="tabular-nums">
                   {formatNumber(purchase.totalAmount)}
                 </span>
               </TableCell>
-              <TableCell>
-                <span className="tabular-nums text-slate-500">
-                  {purchase.employeePayout > 0
-                    ? `-${formatNumber(purchase.employeePayout)}`
-                    : formatNumber(0)}
-                </span>
+              <TableCell align="center">
+                {purchase.employeePayout > 0 ? (
+                  <span className="tabular-nums text-red-600">
+                    -{formatNumber(purchase.employeePayout)}
+                  </span>
+                ) : (
+                  <span className="text-slate-400">-</span>
+                )}
               </TableCell>
-              <TableCell>
+              <TableCell align="center">
                 <span className="font-medium tabular-nums text-emerald-700">
                   {formatNumber(purchase.ownerPayout)}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell align="center">
                 <Button
                   variant="secondary"
                   className="gap-1.5 px-3 py-1.5 text-xs"

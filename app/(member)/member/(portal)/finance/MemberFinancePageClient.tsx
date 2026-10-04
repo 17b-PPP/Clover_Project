@@ -29,7 +29,7 @@ export function MemberFinancePageClient({
     <div className="mx-auto max-w-6xl px-8 py-10">
       <PageHeader
         title="ประวัติทางการเงิน"
-        description="รายรับจากการขายน้ำยางและรายการเบิกเงินของคุณ"
+        description="รายรับจากการขายน้ำยาง เงินปันผล และรายการเบิกเงินของคุณ"
       />
 
       <div className="mb-8 sm:max-w-sm">

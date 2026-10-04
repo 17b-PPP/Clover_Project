@@ -266,7 +266,7 @@ export interface MemberEmployeeInfo {
   employeeShare: number;
 }
 
-export type FinanceEntryType = "PURCHASE" | "WITHDRAWAL";
+export type FinanceEntryType = "PURCHASE" | "WITHDRAWAL" | "DIVIDEND";
 
 export interface FinanceEntry {
   id: string;
@@ -281,6 +281,17 @@ export interface FinanceEntry {
   // what the employee received on the spot, for the member's visibility.
   deliveredByName?: string;
   employeePayout?: number;
+  // PURCHASE rows: what was weighed and the price it was bought at.
+  rawWeightKg?: number;
+  dryPercentage?: number;
+  marketPrice?: number;
+  // WITHDRAWAL rows: the wallet balance left after the withdrawal.
+  balanceAfter?: number;
+  // DIVIDEND rows: which payout this was and how it was computed.
+  buddhistYear?: number;
+  periodLabel?: string | null;
+  rate?: number;
+  dryWeightKg?: number;
 }
 
 // One purchase row, flattened with the seller member's name/code, for the
@@ -325,6 +336,9 @@ export interface DividendData {
     buddhistYear: number;
   }[];
   paidYears: number[];
+  // Every payment row ever made, newest first — the page groups them by year
+  // into the payout history.
+  payments: DividendPayment[];
 }
 
 export interface DividendPaymentInput {

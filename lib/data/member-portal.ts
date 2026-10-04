@@ -50,20 +50,24 @@ function currentThaiPeriod(): { year: number; month: number } {
   return { year, month };
 }
 
-// Deliberately derives the quoted price from the last recorded purchase, NOT
-// from the newer admin-set ReferencePrice table — the two can disagree (e.g.
-// an admin sets tomorrow's price before any purchase is entered), and
-// reconciling them here was an explicit out-of-scope decision, not an oversight.
+// Quotes the reference price staff set on the ราคากลางประจำวัน page — the
+// same ReferencePrice row the purchase page pre-fills from. ReferencePrice is
+// keyed by Bangkok day at UTC midnight, so today's key is built from the
+// Bangkok date. If today hasn't been set yet, the most recent earlier day is
+// shown (the topbar prints its date); a price set ahead for a future day is
+// never shown early.
 export const getDailyMarketPrice = cache(
   async (): Promise<DailyMarketPrice | null> => {
-    const latest = await prisma.purchase.findFirst({
-      orderBy: [{ recordDate: "desc" }, { createdAt: "desc" }],
-      select: { marketPrice: true, recordDate: true },
+    const today = new Date(bangkokDateKey(new Date()));
+    const latest = await prisma.referencePrice.findFirst({
+      where: { date: { lte: today } },
+      orderBy: { date: "desc" },
+      select: { price: true, date: true },
     });
     if (!latest) return null;
     return {
-      price: latest.marketPrice.toNumber(),
-      recordDate: latest.recordDate.toISOString(),
+      price: latest.price.toNumber(),
+      recordDate: latest.date.toISOString(),
     };
   }
 );
@@ -199,13 +203,14 @@ export async function getMemberEmployeeInfo(
     }));
 }
 
-// A member's money moves in exactly two ways: a latex sale credits their share
-// of the purchase to the wallet, a withdrawal debits it. Both are merged into
-// one signed ledger so the member sees income and outgoings in a single run.
+// A member's wallet moves in three ways: a latex sale credits their share of
+// the purchase, a dividend payout credits it, and a withdrawal debits it. All
+// three are merged into one signed ledger so the member sees every change to
+// their balance in a single run.
 export async function getMemberFinanceHistory(
   memberId: string
 ): Promise<FinanceEntry[]> {
-  const [purchases, withdrawals] = await Promise.all([
+  const [purchases, withdrawals, dividends] = await Promise.all([
     prisma.purchase.findMany({
       where: { memberId },
       select: {
@@ -216,6 +221,9 @@ export async function getMemberFinanceHistory(
         sellerType: true,
         deliveredByName: true,
         employeePayout: true,
+        rawWeightKg: true,
+        dryPercentage: true,
+        marketPrice: true,
         createdAt: true,
       },
     }),
@@ -225,12 +233,26 @@ export async function getMemberFinanceHistory(
         id: true,
         withdrawalCode: true,
         amount: true,
+        balanceAfter: true,
+        createdAt: true,
+      },
+    }),
+    prisma.dividendPayment.findMany({
+      where: { memberId },
+      select: {
+        id: true,
+        dividendCode: true,
+        amount: true,
+        buddhistYear: true,
+        periodLabel: true,
+        rate: true,
+        dryWeightKg: true,
         createdAt: true,
       },
     }),
   ]);
 
-  const rows = [
+  const rows: (FinanceEntry & { recordedAt: string })[] = [
     ...purchases.map((purchase) => {
       // Show the employee's cut only when one was actually delivered and paid
       // by an employee — a member selling their own latex has no such line.
@@ -250,6 +272,9 @@ export async function getMemberFinanceHistory(
         employeePayout: employeeDelivered
           ? purchase.employeePayout.toNumber()
           : undefined,
+        rawWeightKg: purchase.rawWeightKg.toNumber(),
+        dryPercentage: purchase.dryPercentage.toNumber(),
+        marketPrice: purchase.marketPrice.toNumber(),
       };
     }),
     ...withdrawals.map((withdrawal) => ({
@@ -260,8 +285,20 @@ export async function getMemberFinanceHistory(
       code: withdrawal.withdrawalCode,
       amount: -withdrawal.amount.toNumber(),
       recordedAt: withdrawal.createdAt.toISOString(),
-      deliveredByName: undefined,
-      employeePayout: undefined,
+      balanceAfter: withdrawal.balanceAfter.toNumber(),
+    })),
+    ...dividends.map((dividend) => ({
+      id: dividend.id,
+      // Like a withdrawal, a payout happens the moment staff confirm it.
+      date: bangkokDateKey(dividend.createdAt),
+      type: "DIVIDEND" as const,
+      code: dividend.dividendCode,
+      amount: dividend.amount.toNumber(),
+      recordedAt: dividend.createdAt.toISOString(),
+      buddhistYear: dividend.buddhistYear,
+      periodLabel: dividend.periodLabel,
+      rate: dividend.rate.toNumber(),
+      dryWeightKg: dividend.dryWeightKg.toNumber(),
     })),
   ];
 
@@ -270,13 +307,10 @@ export async function getMemberFinanceHistory(
       (a, b) =>
         b.date.localeCompare(a.date) || b.recordedAt.localeCompare(a.recordedAt)
     )
-    .map((row) => ({
-      id: row.id,
-      date: row.date,
-      type: row.type,
-      code: row.code,
-      amount: row.amount,
-      deliveredByName: row.deliveredByName,
-      employeePayout: row.employeePayout,
-    }));
+    .map((row) => {
+      // recordedAt only breaks same-day ties; it isn't part of the entry.
+      const entry: FinanceEntry & { recordedAt?: string } = { ...row };
+      delete entry.recordedAt;
+      return entry;
+    });
 }

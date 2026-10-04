@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Input } from "@/components/ui/Input";
+import {
+  MonthRangePicker,
+  formatThaiMonth,
+  type MonthRange,
+} from "@/components/ui/MonthPicker";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { Select } from "@/components/ui/Select";
@@ -29,7 +34,10 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
   }, [data.purchases]);
 
   const [year, setYear] = useState(years[0]);
-  const [periodLabel, setPeriodLabel] = useState("");
+  const [period, setPeriod] = useState<MonthRange>({ start: null, end: null });
+  // Snapshot of the period at the time "ตกลง" was pressed, so editing the
+  // pickers afterwards can't change what gets paid without recalculating.
+  const [appliedPeriodLabel, setAppliedPeriodLabel] = useState("");
   const [rateInput, setRateInput] = useState("");
   const [appliedRate, setAppliedRate] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -72,8 +80,9 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
 
   function handleApply(e: FormEvent) {
     e.preventDefault();
-    if (!periodLabel.trim()) {
-      setError("กรุณาระบุช่วงเวลาที่จ่ายปันผล");
+    const { start, end } = period;
+    if (!start || !end) {
+      setError("กรุณาเลือกเดือนเริ่มต้นและเดือนสิ้นสุดของช่วงเวลาที่จ่ายปันผล");
       return;
     }
     const value = Number(rateInput);
@@ -83,6 +92,9 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
     }
     setError(null);
     setAppliedRate(value);
+    setAppliedPeriodLabel(
+      `${formatThaiMonth(start)} - ${formatThaiMonth(end)}`
+    );
     setPage(1);
     setPaid(false);
     setPayError(null);
@@ -96,7 +108,7 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           buddhistYear: year,
-          periodLabel,
+          periodLabel: appliedPeriodLabel,
           rate: appliedRate,
         }),
       });
@@ -142,12 +154,11 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
               </option>
             ))}
           </Select>
-          <Input
+          <MonthRangePicker
             label="ช่วงเวลาที่จ่ายปันผล"
-            value={periodLabel}
-            onChange={(e) => setPeriodLabel(e.target.value)}
-            placeholder="เช่น พฤษภาคม 2568 - มีนาคม 2569"
-            className="w-64"
+            value={period}
+            onChange={setPeriod}
+            className="w-80"
           />
           <Input
             label="กำหนดอัตราเงินปันผล (บาท/กก.)"
@@ -215,7 +226,15 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
               totalPages={totalPages}
               onPageChange={setPage}
             />
+            <p className="mt-4 text-sm text-slate-600">
+              ช่วงเวลาที่จ่ายปันผล: {appliedPeriodLabel}
+            </p>
             <div className="mt-6 flex items-center justify-end gap-3">
+              {yearAlreadyPaid && !paid && (
+                <span className="text-sm font-medium text-amber-600">
+                  ปันผลประจำปี {year} จ่ายไปแล้ว ไม่สามารถจ่ายซ้ำได้
+                </span>
+              )}
               {paid && (
                 <span className="text-sm font-medium text-emerald-700">
                   จ่ายเงินปันผลเรียบร้อยแล้ว
@@ -224,7 +243,7 @@ export function DividendsPageClient({ data }: DividendsPageClientProps) {
               <Button
                 type="button"
                 variant="primary"
-                disabled={paid}
+                disabled={paid || yearAlreadyPaid}
                 onClick={() => setConfirmOpen(true)}
               >
                 จ่ายปันผล

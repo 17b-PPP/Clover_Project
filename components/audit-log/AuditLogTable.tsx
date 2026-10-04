@@ -37,7 +37,11 @@ export function AuditLogTable({ entries }: AuditLogTableProps) {
           <TableHeaderCell align="center">ชื่อผู้ใช้งาน</TableHeaderCell>
           <TableHeaderCell align="center">บทบาท</TableHeaderCell>
           <TableHeaderCell align="center">Action</TableHeaderCell>
-          <TableHeaderCell align="center">รายละเอียด</TableHeaderCell>
+          <TableHeaderCell align="center">
+            {/* Same box as the details cells below so the header starts where
+                the text starts. */}
+            <div className="mx-auto w-64 pl-3 text-left">รายละเอียด</div>
+          </TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -60,7 +64,12 @@ export function AuditLogTable({ entries }: AuditLogTableProps) {
             </TableCell>
             <TableCell align="center">{entry.action}</TableCell>
             <TableCell align="center">
-              <DetailsCell text={entry.details} />
+              {/* Fixed-width box centered under the header, text left-aligned
+                  inside it so every first letter lines up. DetailsCell cuts
+                  anything wider than the box. */}
+              <div className="mx-auto w-64 text-left">
+                <DetailsCell text={entry.details} />
+              </div>
             </TableCell>
           </TableRow>
         ))}

@@ -34,18 +34,26 @@ export function DividendTable({ rows, rate }: DividendTableProps) {
     <Table>
       <TableHead>
         <TableRow>
-          <TableHeaderCell align="center">ชื่อสมาชิก</TableHeaderCell>
-          <TableHeaderCell align="center">รหัสสมาชิก</TableHeaderCell>
-          <TableHeaderCell align="center">น้ำหนักน้ำยางแห้งรวม (กก.)</TableHeaderCell>
-          <TableHeaderCell align="center">อัตราเงินปันผล (บาท/กก.)</TableHeaderCell>
-          <TableHeaderCell align="center">จำนวนเงิน (บาท)</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[22%]">
+            {/* Same box as the name cells below so the header starts where
+                the names start. */}
+            <div className="mx-auto w-36 pl-3 text-left">ชื่อสมาชิก</div>
+          </TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[14%]">รหัสสมาชิก</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[24%]">น้ำหนักน้ำยางแห้งรวม (กก.)</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[22%]">อัตราเงินปันผล (บาท/กก.)</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[18%]">จำนวนเงิน (บาท)</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
         {rows.map((row) => (
           <TableRow key={row.memberId}>
             <TableCell align="center">
-              <span className="font-medium text-slate-900">{row.memberName}</span>
+              {/* Fixed-width box centered under the header, names left-aligned
+                  inside it so every first letter lines up. */}
+              <div className="mx-auto w-36 whitespace-nowrap text-left font-medium text-slate-900">
+                {row.memberName}
+              </div>
             </TableCell>
             <TableCell align="center">{row.memberCode}</TableCell>
             <TableCell align="center">

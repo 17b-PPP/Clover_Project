@@ -269,6 +269,10 @@ model DividendPayment {
   memberId String
   member   Member @relation(fields: [memberId], references: [id])
 
+  // A member can be paid at most once per Buddhist year. Backstops the
+  // application-level check in payDividend, which two concurrent requests
+  // could both pass.
+  @@unique([memberId, buddhistYear])
   @@index([memberId])
 }
 

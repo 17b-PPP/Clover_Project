@@ -38,12 +38,16 @@ export function MemberTable({
     <Table>
       <TableHead>
         <TableRow>
-          <TableHeaderCell align="center">รหัสสมาชิก</TableHeaderCell>
-          <TableHeaderCell align="center">ชื่อ-นามสกุล</TableHeaderCell>
-          <TableHeaderCell align="center">เลขบัตรประชาชน</TableHeaderCell>
-          <TableHeaderCell align="center">ยอดเงินสะสม</TableHeaderCell>
-          <TableHeaderCell align="center">สถานะ</TableHeaderCell>
-          <TableHeaderCell align="center">จัดการ</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[12%]">รหัสสมาชิก</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[20%]">
+            {/* Same box as the name cells below so the header starts where
+                the names start. */}
+            <div className="mx-auto w-36 pl-3 text-left">ชื่อ-นามสกุล</div>
+          </TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[16%]">เลขบัตรประชาชน</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[14%]">ยอดเงินสะสม</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[13%]">สถานะ</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[25%]">จัดการ</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -55,7 +59,11 @@ export function MemberTable({
               </span>
             </TableCell>
             <TableCell align="center">
-              {member.firstName} {member.lastName}
+              {/* Fixed-width box centered under the header, names left-aligned
+                  inside it so every first letter lines up. */}
+              <div className="mx-auto w-36 whitespace-nowrap text-left">
+                {member.firstName} {member.lastName}
+              </div>
             </TableCell>
             <TableCell align="center">
               <span className="font-mono text-slate-600">

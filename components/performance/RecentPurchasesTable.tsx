@@ -35,14 +35,18 @@ export function RecentPurchasesTable({ rows }: RecentPurchasesTableProps) {
       <Table>
         <TableHead>
           <TableRow>
-            <TableHeaderCell align="center">วันที่/เวลา</TableHeaderCell>
-            <TableHeaderCell align="center">ชื่อสมาชิก</TableHeaderCell>
-            <TableHeaderCell align="center">รหัสสมาชิก</TableHeaderCell>
-            <TableHeaderCell align="center">น้ำหนัก (กก.)</TableHeaderCell>
-            <TableHeaderCell align="center">DRC (%)</TableHeaderCell>
-            <TableHeaderCell align="center">ราคา/กก.</TableHeaderCell>
-            <TableHeaderCell align="center">จำนวนเงิน</TableHeaderCell>
-            <TableHeaderCell align="center">ใบเสร็จ</TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[13%]">วันที่/เวลา</TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[19%]">
+              {/* Same box as the name cells below so the header starts where
+                  the names start. */}
+              <div className="mx-auto w-36 pl-3 text-left">ชื่อสมาชิก</div>
+            </TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[11%]">รหัสสมาชิก</TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[11%]">น้ำหนัก (กก.)</TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[10%]">DRC (%)</TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[10%]">ราคา/กก.</TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[12%]">จำนวนเงิน</TableHeaderCell>
+            <TableHeaderCell align="center" className="w-[14%]">ใบเสร็จ</TableHeaderCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -57,7 +61,11 @@ export function RecentPurchasesTable({ rows }: RecentPurchasesTableProps) {
                 </span>
               </TableCell>
               <TableCell align="center">
-                <span className="font-medium text-slate-900">{row.memberName}</span>
+                {/* Fixed-width box centered under the header, names
+                    left-aligned inside it so every first letter lines up. */}
+                <div className="mx-auto w-36 whitespace-nowrap text-left font-medium text-slate-900">
+                  {row.memberName}
+                </div>
               </TableCell>
               <TableCell align="center">{row.memberCode}</TableCell>
               <TableCell align="center">

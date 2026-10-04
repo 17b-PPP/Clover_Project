@@ -23,13 +23,17 @@ const headerAlignClasses = {
 export function TableHeaderCell({
   children,
   align = "left",
+  className = "",
 }: {
   children: ReactNode;
   align?: keyof typeof headerAlignClasses;
+  // Mostly for column widths: the browser's auto layout hands spare width to
+  // whichever columns have the longest content, which leaves uneven gaps.
+  className?: string;
 }) {
   return (
     <th
-      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 ${headerAlignClasses[align]}`}
+      className={`px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 ${headerAlignClasses[align]} ${className}`}
     >
       {children}
     </th>

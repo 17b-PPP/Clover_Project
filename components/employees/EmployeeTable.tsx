@@ -37,10 +37,14 @@ export function EmployeeTable({
     <Table>
       <TableHead>
         <TableRow>
-          <TableHeaderCell align="center">รหัสลูกจ้าง</TableHeaderCell>
-          <TableHeaderCell align="center">ชื่อ-นามสกุล</TableHeaderCell>
-          <TableHeaderCell align="center">สถานะ</TableHeaderCell>
-          <TableHeaderCell align="center">จัดการ</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[20%]">รหัสลูกจ้าง</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[27%]">
+            {/* Same box as the name cells below so the header starts where
+                the names start. */}
+            <div className="mx-auto w-36 pl-3 text-left">ชื่อ-นามสกุล</div>
+          </TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[20%]">สถานะ</TableHeaderCell>
+          <TableHeaderCell align="center" className="w-[33%]">จัดการ</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
@@ -52,7 +56,11 @@ export function EmployeeTable({
               </span>
             </TableCell>
             <TableCell align="center">
-              {employee.firstName} {employee.lastName}
+              {/* Fixed-width box centered under the header, names left-aligned
+                  inside it so every first letter lines up. */}
+              <div className="mx-auto w-36 whitespace-nowrap text-left">
+                {employee.firstName} {employee.lastName}
+              </div>
             </TableCell>
             <TableCell align="center">
               {employee.status === "Active" ? (

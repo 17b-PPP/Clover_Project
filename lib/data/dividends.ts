@@ -4,6 +4,7 @@ import type {
   DividendPayment,
   DividendPaymentInput,
 } from "@/lib/types";
+import { Prisma } from "@prisma/client";
 import type { DividendPayment as PrismaDividendPayment } from "@prisma/client";
 
 // recordDate is stored at UTC midnight of its business day, so its calendar
@@ -127,6 +128,9 @@ export async function payDividend(
   const startCode = await nextDividendCode();
   const startNumber = parseInt(startCode.replace("D-", ""), 10);
 
+  // The @@unique([memberId, buddhistYear]) constraint aborts the whole
+  // transaction if a concurrent payout for the same year got in first, so no
+  // member is credited twice.
   const payments = await prisma.$transaction(async (tx) => {
     const members = await tx.member.findMany({
       where: { id: { in: memberIds } },
@@ -167,6 +171,19 @@ export async function payDividend(
     }
 
     return created;
+  }).catch((error: unknown) => {
+    // P2002 here means another payout committed between our check above and
+    // this transaction — either on (memberId, buddhistYear) or on the
+    // dividendCode sequence. Either way nothing was written.
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      throw new DividendError(
+        `ปันผลประจำปี ${input.buddhistYear} ถูกจ่ายไปแล้ว หรือมีการจ่ายพร้อมกันจากผู้ใช้อื่น กรุณารีเฟรชหน้าแล้วตรวจสอบอีกครั้ง`
+      );
+    }
+    throw error;
   });
 
   return payments.map(serializePayment);

@@ -2,13 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { FinanceHistoryTable } from "@/components/member/FinanceHistoryTable";
+import { MonthlyIncomeChart } from "@/components/member/MonthlyIncomeChart";
 import { WalletCard } from "@/components/member/WalletCard";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { ResetButton } from "@/components/ui/ResetButton";
 import { StatCard } from "@/components/ui/StatCard";
-import { formatNumber } from "@/lib/format";
+import { formatNumber, monthKeyToDateRange } from "@/lib/format";
 import type { FinanceEntry, FinanceEntryType } from "@/lib/types";
 
 const PAGE_SIZE = 10;
@@ -23,19 +24,20 @@ const TYPE_OPTIONS: { value: "ALL" | FinanceEntryType; label: string }[] = [
 interface MemberFinancePageClientProps {
   entries: FinanceEntry[];
   walletBalance: number;
-  memberCode: string;
+  monthlyEarnings: number;
 }
 
 export function MemberFinancePageClient({
   entries,
   walletBalance,
-  memberCode,
+  monthlyEarnings,
 }: MemberFinancePageClientProps) {
   const [typeFilter, setTypeFilter] = useState<"ALL" | FinanceEntryType>(
     "ALL"
   );
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   const [prevFilters, setPrevFilters] = useState({
@@ -54,6 +56,12 @@ export function MemberFinancePageClient({
 
   const hasActiveFilters =
     typeFilter !== "ALL" || dateFrom !== "" || dateTo !== "";
+
+  function clearDateFilter() {
+    setDateFrom("");
+    setDateTo("");
+    setSelectedMonth(null);
+  }
 
   const filteredEntries = useMemo(
     () =>
@@ -88,7 +96,7 @@ export function MemberFinancePageClient({
       />
 
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:max-w-2xl">
-        <WalletCard balance={walletBalance} memberCode={memberCode} />
+        <WalletCard balance={walletBalance} monthlyEarnings={monthlyEarnings} />
         <StatCard
           label="ยอดเงินที่เบิกไปแล้ว (บาท)"
           value={formatNumber(totalWithdrawn)}
@@ -126,24 +134,44 @@ export function MemberFinancePageClient({
           label="จากวันที่"
           type="date"
           value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
+          onChange={(e) => {
+            setDateFrom(e.target.value);
+            setSelectedMonth(null);
+          }}
         />
         <Input
           label="ถึงวันที่"
           type="date"
           value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
+          onChange={(e) => {
+            setDateTo(e.target.value);
+            setSelectedMonth(null);
+          }}
         />
         <ResetButton
           label="ล้างตัวกรอง"
           disabled={!hasActiveFilters}
           onClick={() => {
             setTypeFilter("ALL");
-            setDateFrom("");
-            setDateTo("");
+            clearDateFilter();
           }}
         />
       </div>
+
+      <section className="mb-8">
+        <MonthlyIncomeChart
+          title="รายได้จากการขายน้ำยางในแต่ละเดือน"
+          entries={filteredEntries}
+          selectedMonth={selectedMonth}
+          onBack={clearDateFilter}
+          onSelectMonth={(monthKey) => {
+            const { from, to } = monthKeyToDateRange(monthKey);
+            setDateFrom(from);
+            setDateTo(to);
+            setSelectedMonth(monthKey);
+          }}
+        />
+      </section>
 
       <FinanceHistoryTable entries={pagedEntries} />
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />

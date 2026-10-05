@@ -39,9 +39,15 @@ function DetailLines({ entry }: { entry: FinanceEntry }) {
   }
   if (entry.type === "DIVIDEND") {
     return (
-      <p className="tabular-nums">
-        อัตรา {formatNumber(entry.rate ?? 0)} บาท/กก.
-      </p>
+      <>
+        <p className="text-xs tabular-nums text-slate-500">
+          เงินปันผลประจำปี {entry.buddhistYear}
+          {entry.periodLabel ? ` (${entry.periodLabel})` : ""}
+        </p>
+        <p className="text-xs tabular-nums text-slate-500">
+          อัตรา {formatNumber(entry.rate ?? 0)} บาท/กก.
+        </p>
+      </>
     );
   }
   return (

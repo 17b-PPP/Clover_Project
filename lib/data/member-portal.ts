@@ -6,14 +6,9 @@ import type {
   DailyMarketPrice,
   FinanceEntry,
   MemberEmployeeInfo,
-  MemberEmployeeSale,
   MemberProfile,
-  MemberYearlySummary,
+  MemberWalletMonthlySummary,
 } from "@/lib/types";
-
-// How many past years the dashboard's year selector offers, in addition to
-// the current year.
-const YEARS_BACK = 4;
 
 export interface MemberPortalContext {
   memberId: string;
@@ -123,76 +118,23 @@ export const requireMemberPortal = cache(
   }
 );
 
-// Weight totals for the current Buddhist year plus YEARS_BACK years before
-// it, so the dashboard's year selector can switch client-side with no
-// further round trip.
-export async function getMemberYearlySummaries(
+// This calendar month's wallet credits from latex sales — shown on the
+// member's wallet card.
+export async function getMemberWalletMonthlySummary(
   memberId: string
-): Promise<MemberYearlySummary[]> {
-  const { year: currentAdYear } = currentThaiPeriod();
-  const currentBuddhistYear = currentAdYear + 543;
-  const buddhistYears = Array.from(
-    { length: YEARS_BACK + 1 },
-    (_, i) => currentBuddhistYear - i
-  );
+): Promise<MemberWalletMonthlySummary> {
+  const { year, month } = currentThaiPeriod();
+  const monthStart = new Date(Date.UTC(year, month - 1, 1));
+  const nextMonthStart = new Date(Date.UTC(year, month, 1));
 
-  return Promise.all(
-    buddhistYears.map(async (buddhistYear) => {
-      const adYear = buddhistYear - 543;
-      const yearStart = new Date(Date.UTC(adYear, 0, 1));
-      const nextYearStart = new Date(Date.UTC(adYear + 1, 0, 1));
-      const where = {
-        memberId,
-        recordDate: { gte: yearStart, lt: nextYearStart },
-      };
+  const result = await prisma.purchase.aggregate({
+    where: { memberId, recordDate: { gte: monthStart, lt: nextMonthStart } },
+    _sum: { ownerPayout: true },
+  });
 
-      const [{ _sum }, employeePurchases, withdrawnTotal] = await Promise.all([
-        prisma.purchase.aggregate({
-          where,
-          _sum: { rawWeightKg: true, dryWeightKg: true, totalAmount: true },
-        }),
-        prisma.purchase.findMany({
-          where: { ...where, sellerType: "EMPLOYEE" },
-          select: { employeeId: true, deliveredByName: true, employeePayout: true },
-        }),
-        prisma.withdrawal.aggregate({
-          where: {
-            memberId,
-            createdAt: { gte: yearStart, lt: nextYearStart },
-          },
-          _sum: { amount: true },
-        }),
-      ]);
-
-      // Each employee's amount is their actual payout share, not the full
-      // sale value — the rest of totalAmount credits the member's wallet.
-      const salesByEmployee = new Map<string, MemberEmployeeSale>();
-      for (const purchase of employeePurchases) {
-        if (!purchase.employeeId) continue;
-        const amount = purchase.employeePayout.toNumber();
-        const existing = salesByEmployee.get(purchase.employeeId);
-        if (existing) {
-          existing.amount += amount;
-        } else {
-          salesByEmployee.set(purchase.employeeId, {
-            name: purchase.deliveredByName,
-            amount,
-          });
-        }
-      }
-
-      return {
-        year: buddhistYear,
-        rawWeightKg: _sum.rawWeightKg?.toNumber() ?? 0,
-        dryWeightKg: _sum.dryWeightKg?.toNumber() ?? 0,
-        totalAmount: _sum.totalAmount?.toNumber() ?? 0,
-        employeeSales: [...salesByEmployee.values()].sort(
-          (a, b) => b.amount - a.amount
-        ),
-        withdrawnAmount: withdrawnTotal._sum.amount?.toNumber() ?? 0,
-      };
-    })
-  );
+  return {
+    monthlyEarnings: result._sum.ownerPayout?.toNumber() ?? 0,
+  };
 }
 
 // The employees currently under an active, unexpired contract to deliver this

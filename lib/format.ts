@@ -54,3 +54,17 @@ export function formatNumber(value: number, fractionDigits = 2): string {
     maximumFractionDigits: fractionDigits,
   }).format(value);
 }
+
+// Turns a "YYYY-MM" month key (as grouped by the monthly trend charts) into
+// the first/last day of that month, for feeding straight into a date-range
+// filter's dateFrom/dateTo.
+export function monthKeyToDateRange(monthKey: string): {
+  from: string;
+  to: string;
+} {
+  const [year, month] = monthKey.split("-").map(Number);
+  return {
+    from: `${monthKey}-01`,
+    to: new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10),
+  };
+}

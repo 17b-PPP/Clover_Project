@@ -242,22 +242,16 @@ export interface DailyMarketPrice {
   recordDate: string;
 }
 
-// One calendar (Buddhist) year's worth of weight totals, used to populate the
-// dashboard's year selector without a round trip per year switch.
-// One employee's share of a member's sales for the year — a member may have
-// had more than one employee deliver on their behalf over time.
+// This calendar month's wallet activity, shown on the member's wallet card.
+export interface MemberWalletMonthlySummary {
+  monthlyEarnings: number;
+}
+
+// One employee's share of a member's sales within a chosen date range — a
+// member may have had more than one employee deliver on their behalf.
 export interface MemberEmployeeSale {
   name: string;
   amount: number;
-}
-
-export interface MemberYearlySummary {
-  year: number;
-  rawWeightKg: number;
-  dryWeightKg: number;
-  totalAmount: number;
-  employeeSales: MemberEmployeeSale[];
-  withdrawnAmount: number;
 }
 
 // The employee currently contracted to deliver this member's latex, per an

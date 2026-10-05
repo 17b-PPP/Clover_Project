@@ -17,23 +17,17 @@ export function InfoSectionCard({ title, children }: InfoSectionCardProps) {
 interface InfoStatBoxProps {
   label: string;
   value?: ReactNode;
-  hint?: string;
-  selector?: ReactNode;
 }
 
-export function InfoStatBox({ label, value, hint, selector }: InfoStatBoxProps) {
+export function InfoStatBox({ label, value }: InfoStatBoxProps) {
   return (
     <div className="rounded-lg bg-slate-50 p-4">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-medium text-slate-500">{label}</p>
-        {selector}
-      </div>
+      <p className="text-xs font-medium text-slate-500">{label}</p>
       {value !== undefined && (
         <p className="mt-2 text-xl font-semibold tabular-nums text-slate-900">
           {value}
         </p>
       )}
-      {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
     </div>
   );
 }

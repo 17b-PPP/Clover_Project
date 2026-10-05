@@ -1,11 +1,11 @@
 import { MemberTopbar } from "@/components/member/MemberTopbar";
 import { EmployeeCard } from "@/components/member/EmployeeCard";
-import { FinanceOverviewSection } from "@/components/member/FinanceOverviewSection";
-import { LatexOverviewSection } from "@/components/member/LatexOverviewSection";
+import { MemberOverviewSections } from "@/components/member/MemberOverviewSections";
 import { WalletCard } from "@/components/member/WalletCard";
 import {
   getMemberEmployeeInfo,
-  getMemberYearlySummaries,
+  getMemberFinanceHistory,
+  getMemberWalletMonthlySummary,
   requireMemberPortal,
 } from "@/lib/data/member-portal";
 
@@ -13,8 +13,9 @@ export default async function MemberDashboardPage() {
   const { memberId, profile, marketPrice, fetchedAt } =
     await requireMemberPortal();
 
-  const [yearlySummaries, employees] = await Promise.all([
-    getMemberYearlySummaries(memberId),
+  const [walletSummary, entries, employees] = await Promise.all([
+    getMemberWalletMonthlySummary(memberId),
+    getMemberFinanceHistory(memberId),
     getMemberEmployeeInfo(memberId),
   ]);
 
@@ -32,13 +33,12 @@ export default async function MemberDashboardPage() {
           <section className="grid gap-4 sm:grid-cols-2">
             <WalletCard
               balance={profile.walletBalance}
-              memberCode={profile.memberCode}
+              monthlyEarnings={walletSummary.monthlyEarnings}
             />
             <EmployeeCard employees={employees} />
           </section>
 
-          <LatexOverviewSection yearlySummaries={yearlySummaries} />
-          <FinanceOverviewSection yearlySummaries={yearlySummaries} />
+          <MemberOverviewSections entries={entries} />
         </div>
       </div>
     </>

@@ -2,10 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { MemberSalesTable } from "@/components/member/MemberSalesTable";
+import { MonthlyWeightChart } from "@/components/member/MonthlyWeightChart";
 import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { ResetButton } from "@/components/ui/ResetButton";
+import { monthKeyToDateRange } from "@/lib/format";
 import type { Purchase } from "@/lib/types";
 
 const PAGE_SIZE = 10;
@@ -19,12 +21,19 @@ export function MemberSalesPageClient({
 }: MemberSalesPageClientProps) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   const [prevFilters, setPrevFilters] = useState({ dateFrom, dateTo });
   if (prevFilters.dateFrom !== dateFrom || prevFilters.dateTo !== dateTo) {
     setPrevFilters({ dateFrom, dateTo });
     setPage(1);
+  }
+
+  function clearDateFilter() {
+    setDateFrom("");
+    setDateTo("");
+    setSelectedMonth(null);
   }
 
   const filteredPurchases = useMemo(
@@ -59,22 +68,40 @@ export function MemberSalesPageClient({
           label="จากวันที่"
           type="date"
           value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
+          onChange={(e) => {
+            setDateFrom(e.target.value);
+            setSelectedMonth(null);
+          }}
         />
         <Input
           label="ถึงวันที่"
           type="date"
           value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
+          onChange={(e) => {
+            setDateTo(e.target.value);
+            setSelectedMonth(null);
+          }}
         />
         <ResetButton
           disabled={!dateFrom && !dateTo}
-          onClick={() => {
-            setDateFrom("");
-            setDateTo("");
-          }}
+          onClick={clearDateFilter}
         />
       </div>
+
+      <section className="mb-8">
+        <MonthlyWeightChart
+          title="น้ำหนักน้ำยางที่ขายได้ในแต่ละเดือน"
+          purchases={filteredPurchases}
+          selectedMonth={selectedMonth}
+          onBack={clearDateFilter}
+          onSelectMonth={(monthKey) => {
+            const { from, to } = monthKeyToDateRange(monthKey);
+            setDateFrom(from);
+            setDateTo(to);
+            setSelectedMonth(monthKey);
+          }}
+        />
+      </section>
 
       <MemberSalesTable purchases={pagedPurchases} />
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />

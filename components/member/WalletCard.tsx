@@ -2,10 +2,10 @@ import { formatNumber } from "@/lib/format";
 
 interface WalletCardProps {
   balance: number;
-  memberCode: string;
+  monthlyEarnings: number;
 }
 
-export function WalletCard({ balance, memberCode }: WalletCardProps) {
+export function WalletCard({ balance, monthlyEarnings }: WalletCardProps) {
   return (
     <div className="rounded-xl bg-emerald-700 p-6 text-white shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -29,9 +29,12 @@ export function WalletCard({ balance, memberCode }: WalletCardProps) {
       <p className="mt-3 text-3xl font-semibold tabular-nums">
         {formatNumber(balance)}
       </p>
-      <p className="mt-2 text-xs text-emerald-100">
-        ยอดเงินสะสมของสมาชิก {memberCode} — ติดต่อเจ้าหน้าที่สหกรณ์เพื่อเบิกเงิน
-      </p>
+      <div className="mt-4 border-t border-emerald-600/40 pt-3">
+        <p className="text-[11px] text-emerald-100">เดือนนี้ได้เงิน (บาท)</p>
+        <p className="mt-0.5 text-base font-semibold tabular-nums">
+          {formatNumber(monthlyEarnings)}
+        </p>
+      </div>
     </div>
   );
 }

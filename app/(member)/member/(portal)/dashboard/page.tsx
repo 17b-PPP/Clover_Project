@@ -1,11 +1,10 @@
 import { MemberTopbar } from "@/components/member/MemberTopbar";
-import { DividendCard } from "@/components/member/DividendCard";
 import { EmployeeCard } from "@/components/member/EmployeeCard";
-import { SummaryCards } from "@/components/member/SummaryCards";
+import { FinanceOverviewSection } from "@/components/member/FinanceOverviewSection";
+import { LatexOverviewSection } from "@/components/member/LatexOverviewSection";
 import { WalletCard } from "@/components/member/WalletCard";
 import {
   getMemberEmployeeInfo,
-  getMemberSalesSummary,
   getMemberYearlySummaries,
   requireMemberPortal,
 } from "@/lib/data/member-portal";
@@ -14,8 +13,7 @@ export default async function MemberDashboardPage() {
   const { memberId, profile, marketPrice, fetchedAt } =
     await requireMemberPortal();
 
-  const [summary, yearlySummaries, employees] = await Promise.all([
-    getMemberSalesSummary(memberId),
+  const [yearlySummaries, employees] = await Promise.all([
     getMemberYearlySummaries(memberId),
     getMemberEmployeeInfo(memberId),
   ]);
@@ -30,18 +28,18 @@ export default async function MemberDashboardPage() {
       />
 
       <div className="mx-auto max-w-6xl px-8 py-10">
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <WalletCard
-            balance={profile.walletBalance}
-            memberCode={profile.memberCode}
-          />
-          <EmployeeCard employees={employees} />
-          <SummaryCards
-            monthlySalesAmount={summary.monthlySalesAmount}
-            yearlySummaries={yearlySummaries}
-          />
-          <DividendCard dividendBalance={profile.dividendBalance} />
-        </section>
+        <div className="flex flex-col gap-6">
+          <section className="grid gap-4 sm:grid-cols-2">
+            <WalletCard
+              balance={profile.walletBalance}
+              memberCode={profile.memberCode}
+            />
+            <EmployeeCard employees={employees} />
+          </section>
+
+          <LatexOverviewSection yearlySummaries={yearlySummaries} />
+          <FinanceOverviewSection yearlySummaries={yearlySummaries} />
+        </div>
       </div>
     </>
   );

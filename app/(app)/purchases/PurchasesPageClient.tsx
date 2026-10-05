@@ -45,7 +45,6 @@ export function PurchasesPageClient({
 }: PurchasesPageClientProps) {
   const [recordDate] = useState(todayIso());
   const [marketPrice, setMarketPrice] = useState(initialMarketPrice ?? "");
-  const [priceLocked, setPriceLocked] = useState(true);
   const [priceEditedManually, setPriceEditedManually] = useState(false);
   const [sellerCode, setSellerCode] = useState("");
   const [rawWeightKg, setRawWeightKg] = useState("");
@@ -82,10 +81,9 @@ export function PurchasesPageClient({
   );
 
   // Keeps the field in sync with whatever the admin currently has saved for
-  // today, regardless of the padlock — the padlock only guards against
-  // accidental manual edits, it doesn't freeze which price is shown. A
-  // manual override (priceEditedManually) or an already-saved purchase
-  // (locked) stops the sync so it doesn't fight the user or rewrite history.
+  // today. A manual override (priceEditedManually) or an already-saved
+  // purchase (locked) stops the sync so it doesn't fight the user or rewrite
+  // history.
   useEffect(() => {
     if (priceEditedManually || locked) return;
 
@@ -126,7 +124,6 @@ export function PurchasesPageClient({
   }, [marketPrice, dryWeightKg]);
 
   function resetForm() {
-    setPriceLocked(true);
     setSellerCode("");
     setSelectedMemberId("");
     setRawWeightKg("");
@@ -197,7 +194,6 @@ export function PurchasesPageClient({
         throw new Error(data.error ?? "ไม่สามารถบันทึกรายการรับซื้อได้");
       }
       setSaved(data as Purchase);
-      setPriceLocked(true);
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "เกิดข้อผิดพลาด");
     } finally {
@@ -234,7 +230,7 @@ export function PurchasesPageClient({
                 min={0}
                 step="0.01"
                 value={marketPrice}
-                disabled={priceLocked || locked}
+                disabled={locked}
                 onChange={(e) => {
                   setMarketPrice(e.target.value);
                   setPriceEditedManually(true);
@@ -242,45 +238,6 @@ export function PurchasesPageClient({
                 placeholder="0.0"
                 className="w-full border-none bg-transparent p-0 text-right text-sm font-semibold text-emerald-800 focus:outline-none focus:ring-0 disabled:text-emerald-700"
               />
-              <button
-                type="button"
-                onClick={() => setPriceLocked((v) => !v)}
-                aria-label={priceLocked ? "ปลดล็อกราคา" : "ล็อกราคา"}
-                title={
-                  priceLocked
-                    ? "ราคาถูกล็อกไว้ กดเพื่อปลดล็อกและเปลี่ยนค่าใหม่"
-                    : "กดเพื่อล็อกราคานี้ไว้"
-                }
-                className="shrink-0 rounded p-0.5 text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {priceLocked ? (
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={1.75}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                  >
-                    <rect x="4" y="11" width="16" height="9" rx="1.5" />
-                    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-                  </svg>
-                ) : (
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={1.75}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4"
-                  >
-                    <rect x="4" y="11" width="16" height="9" rx="1.5" />
-                    <path d="M8 11V7a4 4 0 0 1 7.4-2" />
-                  </svg>
-                )}
-              </button>
             </div>
           </div>
 

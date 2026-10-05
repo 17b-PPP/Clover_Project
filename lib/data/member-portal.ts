@@ -8,7 +8,6 @@ import type {
   MemberEmployeeInfo,
   MemberEmployeeSale,
   MemberProfile,
-  MemberSalesSummary,
   MemberYearlySummary,
 } from "@/lib/types";
 
@@ -123,23 +122,6 @@ export const requireMemberPortal = cache(
     };
   }
 );
-
-export async function getMemberSalesSummary(
-  memberId: string
-): Promise<MemberSalesSummary> {
-  const { year, month } = currentThaiPeriod();
-  const monthStart = new Date(Date.UTC(year, month - 1, 1));
-  const nextMonthStart = new Date(Date.UTC(year, month, 1));
-
-  const monthly = await prisma.purchase.aggregate({
-    where: { memberId, recordDate: { gte: monthStart, lt: nextMonthStart } },
-    _sum: { totalAmount: true },
-  });
-
-  return {
-    monthlySalesAmount: monthly._sum.totalAmount?.toNumber() ?? 0,
-  };
-}
 
 // Weight totals for the current Buddhist year plus YEARS_BACK years before
 // it, so the dashboard's year selector can switch client-side with no

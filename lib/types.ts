@@ -395,3 +395,15 @@ export interface ReferencePriceLogEntry {
   price: number;
   recordedAt: string;
 }
+
+// One short alert in the member portal's notification bell: a wallet credit
+// from a latex sale, a withdrawal, or a dividend payout.
+export interface MemberNotification {
+  id: string;
+  type: FinanceEntryType;
+  code: string;
+  // Always positive; `type` says which direction the money moved.
+  amount: number;
+  // ISO instant the record was created — orders the list and decides unread.
+  occurredAt: string;
+}

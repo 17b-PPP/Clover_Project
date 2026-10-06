@@ -6,6 +6,7 @@ import type {
   DailyMarketPrice,
   FinanceEntry,
   MemberEmployeeInfo,
+  MemberNotification,
   MemberProfile,
   MemberWalletMonthlySummary,
 } from "@/lib/types";
@@ -282,3 +283,59 @@ export async function getMemberFinanceHistory(
       return entry;
     });
 }
+
+// The member's latest wallet movements for the topbar's notification bell —
+// the same three sources as the finance ledger, but ordered by when each was
+// actually entered so a newly recorded sale always surfaces at the top.
+export const getMemberNotifications = cache(
+  async (memberId: string, limit = 20): Promise<MemberNotification[]> => {
+    const [purchases, withdrawals, dividends] = await Promise.all([
+      prisma.purchase.findMany({
+        where: { memberId },
+        select: { id: true, purchaseCode: true, ownerPayout: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      }),
+      prisma.withdrawal.findMany({
+        where: { memberId },
+        select: { id: true, withdrawalCode: true, amount: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      }),
+      prisma.dividendPayment.findMany({
+        where: { memberId },
+        select: { id: true, dividendCode: true, amount: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+      }),
+    ]);
+
+    const notifications: MemberNotification[] = [
+      ...purchases.map((purchase) => ({
+        id: purchase.id,
+        type: "PURCHASE" as const,
+        code: purchase.purchaseCode,
+        amount: purchase.ownerPayout.toNumber(),
+        occurredAt: purchase.createdAt.toISOString(),
+      })),
+      ...withdrawals.map((withdrawal) => ({
+        id: withdrawal.id,
+        type: "WITHDRAWAL" as const,
+        code: withdrawal.withdrawalCode,
+        amount: withdrawal.amount.toNumber(),
+        occurredAt: withdrawal.createdAt.toISOString(),
+      })),
+      ...dividends.map((dividend) => ({
+        id: dividend.id,
+        type: "DIVIDEND" as const,
+        code: dividend.dividendCode,
+        amount: dividend.amount.toNumber(),
+        occurredAt: dividend.createdAt.toISOString(),
+      })),
+    ];
+
+    return notifications
+      .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt))
+      .slice(0, limit);
+  }
+);

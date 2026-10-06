@@ -1,4 +1,13 @@
-import { formatCurrency, formatDateTimeThai, formatDateUtc } from "@/lib/format";
+import { NotificationBell } from "@/components/member/NotificationBell";
+import {
+  getMemberNotifications,
+  requireMemberPortal,
+} from "@/lib/data/member-portal";
+import {
+  formatCurrency,
+  formatDateTimeThai,
+  formatDateUtc,
+} from "@/lib/format";
 import type { DailyMarketPrice } from "@/lib/types";
 
 interface MemberTopbarProps {
@@ -9,12 +18,17 @@ interface MemberTopbarProps {
   marketPrice: DailyMarketPrice | null;
 }
 
-export function MemberTopbar({
+// Async so every portal page gets the notification bell without loading it
+// itself — requireMemberPortal is cached per request.
+export async function MemberTopbar({
   firstName,
   lastName,
   fetchedAt,
   marketPrice,
 }: MemberTopbarProps) {
+  const { memberId } = await requireMemberPortal();
+  const notifications = await getMemberNotifications(memberId);
+
   return (
     <header className="border-b border-slate-200 bg-white px-8 py-5">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
@@ -27,25 +41,29 @@ export function MemberTopbar({
           </p>
         </div>
 
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-right">
-          <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
-            ราคากลางน้ำยางประจำวัน
-          </p>
-          {marketPrice ? (
-            <>
-              <p className="text-lg font-semibold tabular-nums text-emerald-800">
-                {formatCurrency(marketPrice.price)}
-                <span className="ml-1 text-xs font-medium"> / กก.</span>
-              </p>
-              <p className="text-xs text-emerald-700">
-                ประจำวันที่ {formatDateUtc(marketPrice.recordDate)}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm font-medium text-emerald-800">
-              ยังไม่มีข้อมูลราคากลาง
+        <div className="flex items-center gap-4">
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-right">
+            <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+              ราคากลางน้ำยางประจำวัน
             </p>
-          )}
+            {marketPrice ? (
+              <>
+                <p className="text-lg font-semibold tabular-nums text-emerald-800">
+                  {formatCurrency(marketPrice.price)}
+                  <span className="ml-1 text-xs font-medium"> / กก.</span>
+                </p>
+                <p className="text-xs text-emerald-700">
+                  ประจำวันที่ {formatDateUtc(marketPrice.recordDate)}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm font-medium text-emerald-800">
+                ยังไม่มีข้อมูลราคากลาง
+              </p>
+            )}
+          </div>
+
+          <NotificationBell memberId={memberId} notifications={notifications} />
         </div>
       </div>
     </header>

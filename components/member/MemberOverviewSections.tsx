@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { DividendCard } from "@/components/member/DividendCard";
 import { FinanceOverviewSection } from "@/components/member/FinanceOverviewSection";
 import { LatexOverviewSection } from "@/components/member/LatexOverviewSection";
 import { Input } from "@/components/ui/Input";
@@ -9,10 +10,12 @@ import type { FinanceEntry, MemberEmployeeSale } from "@/lib/types";
 
 interface MemberOverviewSectionsProps {
   entries: FinanceEntry[];
+  dividendBalance: number;
 }
 
 export function MemberOverviewSections({
   entries,
+  dividendBalance,
 }: MemberOverviewSectionsProps) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -102,6 +105,7 @@ export function MemberOverviewSections({
         withdrawnAmount={totals.withdrawnAmount}
         employeeSales={totals.employeeSales}
       />
+      <DividendCard dividendBalance={dividendBalance} entries={entries} />
     </div>
   );
 }

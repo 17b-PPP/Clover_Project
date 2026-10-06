@@ -38,7 +38,10 @@ export default async function MemberDashboardPage() {
             <EmployeeCard employees={employees} />
           </section>
 
-          <MemberOverviewSections entries={entries} />
+          <MemberOverviewSections
+            entries={entries}
+            dividendBalance={profile.dividendBalance}
+          />
         </div>
       </div>
     </>

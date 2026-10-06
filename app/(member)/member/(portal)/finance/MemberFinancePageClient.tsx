@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { ResetButton } from "@/components/ui/ResetButton";
 import { StatCard } from "@/components/ui/StatCard";
-import { formatNumber, monthKeyToDateRange } from "@/lib/format";
+import { formatNumber } from "@/lib/format";
 import type { FinanceEntry, FinanceEntryType } from "@/lib/types";
 
 const PAGE_SIZE = 10;
@@ -37,7 +37,6 @@ export function MemberFinancePageClient({
   );
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   const [prevFilters, setPrevFilters] = useState({
@@ -60,7 +59,6 @@ export function MemberFinancePageClient({
   function clearDateFilter() {
     setDateFrom("");
     setDateTo("");
-    setSelectedMonth(null);
   }
 
   const filteredEntries = useMemo(
@@ -134,19 +132,13 @@ export function MemberFinancePageClient({
           label="จากวันที่"
           type="date"
           value={dateFrom}
-          onChange={(e) => {
-            setDateFrom(e.target.value);
-            setSelectedMonth(null);
-          }}
+          onChange={(e) => setDateFrom(e.target.value)}
         />
         <Input
           label="ถึงวันที่"
           type="date"
           value={dateTo}
-          onChange={(e) => {
-            setDateTo(e.target.value);
-            setSelectedMonth(null);
-          }}
+          onChange={(e) => setDateTo(e.target.value)}
         />
         <ResetButton
           label="ล้างตัวกรอง"
@@ -162,14 +154,6 @@ export function MemberFinancePageClient({
         <MonthlyIncomeChart
           title="รายได้จากการขายน้ำยางในแต่ละเดือน"
           entries={filteredEntries}
-          selectedMonth={selectedMonth}
-          onBack={clearDateFilter}
-          onSelectMonth={(monthKey) => {
-            const { from, to } = monthKeyToDateRange(monthKey);
-            setDateFrom(from);
-            setDateTo(to);
-            setSelectedMonth(monthKey);
-          }}
         />
       </section>
 

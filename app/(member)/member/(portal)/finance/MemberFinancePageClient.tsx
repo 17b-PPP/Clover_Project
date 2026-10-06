@@ -93,12 +93,17 @@ export function MemberFinancePageClient({
         description="รายรับจากการขายน้ำยาง เงินปันผล และรายการเบิกเงินของคุณ"
       />
 
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:max-w-2xl">
-        <WalletCard balance={walletBalance} monthlyEarnings={monthlyEarnings} />
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:max-w-xl">
+        <WalletCard
+          balance={walletBalance}
+          monthlyEarnings={monthlyEarnings}
+          compact
+        />
         <StatCard
           label="ยอดเงินที่เบิกไปแล้ว (บาท)"
           value={formatNumber(totalWithdrawn)}
           hint="รวมทุกรายการเบิกเงินของคุณ"
+          compact
         />
       </div>
 
@@ -150,12 +155,16 @@ export function MemberFinancePageClient({
         />
       </div>
 
-      <section className="mb-8">
-        <MonthlyIncomeChart
-          title="รายได้จากการขายน้ำยางในแต่ละเดือน"
-          entries={filteredEntries}
-        />
-      </section>
+      {/* The chart only plots latex-sale income, so it has nothing to say
+          when the list is narrowed to withdrawals or dividends. */}
+      {(typeFilter === "ALL" || typeFilter === "PURCHASE") && (
+        <section className="mb-8">
+          <MonthlyIncomeChart
+            title="รายได้จากการขายน้ำยางในแต่ละเดือน"
+            entries={filteredEntries}
+          />
+        </section>
+      )}
 
       <FinanceHistoryTable entries={pagedEntries} />
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />

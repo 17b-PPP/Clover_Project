@@ -6,6 +6,7 @@ import { FinanceOverviewSection } from "@/components/member/FinanceOverviewSecti
 import { LatexOverviewSection } from "@/components/member/LatexOverviewSection";
 import { Input } from "@/components/ui/Input";
 import { ResetButton } from "@/components/ui/ResetButton";
+import { DEFAULT_DATE_FROM, todayBangkok } from "@/lib/format";
 import type { FinanceEntry, MemberEmployeeSale } from "@/lib/types";
 
 interface MemberOverviewSectionsProps {
@@ -17,8 +18,8 @@ export function MemberOverviewSections({
   entries,
   dividendBalance,
 }: MemberOverviewSectionsProps) {
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState(DEFAULT_DATE_FROM);
+  const [dateTo, setDateTo] = useState(todayBangkok());
 
   const filteredEntries = useMemo(
     () =>
@@ -90,10 +91,10 @@ export function MemberOverviewSections({
           onChange={(e) => setDateTo(e.target.value)}
         />
         <ResetButton
-          disabled={!dateFrom && !dateTo}
+          disabled={dateFrom === DEFAULT_DATE_FROM && dateTo === todayBangkok()}
           onClick={() => {
-            setDateFrom("");
-            setDateTo("");
+            setDateFrom(DEFAULT_DATE_FROM);
+            setDateTo(todayBangkok());
           }}
         />
       </div>

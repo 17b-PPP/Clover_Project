@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { ResetButton } from "@/components/ui/ResetButton";
+import { DEFAULT_DATE_FROM, todayBangkok } from "@/lib/format";
 import type { Purchase } from "@/lib/types";
 
 const PAGE_SIZE = 10;
@@ -18,8 +19,8 @@ interface MemberSalesPageClientProps {
 export function MemberSalesPageClient({
   purchases,
 }: MemberSalesPageClientProps) {
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState(DEFAULT_DATE_FROM);
+  const [dateTo, setDateTo] = useState(todayBangkok());
   const [page, setPage] = useState(1);
 
   const [prevFilters, setPrevFilters] = useState({ dateFrom, dateTo });
@@ -29,8 +30,8 @@ export function MemberSalesPageClient({
   }
 
   function clearDateFilter() {
-    setDateFrom("");
-    setDateTo("");
+    setDateFrom(DEFAULT_DATE_FROM);
+    setDateTo(todayBangkok());
   }
 
   const filteredPurchases = useMemo(
@@ -74,7 +75,7 @@ export function MemberSalesPageClient({
           onChange={(e) => setDateTo(e.target.value)}
         />
         <ResetButton
-          disabled={!dateFrom && !dateTo}
+          disabled={dateFrom === DEFAULT_DATE_FROM && dateTo === todayBangkok()}
           onClick={clearDateFilter}
         />
       </div>

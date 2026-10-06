@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { ResetButton } from "@/components/ui/ResetButton";
 import { AuditLogTable } from "@/components/audit-log/AuditLogTable";
+import { DEFAULT_DATE_FROM, todayBangkok } from "@/lib/format";
 import type { AuditLogEntry } from "@/lib/types";
 
 const PAGE_SIZE = 10;
@@ -16,8 +17,8 @@ interface AuditLogPageClientProps {
 
 export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
   const [search, setSearch] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState(DEFAULT_DATE_FROM);
+  const [dateTo, setDateTo] = useState(todayBangkok());
   const [page, setPage] = useState(1);
 
   const [prevFilters, setPrevFilters] = useState({ search, dateFrom, dateTo });
@@ -79,10 +80,10 @@ export function AuditLogPageClient({ entries }: AuditLogPageClientProps) {
           onChange={(e) => setDateTo(e.target.value)}
         />
         <ResetButton
-          disabled={!dateFrom && !dateTo}
+          disabled={dateFrom === DEFAULT_DATE_FROM && dateTo === todayBangkok()}
           onClick={() => {
-            setDateFrom("");
-            setDateTo("");
+            setDateFrom(DEFAULT_DATE_FROM);
+            setDateTo(todayBangkok());
           }}
         />
       </div>

@@ -12,7 +12,12 @@ import {
   PurchaseTrendChart,
   type PurchaseTrendPoint,
 } from "@/components/performance/PurchaseTrendChart";
-import { formatCurrency, formatNumber } from "@/lib/format";
+import {
+  DEFAULT_DATE_FROM,
+  formatCurrency,
+  formatNumber,
+  todayBangkok,
+} from "@/lib/format";
 import type { PurchaseSummaryRow, Withdrawal } from "@/lib/types";
 
 const PAGE_SIZE = 10;
@@ -26,8 +31,8 @@ export function PurchaseSummaryPageClient({
   rows,
   withdrawals,
 }: PurchaseSummaryPageClientProps) {
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState(DEFAULT_DATE_FROM);
+  const [dateTo, setDateTo] = useState(todayBangkok());
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
@@ -184,10 +189,14 @@ export function PurchaseSummaryPageClient({
           />
         </div>
         <ResetButton
-          disabled={!dateFrom && !dateTo && !search}
+          disabled={
+            dateFrom === DEFAULT_DATE_FROM &&
+            dateTo === todayBangkok() &&
+            !search
+          }
           onClick={() => {
-            setDateFrom("");
-            setDateTo("");
+            setDateFrom(DEFAULT_DATE_FROM);
+            setDateTo(todayBangkok());
             setSearch("");
           }}
         />
@@ -229,7 +238,7 @@ export function PurchaseSummaryPageClient({
           hint="มูลค่ารับซื้อทั้งหมด (ก่อนหักเบิกเงิน)"
         />
         <StatCard
-          label="ยอดเบิกเงินในช่วงนี้"
+          label="ยอดเบิกเงินทั้งหมด"
           value={formatCurrency(summary.totalWithdrawn)}
           hint="ยอดที่สมาชิกเบิกเงินสะสมออกไป"
         />

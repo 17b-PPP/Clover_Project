@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { ResetButton } from "@/components/ui/ResetButton";
 import { StatCard } from "@/components/ui/StatCard";
-import { formatNumber } from "@/lib/format";
+import { DEFAULT_DATE_FROM, formatNumber, todayBangkok } from "@/lib/format";
 import type { FinanceEntry, FinanceEntryType } from "@/lib/types";
 
 const PAGE_SIZE = 10;
@@ -35,8 +35,8 @@ export function MemberFinancePageClient({
   const [typeFilter, setTypeFilter] = useState<"ALL" | FinanceEntryType>(
     "ALL"
   );
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState(DEFAULT_DATE_FROM);
+  const [dateTo, setDateTo] = useState(todayBangkok());
   const [page, setPage] = useState(1);
 
   const [prevFilters, setPrevFilters] = useState({
@@ -54,11 +54,13 @@ export function MemberFinancePageClient({
   }
 
   const hasActiveFilters =
-    typeFilter !== "ALL" || dateFrom !== "" || dateTo !== "";
+    typeFilter !== "ALL" ||
+    dateFrom !== DEFAULT_DATE_FROM ||
+    dateTo !== todayBangkok();
 
   function clearDateFilter() {
-    setDateFrom("");
-    setDateTo("");
+    setDateFrom(DEFAULT_DATE_FROM);
+    setDateTo(todayBangkok());
   }
 
   const filteredEntries = useMemo(

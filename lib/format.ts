@@ -48,6 +48,24 @@ export function formatTimeThai(iso: string): string {
   }).format(new Date(iso));
 }
 
+const bangkokDayFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Bangkok",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+// Today's calendar day in Thailand, as YYYY-MM-DD — the default upper bound
+// for date-range filters, so "ถึงวันที่" starts pinned to today instead of
+// blank/unbounded.
+export function todayBangkok(): string {
+  return bangkokDayFormatter.format(new Date());
+}
+
+// The default lower bound for date-range filters across the app, so
+// "จากวันที่" starts pinned to this date instead of blank/unbounded.
+export const DEFAULT_DATE_FROM = "2026-06-23";
+
 export function formatNumber(value: number, fractionDigits = 2): string {
   return new Intl.NumberFormat("th-TH", {
     minimumFractionDigits: fractionDigits,

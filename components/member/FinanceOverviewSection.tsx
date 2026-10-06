@@ -4,12 +4,14 @@ import type { MemberEmployeeSale } from "@/lib/types";
 
 interface FinanceOverviewSectionProps {
   totalAmount: number;
+  myAmount: number;
   withdrawnAmount: number;
   employeeSales: MemberEmployeeSale[];
 }
 
 export function FinanceOverviewSection({
   totalAmount,
+  myAmount,
   withdrawnAmount,
   employeeSales,
 }: FinanceOverviewSectionProps) {
@@ -17,7 +19,21 @@ export function FinanceOverviewSection({
     <InfoSectionCard title="การเงิน">
       <InfoStatBox
         label="ยอดเงินรวมที่ขายได้ (บาท)"
-        value={formatNumber(totalAmount)}
+        value={
+          <span className="flex flex-col gap-3">
+            <span className="text-xl font-semibold tabular-nums text-slate-900">
+              {formatNumber(totalAmount)}
+            </span>
+            <span className="flex flex-col gap-1 border-t border-slate-200 pt-2">
+              <span className="text-xs font-medium text-slate-500">
+                ยอดเงินรวมของฉัน (บาท)
+              </span>
+              <span className="text-xl font-semibold tabular-nums text-slate-900">
+                {formatNumber(myAmount)}
+              </span>
+            </span>
+          </span>
+        }
       />
       <InfoStatBox label="ยอดเบิก (บาท)" value={formatNumber(withdrawnAmount)} />
       <InfoStatBox

@@ -34,6 +34,7 @@ export function MemberOverviewSections({
     let rawWeightKg = 0;
     let dryWeightKg = 0;
     let totalAmount = 0;
+    let myAmount = 0;
     let withdrawnAmount = 0;
     let saleCount = 0;
     const salesByEmployee = new Map<string, number>();
@@ -45,6 +46,7 @@ export function MemberOverviewSections({
         dryWeightKg +=
           ((entry.rawWeightKg ?? 0) * (entry.dryPercentage ?? 0)) / 100;
         totalAmount += entry.totalAmount ?? 0;
+        myAmount += entry.amount;
         if (entry.deliveredByName && entry.employeePayout) {
           salesByEmployee.set(
             entry.deliveredByName,
@@ -65,6 +67,7 @@ export function MemberOverviewSections({
       rawWeightKg,
       dryWeightKg,
       totalAmount,
+      myAmount,
       withdrawnAmount,
       saleCount,
       employeeSales,
@@ -102,6 +105,7 @@ export function MemberOverviewSections({
       />
       <FinanceOverviewSection
         totalAmount={totals.totalAmount}
+        myAmount={totals.myAmount}
         withdrawnAmount={totals.withdrawnAmount}
         employeeSales={totals.employeeSales}
       />

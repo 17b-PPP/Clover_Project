@@ -32,18 +32,17 @@ export function DividendCard({ dividendBalance, entries }: DividendCardProps) {
     return map;
   }, [entries]);
 
-  const years = useMemo(
-    () => [...dividendsByYear.keys()].sort((a, b) => b - a),
-    [dividendsByYear]
-  );
+  // Always offer the current year even with no payout yet, so the filter is
+  // there from day one instead of only appearing once a dividend exists.
+  const years = useMemo(() => {
+    const currentBuddhistYear = new Date().getUTCFullYear() + 543;
+    const set = new Set<number>([currentBuddhistYear, ...dividendsByYear.keys()]);
+    return [...set].sort((a, b) => b - a);
+  }, [dividendsByYear]);
 
-  const [selectedYear, setSelectedYear] = useState(years[0] ?? null);
-  const activeYear =
-    selectedYear !== null && dividendsByYear.has(selectedYear)
-      ? selectedYear
-      : years[0] ?? null;
-  const yearSummary =
-    activeYear !== null ? dividendsByYear.get(activeYear) : undefined;
+  const [selectedYear, setSelectedYear] = useState(years[0]);
+  const activeYear = years.includes(selectedYear) ? selectedYear : years[0];
+  const yearSummary = dividendsByYear.get(activeYear);
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -66,22 +65,20 @@ export function DividendCard({ dividendBalance, entries }: DividendCardProps) {
             <p className="text-xs font-medium text-slate-500">
               ปันผลประจำปี
             </p>
-            {years.length > 0 && activeYear !== null && (
-              <select
-                value={activeYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-600"
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            )}
+            <select
+              value={activeYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+            >
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
           </div>
           <p className="mt-2 text-xl font-semibold tabular-nums text-slate-900">
-            {years.length === 0 ? "—" : formatNumber(yearSummary?.amount ?? 0)}
+            {formatNumber(yearSummary?.amount ?? 0)}
           </p>
           {yearSummary?.periodLabel && (
             <p className="mt-1 text-xs text-slate-500">

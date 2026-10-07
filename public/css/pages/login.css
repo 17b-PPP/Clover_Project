@@ -1,0 +1,65 @@
+/* =============================================================================
+   public/css/pages/login.css
+   -----------------------------------------------------------------------------
+   หน้าเข้าสู่ระบบ (ทั้งของพนักงานและของสมาชิก)
+   การ์ดสีขาวอยู่กลางจอบนพื้นหลังสีเทาอ่อน
+   ============================================================================= */
+
+/* พื้นหลังเต็มจอ จัดการ์ดให้อยู่กึ่งกลาง */
+.login-screen {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--slate-50);
+  padding-inline: 1rem;
+}
+
+/* การ์ดเข้าสู่ระบบ */
+.login-card {
+  width: 100%;
+  max-width: 24rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--slate-200);
+  background-color: var(--white);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ส่วนหัว: โลโก้ + หัวข้อ + ชื่อสหกรณ์ */
+.login-header {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.login-logo {
+  margin-bottom: 0.75rem;
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background-color: var(--emerald-700);
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.login-title {
+  font-size: 1.125rem;
+  line-height: calc(1.75 / 1.125);
+  font-weight: 600;
+  color: var(--slate-900);
+}
+
+.login-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  color: var(--slate-500);
+}

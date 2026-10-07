@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!--
+  pages/member-login.html  (URL: /member/login)
+  หน้าเข้าสู่ระบบของสมาชิก — ใช้เลขบัตรประชาชน + วันเกิด (วว/ดด/ปปปป 8 หลัก)
+  การทำงาน: public/js/pages/member-login.js   สไตล์: public/css/pages/login.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/pages/login.css">
+</head>
+<body>
+  <div class="login-screen">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">FL</div>
+        <h1 class="login-title">เข้าสู่ระบบสมาชิก</h1>
+        <p class="login-subtitle">สหกรณ์กองทุนสวนยางบ้านบางบอน</p>
+      </div>
+
+      <form id="member-login-form" class="stack-4">
+        <!-- เลขบัตรประชาชน 13 หลัก -->
+        <div class="field">
+          <div class="field-label-row">
+            <label class="field-label" for="id-card-number">เลขบัตรประชาชน<span class="field-required">*</span></label>
+          </div>
+          <input id="id-card-number" class="input" required autofocus inputmode="numeric" pattern="[0-9]{13}" title="เลขบัตรประชาชน 13 หลัก" minlength="13" maxlength="13" autocomplete="username">
+        </div>
+
+        <!-- วันเกิด 8 หลัก (ซ่อนตัวเลขได้เหมือนรหัสผ่าน) -->
+        <div class="password-field">
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="date-of-birth">วันเกิด<span class="field-required">*</span></label>
+            </div>
+            <input id="date-of-birth" class="input" type="password" required inputmode="numeric" pattern="[0-9]{8}" title="วันเกิด 8 หลัก รูปแบบ วว/ดด/ปปปป เช่น 01012000" placeholder="วว/ดด/ปปปป เช่น 01012000" minlength="8" maxlength="8" autocomplete="off">
+          </div>
+          <!-- @include partials/password-toggle.html -->
+        </div>
+
+        <p class="form-error" id="login-error" hidden></p>
+
+        <button type="submit" class="btn btn-primary btn-block" id="login-submit">เข้าสู่ระบบ</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/js/pages/member-login.js"></script>
+</body>
+</html>

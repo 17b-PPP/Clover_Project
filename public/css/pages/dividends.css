@@ -1,0 +1,159 @@
+/* =============================================================================
+   public/css/pages/dividends.css
+   -----------------------------------------------------------------------------
+   สไตล์เฉพาะหน้า "การจัดการคำนวณเงินปันผล"
+   ============================================================================= */
+
+/* การ์ดฟอร์มเลือกปีและอัตราปันผล */
+.dividend-form {
+  margin-bottom: 2rem;
+}
+
+/* ช่องเลือกปี กว้าง 16rem */
+.year-field {
+  width: 16rem;
+}
+
+.year-field .select {
+  width: 100%;
+}
+
+/* ช่องอัตราปันผล กว้าง 14rem */
+.rate-input {
+  width: 14rem;
+}
+
+/* ข้อความใต้ฟอร์ม */
+.dividend-note {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  color: var(--amber-600);
+}
+
+.dividend-form .form-error {
+  margin-top: 0.75rem;
+}
+
+/* แถวการ์ดสรุป */
+.dividend-stats {
+  margin-bottom: 2rem;
+}
+
+/* ความกว้างคอลัมน์ตารางปันผล */
+.dividend-table .col-name {
+  width: 22%;
+}
+.dividend-table .col-code {
+  width: 14%;
+}
+.dividend-table .col-weight {
+  width: 24%;
+}
+.dividend-table .col-rate {
+  width: 22%;
+}
+.dividend-table .col-amount {
+  width: 18%;
+}
+
+/* ข้อความช่วงเวลาที่จ่ายปันผล */
+.period-text {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  color: var(--slate-600);
+}
+
+/* แถวปุ่ม "จ่ายปันผล" ชิดขวา พร้อมข้อความสถานะ */
+.pay-row {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.pay-status {
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  font-weight: 500;
+}
+
+.pay-status--warning {
+  color: var(--amber-600);
+}
+
+.pay-status--done {
+  color: var(--emerald-700);
+}
+
+.pay-error {
+  margin-top: 0.75rem;
+  text-align: right;
+}
+
+/* -----------------------------------------------------------------------------
+   ประวัติการจ่ายปันผล
+   ----------------------------------------------------------------------------- */
+.payout-history {
+  margin-top: 3rem;
+}
+
+.payout-table .col-date {
+  width: 18%;
+}
+.payout-table .col-year {
+  width: 10%;
+}
+.payout-table .col-period {
+  width: 26%;
+}
+.payout-table .col-rate {
+  width: 12%;
+}
+.payout-table .col-count {
+  width: 10%;
+}
+.payout-table .col-total {
+  width: 12%;
+}
+.payout-table .col-detail {
+  width: 12%;
+}
+
+/* สรุปด้านบนของหน้าต่างรายละเอียด: 2 คอลัมน์ → 4 คอลัมน์ (จอ ≥640px) */
+.payout-summary {
+  margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.5rem;
+  row-gap: 0.25rem;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+}
+
+@media (min-width: 40rem) {
+  .payout-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.payout-summary dt {
+  color: var(--slate-500);
+}
+
+.payout-summary dd {
+  font-weight: 500;
+  color: var(--slate-900);
+}
+
+.payout-summary dd.num-income {
+  color: var(--emerald-700);
+}
+
+/* ตารางรายชื่อในหน้าต่างรายละเอียด (สูงเกินครึ่งจอจะเลื่อนดูได้) */
+.payout-detail-scroll {
+  max-height: 50vh;
+  overflow-y: auto;
+}

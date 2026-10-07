@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<!--
+  pages/contracts.html  (URL: /contracts)
+  หน้า "การจัดการสัญญาจ้าง": จับคู่สมาชิก (เจ้าของสวน) กับลูกจ้าง พร้อมสัดส่วนแบ่งรายได้
+  การทำงาน: public/js/pages/contracts.js   สไตล์: public/css/pages/contracts.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/pages/contracts.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- @include partials/sidebar.html -->
+
+    <main class="app-main">
+      <div class="page-loading" id="page-loading">
+        <!-- @include partials/spinner-lg.html -->
+      </div>
+
+      <div class="page" id="page-content" hidden>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">การจัดการสัญญาจ้าง</h1>
+            <p class="page-description">จัดการการจับคู่ระหว่างสมาชิกและลูกจ้าง พร้อมสัดส่วนแบ่งรายได้</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="add-contract-button">+ เพิ่มสัญญาจ้างใหม่</button>
+        </div>
+
+        <!-- ตัวกรอง -->
+        <div class="contracts-filter">
+          <div class="contracts-search">
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="contract-search">ค้นหาสัญญาจ้าง</label>
+              </div>
+              <input id="contract-search" class="input" placeholder="ค้นหาด้วยรหัสจับคู่ ชื่อ หรือรหัสสมาชิก/ลูกจ้าง">
+            </div>
+          </div>
+          <label class="checkbox-label">
+            <input type="checkbox" class="checkbox" id="show-expired">
+            แสดงสัญญาที่สิ้นสุดแล้ว
+          </label>
+        </div>
+
+        <div class="empty-state" id="contract-empty" hidden>ไม่พบข้อมูลสัญญาจ้าง</div>
+
+        <!-- ตารางสัญญาจ้าง -->
+        <div class="table-wrap" id="contract-table" hidden>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>รหัสจับคู่</th>
+                <th>เจ้าของสวน</th>
+                <th>ลูกจ้าง</th>
+                <th>สัดส่วน</th>
+                <th>สถานะ</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="contract-rows"></tbody>
+          </table>
+        </div>
+
+        <!-- ================= หน้าต่างสัญญาจ้าง (เพิ่ม / ดู / แก้ไขสัดส่วน) ================= -->
+        <div class="modal-overlay" id="contract-form-modal" hidden>
+          <div class="modal modal--xl" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title" data-modal-title></h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <!-- โหมดดูข้อมูล -->
+              <div class="detail-list stack-4" id="contract-view">
+                <div>
+                  <p class="detail-label">รหัสจับคู่</p>
+                  <p class="detail-value" data-slot="pairCode"></p>
+                </div>
+                <div>
+                  <p class="detail-label">เจ้าของสวน</p>
+                  <p class="detail-value" data-slot="memberText"></p>
+                </div>
+                <div>
+                  <p class="detail-label">ลูกจ้าง</p>
+                  <p class="detail-value" data-slot="employeeText"></p>
+                </div>
+                <div>
+                  <p class="detail-label">สัดส่วน</p>
+                  <p class="detail-value" data-slot="sharesText"></p>
+                </div>
+              </div>
+
+              <!-- โหมดเพิ่ม / แก้ไขสัดส่วน -->
+              <form id="contract-form" class="stack-5">
+                <!-- แก้ไข: แสดงคู่สัญญา (เปลี่ยนไม่ได้) -->
+                <div class="contract-parties" id="contract-parties">
+                  <p class="contract-parties-note">คู่สัญญา (ไม่สามารถเปลี่ยนได้เมื่อแก้ไขสัดส่วน)</p>
+                  <p class="contract-parties-names" data-slot="partiesText"></p>
+                  <p class="contract-parties-current" data-slot="currentSharesText"></p>
+                </div>
+
+                <!-- เพิ่มใหม่: เลือกเจ้าของสวนและลูกจ้าง -->
+                <div class="field" id="contract-member-field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="contract-member-input">เจ้าของสวน (รหัสสมาชิก)<span class="field-required">*</span></label>
+                    <span class="field-error" data-combobox-error hidden></span>
+                  </div>
+                  <div class="combobox">
+                    <input id="contract-member-input" class="input" role="combobox" aria-expanded="false" aria-controls="contract-member-listbox" autocomplete="off" required placeholder="พิมพ์รหัสหรือชื่อสมาชิก">
+                    <ul id="contract-member-listbox" class="combobox-list" role="listbox" hidden></ul>
+                  </div>
+                </div>
+
+                <div class="field" id="contract-employee-field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="contract-employee-input">ลูกจ้าง (รหัสลูกจ้าง)<span class="field-required">*</span></label>
+                    <span class="field-error" data-combobox-error hidden></span>
+                  </div>
+                  <div class="combobox">
+                    <input id="contract-employee-input" class="input" role="combobox" aria-expanded="false" aria-controls="contract-employee-listbox" autocomplete="off" required placeholder="พิมพ์รหัสหรือชื่อลูกจ้าง">
+                    <ul id="contract-employee-listbox" class="combobox-list" role="listbox" hidden></ul>
+                  </div>
+                </div>
+
+                <!-- สัดส่วนรายได้ (กรอกส่วนของลูกจ้าง ส่วนของเจ้าของสวนคำนวณให้) -->
+                <div class="form-grid-2">
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="contract-employee-share">สัดส่วนลูกจ้าง (%)<span class="field-required">*</span></label>
+                    </div>
+                    <input id="contract-employee-share" class="input" type="number" min="0" max="100" step="0.01" required>
+                  </div>
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="contract-member-share">สัดส่วนเจ้าของสวน (%)</label>
+                    </div>
+                    <input id="contract-member-share" class="input" type="number" disabled>
+                  </div>
+                </div>
+
+                <p class="form-error" id="contract-form-error" hidden></p>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="contract-form-close">ปิด</button>
+              <button type="button" class="btn btn-primary" id="contract-form-edit">แก้ไขสัดส่วนรายได้</button>
+              <button type="button" class="btn btn-secondary" id="contract-form-cancel">ยกเลิก</button>
+              <button type="submit" form="contract-form" class="btn btn-primary" id="contract-form-submit">บันทึก</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= หน้าต่างยืนยันระงับ / เปิดใช้งานสัญญา ================= -->
+        <div class="modal-overlay" id="contract-status-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title" data-modal-title></h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-message" data-mode="suspend">ต้องการระงับสัญญาจ้างของ <strong data-slot="memberName"></strong> กับ <strong data-slot="employeeName"></strong> (<span data-slot="pairCode"></span>) ใช่หรือไม่?</p>
+              <p class="modal-message" data-mode="activate">ต้องการเปิดใช้งานสัญญาจ้าง <strong data-slot="pairCode"></strong> อีกครั้งใช่หรือไม่?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+              <button type="button" class="btn btn-danger" data-action="confirm"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= หน้าต่างยืนยันการลบสัญญา ================= -->
+        <div class="modal-overlay" id="contract-delete-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title">ลบสัญญาจ้าง</h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-message">ต้องการลบสัญญาจ้าง <strong data-slot="pairCode"></strong> ระหว่าง <span data-slot="memberName"></span> กับ <span data-slot="employeeName"></span> อย่างถาวรใช่หรือไม่? การลบไม่สามารถย้อนกลับได้</p>
+              <p class="form-error" data-slot="error" hidden></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+              <button type="button" class="btn btn-danger" data-action="confirm">ยืนยันการลบ</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= หน้าต่างประวัติสัดส่วนสัญญา ================= -->
+        <div class="modal-overlay" id="contract-history-modal" hidden>
+          <div class="modal modal--xl" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title">ประวัติสัดส่วนสัญญา</h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="history-parties" id="history-parties"></p>
+              <p class="history-loading" id="history-loading">กำลังโหลดข้อมูล...</p>
+              <ul class="stack-3" id="history-list" hidden></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบแถวในตารางสัญญาจ้าง -->
+  <template id="contract-row-template">
+    <tr>
+      <td><span class="cell-strong" data-slot="pairCode"></span></td>
+      <td data-slot="memberName"></td>
+      <td data-slot="employeeName"></td>
+      <td data-slot="shares"></td>
+      <td>
+        <div class="status-cell">
+          <span class="badge badge-neutral" data-slot="badge-expired">สิ้นสุดสัญญาแล้ว</span>
+          <span class="badge badge-success" data-slot="badge-active">ใช้งานอยู่</span>
+          <span class="badge badge-danger" data-slot="badge-inactive">ถูกระงับ</span>
+        </div>
+      </td>
+      <td>
+        <div class="row-actions">
+          <button type="button" class="btn btn-ghost" data-action="view">ดูข้อมูล</button>
+          <button type="button" class="btn btn-ghost" data-action="history">ประวัติ</button>
+          <button type="button" class="btn btn-ghost" data-action="edit">แก้ไข</button>
+          <button type="button" class="btn" data-action="toggle-status"></button>
+          <button type="button" class="btn btn-danger" data-action="delete">ลบ</button>
+        </div>
+      </td>
+    </tr>
+  </template>
+
+  <!-- แม่แบบรายการในหน้าต่างประวัติ -->
+  <template id="history-item-template">
+    <li class="history-item">
+      <div class="history-item-head">
+        <span class="history-item-shares">เจ้าของสวน <span data-slot="memberShare"></span>% / ลูกจ้าง <span data-slot="employeeShare"></span>%</span>
+        <span class="badge badge-success" data-slot="badge-current">ปัจจุบัน</span>
+        <span class="badge badge-neutral" data-slot="badge-ended">สิ้นสุดแล้ว</span>
+      </div>
+      <p class="history-item-dates" data-slot="dates"></p>
+    </li>
+  </template>
+
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/contracts.js"></script>
+</body>
+</html>

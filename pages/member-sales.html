@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!--
+  pages/member-sales.html  (URL: /member/sales)
+  หน้า "ประวัติการขาย" ของสมาชิก: กราฟน้ำหนักรายเดือน + ตารางการขายพร้อมใบเสร็จ
+  การทำงาน: public/js/pages/member-sales.js   สไตล์: public/css/member.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/receipt.css">
+  <link rel="stylesheet" href="/css/member.css">
+</head>
+<body>
+  <div class="app-shell app-shell--member">
+    <!-- @include partials/member-sidebar.html -->
+
+    <main class="app-main">
+      <div class="page-loading" id="page-loading">
+        <!-- @include partials/spinner-lg.html -->
+      </div>
+
+      <div id="page-content" hidden>
+        <!-- @include partials/member-topbar.html -->
+
+        <div class="page">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">ประวัติการขาย</h1>
+              <p class="page-description">ประวัติการขายน้ำยางพาราของคุณ พร้อมใบเสร็จรับเงินของแต่ละรายการ</p>
+            </div>
+          </div>
+
+          <!-- ตัวกรองช่วงวันที่ -->
+          <div class="filter-bar member-filter">
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="date-from">จากวันที่</label>
+              </div>
+              <input id="date-from" class="input" type="date">
+            </div>
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="date-to">ถึงวันที่</label>
+              </div>
+              <input id="date-to" class="input" type="date">
+            </div>
+            <button type="button" class="btn btn-secondary btn-icon-square" id="reset-dates" aria-label="ล้างการเลือกวันที่" title="ล้างการเลือกวันที่" disabled>
+              <!-- @include partials/reset-icon.html -->
+            </button>
+          </div>
+
+          <!-- กราฟน้ำหนักรายเดือน -->
+          <section class="member-section">
+            <div class="card card--p6">
+              <h2 class="chart-card-title">น้ำหนักน้ำยางที่ขายได้ในแต่ละเดือน</h2>
+              <div class="empty-state" id="weight-chart-empty" hidden>ไม่มีข้อมูลในช่วงเวลาที่เลือก</div>
+              <div class="chart-area" id="weight-chart" hidden></div>
+            </div>
+          </section>
+
+          <!-- ตารางประวัติการขาย -->
+          <div class="empty-state" id="sales-empty" hidden>ยังไม่มีประวัติการขายน้ำยาง</div>
+          <div class="table-wrap" id="sales-table" hidden>
+            <table class="table sales-table">
+              <thead>
+                <tr>
+                  <th class="col-date">วัน/เดือน/ปี</th>
+                  <th class="col-detail"><div class="col-box col-box--w32 col-box--head">รายละเอียด</div></th>
+                  <th class="col-seller"><div class="col-box col-box--w36 col-box--head">ขายน้ำยางโดย</div></th>
+                  <th class="col-total">จำนวนเงินรวม (บาท)</th>
+                  <th class="col-employee">หักจ่ายลูกจ้าง (บาท)</th>
+                  <th class="col-owner">ยอดเข้ากระเป๋าเงิน (บาท)</th>
+                  <th class="col-receipt">ใบเสร็จ</th>
+                </tr>
+              </thead>
+              <tbody id="sales-rows"></tbody>
+            </table>
+          </div>
+          <!-- @include partials/receipt-modal.html -->
+          <div id="sales-pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบแถวประวัติการขาย -->
+  <template id="sales-row-template">
+    <tr>
+      <td><span class="cell-muted cell-nowrap" data-slot="date"></span></td>
+      <td>
+        <div class="col-box col-box--w32">
+          <p class="detail-line">น้ำยางสด <span data-slot="rawWeightKg"></span> กก.</p>
+          <p class="detail-line detail-line--muted">ยางแห้ง <span data-slot="dryWeightKg"></span> กก.</p>
+          <p class="detail-line detail-line--muted">ราคา <span data-slot="marketPrice"></span> บาท/กก.</p>
+        </div>
+      </td>
+      <td><div class="col-box col-box--w36 col-box--nowrap cell-strong" data-slot="deliveredByName"></div></td>
+      <td><span class="num" data-slot="totalAmount"></span></td>
+      <td>
+        <span class="num-expense" data-slot="employeePayout"></span>
+        <span class="cell-faint" data-slot="no-employee-payout">-</span>
+      </td>
+      <td><span class="num-income" data-slot="ownerPayout"></span></td>
+      <td>
+        <button type="button" class="btn btn-secondary btn-sm btn-receipt" data-action="receipt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 3h9l3 3v15H6z"/>
+            <path d="M15 3v4h4"/>
+            <path d="M9 13h6M9 17h6"/>
+          </svg>
+          ใบเสร็จ
+        </button>
+      </td>
+    </tr>
+  </template>
+
+  <!-- @include partials/purchase-receipt.html -->
+  <!-- @include partials/pagination.html -->
+
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/member-sales.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+/* =============================================================================
+   public/css/pages/purchase-summary.css
+   -----------------------------------------------------------------------------
+   สไตล์เฉพาะหน้า "ผลประกอบการการรับซื้อน้ำยางสด"
+   ============================================================================= */
+
+/* ลิงก์ดาวน์โหลดรายงาน Excel (หน้าตาเหมือนปุ่มสีเขียว) */
+.export-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--emerald-700);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  font-weight: 500;
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.export-link svg {
+  height: 1rem;
+  width: 1rem;
+}
+
+@media (hover: hover) {
+  .export-link:hover {
+    background-color: var(--emerald-800);
+  }
+}
+
+/* แถวตัวกรอง */
+.summary-filter {
+  margin-bottom: 1.5rem;
+}
+
+/* ช่องค้นหาสมาชิก กว้าง 16rem */
+.member-search-box {
+  width: 16rem;
+}
+
+/* ส่วนต่าง ๆ ของหน้าเว้นระยะด้านล่าง 2rem */
+.summary-section {
+  margin-bottom: 2rem;
+}
+
+/* กล่องกราฟสูง 18rem */
+.chart-box {
+  height: 18rem;
+}
+
+/* ความกว้างคอลัมน์ตารางรายการรับซื้อล่าสุด */
+.recent-table .col-date {
+  width: 13%;
+}
+.recent-table .col-name {
+  width: 19%;
+}
+.recent-table .col-code {
+  width: 11%;
+}
+.recent-table .col-weight {
+  width: 11%;
+}
+.recent-table .col-drc {
+  width: 10%;
+}
+.recent-table .col-price {
+  width: 10%;
+}
+.recent-table .col-amount {
+  width: 12%;
+}
+.recent-table .col-receipt {
+  width: 14%;
+}

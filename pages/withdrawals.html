@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<!--
+  pages/withdrawals.html  (URL: /withdrawals)
+  หน้า "การจัดการเบิกเงิน": เบิกเงินจากยอดเงินสะสมของสมาชิก พิมพ์ใบเสร็จ
+  และดูประวัติการเบิกเงิน (ค้นหา / กรองช่วงวันที่ / แบ่งหน้า)
+  การทำงาน: public/js/pages/withdrawals.js
+  สไตล์: public/css/pages/transaction.css และ public/css/pages/withdrawals.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/receipt.css">
+  <link rel="stylesheet" href="/css/pages/transaction.css">
+  <link rel="stylesheet" href="/css/pages/withdrawals.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- @include partials/sidebar.html -->
+
+    <main class="app-main">
+      <div class="page page--5xl" id="page-content" hidden>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">การจัดการเบิกเงิน</h1>
+            <p class="page-description">เบิกเงินจากยอดเงินสะสมของสมาชิก และพิมพ์ใบเสร็จ</p>
+          </div>
+          <div class="live-clock">
+            <p class="live-clock-label">เวลาปัจจุบัน</p>
+            <p class="live-clock-time" id="live-clock">--:--:--</p>
+          </div>
+        </div>
+
+        <div class="card card--p8">
+          <h2 class="transaction-heading">ยืนยันตัวตนสมาชิก</h2>
+          <div class="transaction-grid">
+            <!-- รหัสสมาชิก (ช่องค้นหาแบบเลือกได้) -->
+            <div>
+              <div class="field" id="member-field">
+                <div class="field-label-row">
+                  <label class="field-label" for="member-input">รหัสสมาชิก</label>
+                  <span class="field-error" data-combobox-error hidden></span>
+                </div>
+                <div class="combobox">
+                  <input id="member-input" class="input" role="combobox" aria-expanded="false" aria-controls="member-listbox" autocomplete="off" placeholder="พิมพ์ชื่อหรือรหัสสมาชิก">
+                  <ul id="member-listbox" class="combobox-list" role="listbox" hidden></ul>
+                </div>
+              </div>
+              <span class="field-searching" id="member-loading" hidden>กำลังค้นหา...</span>
+            </div>
+
+            <!-- ยอดเงินสะสม (หลังบันทึกจะแสดงยอดคงเหลือหลังเบิก) -->
+            <div class="field">
+              <label class="field-label" id="balance-label">ยอดเงินที่มีสะสม</label>
+              <div class="money-box money-box--between">
+                <span class="money-unit">บาท</span>
+                <span class="money-value" id="balance-value">0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <h2 class="transaction-heading transaction-heading--divided">รายละเอียดการเบิกเงิน</h2>
+          <div class="transaction-grid">
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="receiver-name">ผู้รับเงิน</label>
+              </div>
+              <input id="receiver-name" class="input" readonly disabled placeholder="ระบบจะแสดงให้อัตโนมัติ">
+            </div>
+
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="withdraw-amount">ยอดเงินที่ต้องการเบิก</label>
+              </div>
+              <input id="withdraw-amount" class="input" type="number" min="0" step="0.01" placeholder="0.00">
+            </div>
+          </div>
+
+          <p class="form-error transaction-error" id="form-error" hidden></p>
+
+          <div class="transaction-footer transaction-footer--end">
+            <button type="button" class="btn btn-primary" id="confirm-button">ยืนยัน</button>
+            <button type="button" class="btn btn-secondary" id="reset-button">ยกเลิก</button>
+            <button type="button" class="btn btn-primary" id="print-button" disabled>พิมพ์ใบเสร็จ</button>
+          </div>
+        </div>
+
+        <!-- ใบเสร็จสำหรับพิมพ์ -->
+        <div id="receipt-container"></div>
+
+        <!-- ================= ประวัติการเบิกเงิน ================= -->
+        <section class="withdrawal-history">
+          <h2 class="section-title">ประวัติการเบิกเงิน</h2>
+
+          <!-- จำนวนบิลเบิกเงินของวันนี้ -->
+          <div class="today-count">
+            <div class="stat-card">
+              <p class="stat-label">จำนวนรายการเบิกเงินวันนี้</p>
+              <p class="stat-value" id="today-count"></p>
+            </div>
+          </div>
+
+          <!-- ตัวกรอง: ค้นหา + ช่วงวันที่ + ปุ่มล้าง -->
+          <div class="filter-bar history-filter">
+            <div class="history-search">
+              <div class="field">
+                <div class="field-label-row">
+                  <label class="field-label" for="history-search">ค้นหารายการ</label>
+                </div>
+                <input id="history-search" class="input" placeholder="ค้นหาด้วยชื่อสมาชิก รหัสสมาชิก หรือเลขที่รายการ">
+              </div>
+            </div>
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="date-from">จากวันที่</label>
+              </div>
+              <input id="date-from" class="input" type="date">
+            </div>
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="date-to">ถึงวันที่</label>
+              </div>
+              <input id="date-to" class="input" type="date">
+            </div>
+            <button type="button" class="btn btn-secondary btn-icon-square" id="reset-filters" aria-label="ล้างการเลือกวันที่" title="ล้างการเลือกวันที่" disabled>
+              <!-- @include partials/reset-icon.html -->
+            </button>
+          </div>
+
+          <div class="empty-state" id="history-empty" hidden>ไม่พบรายการเบิกเงิน</div>
+          <div class="table-wrap" id="history-table" hidden>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>วันที่ทำรายการ</th>
+                  <th>เลขที่รายการ</th>
+                  <th><div class="col-box col-box--w40 col-box--head">ชื่อสมาชิก</div></th>
+                  <th>ยอดเบิก (บาท)</th>
+                  <th>ยอดเงินสะสม ก่อน → หลัง</th>
+                </tr>
+              </thead>
+              <tbody id="history-rows"></tbody>
+            </table>
+          </div>
+          <div id="history-pagination"></div>
+        </section>
+
+        <!-- หน้าต่างยืนยันการทำรายการ -->
+        <div class="modal-overlay" id="confirm-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title">ยืนยันการทำรายการ</h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-message" data-slot="message">ต้องการบันทึกรายการเบิกเงินนี้ใช่หรือไม่?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+              <button type="button" class="btn btn-primary" data-action="confirm">ยืนยัน</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบแถวประวัติการเบิกเงิน -->
+  <template id="history-row-template">
+    <tr>
+      <td><span class="cell-muted cell-nowrap"><span data-slot="createdAt"></span> น.</span></td>
+      <td><span class="cell-strong" data-slot="withdrawalCode"></span></td>
+      <td>
+        <div class="col-box col-box--w40 col-box--nowrap">
+          <span class="cell-strong" data-slot="memberName"></span>
+          <span class="cell-subline" data-slot="memberCode"></span>
+        </div>
+      </td>
+      <td><span class="num-income" data-slot="amount"></span></td>
+      <td><span class="num cell-muted cell-nowrap" data-slot="balances"></span></td>
+    </tr>
+  </template>
+
+  <!-- @include partials/withdrawal-receipt.html -->
+  <!-- @include partials/pagination.html -->
+
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/withdrawals.js"></script>
+</body>
+</html>

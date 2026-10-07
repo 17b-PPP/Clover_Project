@@ -1,0 +1,11 @@
+<!--
+  pages/partials/pagination.html
+  แม่แบบตัวแบ่งหน้า — public/js/components/pagination.js คัดลอกไปใช้ใต้ตาราง
+-->
+<template id="pagination-template">
+  <div class="pagination">
+    <button type="button" class="btn btn-secondary" data-action="prev">ก่อนหน้า</button>
+    <span class="pagination-label">หน้า <span data-slot="page"></span> จาก <span data-slot="total"></span></span>
+    <button type="button" class="btn btn-secondary" data-action="next">ถัดไป</button>
+  </div>
+</template>

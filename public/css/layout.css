@@ -1,0 +1,332 @@
+/* =============================================================================
+   public/css/layout.css
+   -----------------------------------------------------------------------------
+   โครงหน้าหลัก: เมนูด้านซ้าย (sidebar) + พื้นที่เนื้อหา (main)
+     - .sidebar ของพนักงาน (หน้าระบบหลังบ้าน)
+     - .sidebar ของสมาชิก (พอร์ทัลสมาชิก) มีส่วนโปรไฟล์เพิ่ม
+   ============================================================================= */
+
+/* โครงหน้า: เมนูซ้ายสูงเต็มจอ + เนื้อหาด้านขวาเลื่อนดูได้ */
+.app-shell {
+  display: flex;
+  height: 100%;
+  min-height: 100vh;
+}
+
+/* พอร์ทัลสมาชิกใช้พื้นหลังสีเทาอ่อน */
+.app-shell--member {
+  background-color: var(--slate-50);
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* -----------------------------------------------------------------------------
+   เมนูด้านซ้าย
+   ----------------------------------------------------------------------------- */
+.sidebar {
+  display: flex;
+  height: 100vh;
+  width: 16rem;
+  flex-shrink: 0;
+  flex-direction: column;
+  border-right: 1px solid var(--slate-200);
+  background-color: var(--white);
+}
+
+/* ส่วนบน: โลโก้ "FL" + ชื่อสหกรณ์ */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--slate-200);
+  padding: 1.25rem 1.5rem;
+}
+
+.brand-logo {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background-color: var(--emerald-700);
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  font-weight: 700;
+  color: var(--white);
+}
+
+.brand-name {
+  font-size: 0.875rem;
+  line-height: 1.25;
+  font-weight: 600;
+  color: var(--slate-900);
+}
+
+.brand-subtitle {
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+  color: var(--slate-500);
+}
+
+/* -----------------------------------------------------------------------------
+   รายการเมนู
+   ----------------------------------------------------------------------------- */
+.nav {
+  flex: 1;
+  padding: 1rem 0.75rem;
+}
+
+/* ระยะห่างระหว่างรายการเมนูใช้คลาส .stack-4 (ระหว่างกลุ่ม) และ .stack-1
+   (ระหว่างลิงก์) จาก components.css */
+
+/* ชื่อกลุ่มเมนู เช่น Staff / Reports / Admin */
+.nav-group-label {
+  padding: 0 0.75rem 0.25rem;
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: var(--slate-400);
+}
+
+/* ลิงก์เมนูแต่ละรายการ */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.5rem;
+  border-left: 2px solid transparent;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  font-weight: 500;
+  color: var(--slate-600);
+  transition-property: color, background-color, border-color;
+  transition-duration: 0.15s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-icon {
+  color: var(--slate-400);
+}
+
+/* ไอคอนของเมนู ขนาด 18px */
+.nav-icon svg,
+.sidebar-logout svg {
+  height: 18px;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+@media (hover: hover) {
+  .nav-link:hover {
+    border-color: var(--slate-200);
+    background-color: var(--slate-50);
+  }
+  .nav-link:hover .nav-icon {
+    color: var(--slate-500);
+  }
+}
+
+/* เมนูของหน้าที่เปิดอยู่: พื้นเขียวอ่อน มีแถบเขียวด้านซ้าย */
+.nav-link.is-active {
+  border-color: var(--emerald-700);
+  background-color: var(--emerald-50);
+  color: var(--emerald-800);
+}
+
+.nav-link.is-active .nav-icon {
+  color: var(--emerald-700);
+}
+
+/* -----------------------------------------------------------------------------
+   ส่วนล่างของเมนู: ข้อมูลผู้ใช้ + ปุ่มออกจากระบบ
+   ----------------------------------------------------------------------------- */
+.sidebar-footer {
+  border-top: 1px solid var(--slate-200);
+  padding: 1rem;
+}
+
+.sidebar-user {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-inline: 0.5rem;
+}
+
+.sidebar-user-info {
+  min-width: 0;
+}
+
+.sidebar-user-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  font-weight: 500;
+  color: var(--slate-900);
+}
+
+.sidebar-user-role {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+  color: var(--slate-500);
+}
+
+/* ปุ่มเฟือง (เปลี่ยนรหัสผ่าน) */
+.gear-button {
+  position: relative;
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  color: var(--slate-400);
+  cursor: pointer;
+  transition-property: color, background-color;
+  transition-duration: 0.15s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gear-button svg {
+  height: 18px;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+@media (hover: hover) {
+  .gear-button:hover {
+    background-color: var(--slate-100);
+    color: var(--slate-600);
+  }
+}
+
+/* จุดแดงบนปุ่มเฟือง = ยังใช้รหัสผ่านตั้งต้นอยู่ */
+.gear-dot {
+  position: absolute;
+  right: 0.125rem;
+  top: 0.125rem;
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--red-500);
+  box-shadow: 0 0 0 2px var(--white);
+}
+
+/* ปุ่มออกจากระบบ */
+.sidebar-logout {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  font-weight: 500;
+  color: var(--slate-600);
+  cursor: pointer;
+  transition-property: color, background-color;
+  transition-duration: 0.15s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (hover: hover) {
+  .sidebar-logout:hover {
+    background-color: var(--slate-50);
+    color: var(--slate-900);
+  }
+}
+
+.sidebar-logout:disabled {
+  opacity: 0.5;
+}
+
+/* ปุ่มออกจากระบบของสมาชิกแสดงเคอร์เซอร์ "ห้าม" ตอนปิดใช้งาน */
+.sidebar-logout--member:disabled {
+  cursor: not-allowed;
+}
+
+/* -----------------------------------------------------------------------------
+   ส่วนโปรไฟล์ในเมนูของสมาชิก
+   ----------------------------------------------------------------------------- */
+.sidebar-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 1px solid var(--slate-200);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+/* รูปโปรไฟล์วงกลม (หรือตัวอักษรแรกของชื่อถ้าไม่มีรูป) */
+.profile-avatar {
+  display: flex;
+  height: 5rem;
+  width: 5rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  border: 1px solid var(--slate-200);
+  background-color: var(--slate-100);
+}
+
+.profile-avatar img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  color: transparent;
+}
+
+.profile-initial {
+  font-size: 1.25rem;
+  line-height: calc(1.75 / 1.25);
+  font-weight: 600;
+  color: var(--slate-400);
+}
+
+.profile-name {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  font-weight: 600;
+  color: var(--slate-900);
+}
+
+/* ป้ายรหัสสมาชิก */
+.profile-code {
+  margin-top: 0.25rem;
+  border-radius: 9999px;
+  background-color: var(--emerald-50);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+  font-weight: 500;
+  color: var(--emerald-700);
+  box-shadow: 0 0 0 1px var(--emerald-600-a20);
+}
+
+.profile-garden {
+  margin-top: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+  color: var(--slate-500);
+}

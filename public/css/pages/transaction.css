@@ -1,0 +1,169 @@
+/* =============================================================================
+   public/css/pages/transaction.css
+   -----------------------------------------------------------------------------
+   สไตล์ที่หน้า "การจัดการรับซื้อน้ำยาง" และ "การจัดการเบิกเงิน" ใช้ร่วมกัน
+   (ฟอร์มทำรายการ + ช่องแสดงยอดเงินสีเขียว + แถวปุ่มด้านล่าง)
+   ============================================================================= */
+
+/* ฟอร์ม 2 คอลัมน์ ระยะห่าง 1.5rem */
+.transaction-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+/* ช่องที่กินพื้นที่ทั้ง 2 คอลัมน์ */
+.span-2 {
+  grid-column: span 2 / span 2;
+}
+
+/* วางปุ่มชิดด้านล่างของช่อง (ให้ตรงกับช่องกรอกข้างเคียง) */
+.align-bottom {
+  display: flex;
+  align-items: flex-end;
+}
+
+/* หัวข้อส่วนในฟอร์มเบิกเงิน */
+.transaction-heading {
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: var(--slate-900);
+}
+
+.transaction-heading--divided {
+  margin-top: 2rem;
+  border-top: 1px solid var(--slate-200);
+  padding-top: 1.5rem;
+}
+
+/* ช่องวันที่แบบไทย (แสดงอย่างเดียว) + ไอคอนปฏิทิน */
+.thai-date-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--slate-300);
+  background-color: var(--slate-100);
+  padding: 0.5rem 0.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.thai-date-text {
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  color: var(--slate-600);
+}
+
+.thai-date-box svg {
+  height: 1rem;
+  width: 1rem;
+  flex-shrink: 0;
+  color: var(--slate-400);
+}
+
+/* กล่องสีเขียวอ่อน: ราคากลาง (กรอกได้) / ยอดเงินสะสม (แสดงอย่างเดียว) */
+.money-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--emerald-200);
+  background-color: var(--emerald-50);
+  padding: 0.5rem 0.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.money-box--between {
+  justify-content: space-between;
+}
+
+/* วงแหวนสีเขียวเมื่อกำลังพิมพ์ในกล่อง */
+.money-box:focus-within {
+  box-shadow: 0 0 0 2px var(--emerald-600), var(--shadow-sm);
+}
+
+.money-unit {
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+  font-weight: 500;
+  color: var(--emerald-700);
+}
+
+/* ช่องกรอกตัวเลขภายในกล่องสีเขียว (ไม่มีขอบ ชิดขวา) */
+.money-input {
+  width: 100%;
+  border-style: none;
+  background-color: transparent;
+  padding: 0;
+  text-align: right;
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  font-weight: 600;
+  color: var(--emerald-800);
+}
+
+.money-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.money-input:disabled {
+  color: var(--emerald-700);
+}
+
+.money-value {
+  font-size: 0.875rem;
+  line-height: calc(1.25 / 0.875);
+  font-weight: 600;
+  color: var(--emerald-800);
+}
+
+/* ข้อความผิดพลาดของฟอร์มทำรายการ */
+.transaction-error {
+  margin-top: 1rem;
+}
+
+/* แถวสรุปยอดรวม + ปุ่ม (มีเส้นคั่นด้านบน) */
+.transaction-footer {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-top: 1px solid var(--slate-200);
+  padding-top: 1.5rem;
+}
+
+.transaction-footer--end {
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.total-label {
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: var(--slate-400);
+}
+
+.total-amount {
+  font-size: 1.875rem;
+  line-height: calc(2.25 / 1.875);
+  font-weight: 700;
+  color: var(--emerald-700);
+}
+
+.total-unit {
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 500;
+  color: var(--slate-400);
+}
+
+.button-row {
+  display: flex;
+  gap: 0.75rem;
+}

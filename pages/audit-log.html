@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!--
+  pages/audit-log.html  (URL: /audit-log — เฉพาะผู้ดูแลระบบ)
+  หน้า "ประวัติการใช้งาน": ตรวจสอบกิจกรรมของผู้ใช้งานแต่ละคน (200 รายการล่าสุด)
+  การทำงาน: public/js/pages/audit-log.js   สไตล์: public/css/pages/audit-log.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/pages/audit-log.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- @include partials/sidebar.html -->
+
+    <main class="app-main">
+      <div class="page" id="page-content" hidden>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">ประวัติการใช้งาน</h1>
+            <p class="page-description">ตรวจสอบกิจกรรมของผู้ใช้งานแต่ละคนภายในระบบ</p>
+          </div>
+        </div>
+
+        <!-- ตัวกรอง: ค้นหา + ช่วงวันที่ + ปุ่มล้างวันที่ -->
+        <div class="filter-bar audit-filter">
+          <div class="audit-search">
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="audit-search">ค้นหาประวัติ</label>
+              </div>
+              <input id="audit-search" class="input" placeholder="ค้นหาด้วยชื่อผู้ใช้งาน หรือ Action">
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="date-from">จากวันที่</label>
+            </div>
+            <input id="date-from" class="input" type="date">
+          </div>
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="date-to">ถึงวันที่</label>
+            </div>
+            <input id="date-to" class="input" type="date">
+          </div>
+          <button type="button" class="btn btn-secondary btn-icon-square" id="reset-dates" aria-label="ล้างการเลือกวันที่" title="ล้างการเลือกวันที่" disabled>
+            <!-- @include partials/reset-icon.html -->
+          </button>
+        </div>
+        <p class="audit-note">แสดงเฉพาะ 200 รายการล่าสุด</p>
+
+        <div class="empty-state" id="audit-empty" hidden>ไม่พบประวัติการใช้งาน</div>
+
+        <div class="table-wrap" id="audit-table" hidden>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>เวลา</th>
+                <th>ชื่อผู้ใช้งาน</th>
+                <th>บทบาท</th>
+                <th>Action</th>
+                <th><div class="col-box col-box--w64 col-box--head">รายละเอียด</div></th>
+              </tr>
+            </thead>
+            <tbody id="audit-rows"></tbody>
+          </table>
+        </div>
+        <div id="audit-pagination"></div>
+
+        <!-- หน้าต่างแสดงรายละเอียดเต็ม -->
+        <div class="modal-overlay details-modal" id="details-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title">รายละเอียด</h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="details-full" id="details-full"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบแถวประวัติการใช้งาน -->
+  <template id="audit-row-template">
+    <tr>
+      <td><span class="cell-muted cell-nowrap" data-slot="timestamp"></span></td>
+      <td><span class="cell-strong" data-slot="username"></span></td>
+      <td>
+        <span class="badge badge-success" data-slot="role-admin">ผู้ดูแลระบบ</span>
+        <span class="badge badge-neutral" data-slot="role-staff">พนักงาน</span>
+      </td>
+      <td data-slot="action"></td>
+      <td>
+        <div class="col-box col-box--w64">
+          <div class="details-cell">
+            <span class="details-text" data-slot="details"></span>
+            <button type="button" class="details-more" data-action="more" hidden>ดูข้อความเต็ม</button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </template>
+
+  <!-- @include partials/pagination.html -->
+
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/audit-log.js"></script>
+</body>
+</html>

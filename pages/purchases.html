@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<!--
+  pages/purchases.html  (URL: /purchases)
+  หน้า "การจัดการรับซื้อน้ำยาง": บันทึกการรับซื้อ คำนวณจำนวนเงิน และพิมพ์ใบเสร็จ
+  การทำงาน: public/js/pages/purchases.js   สไตล์: public/css/pages/transaction.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/receipt.css">
+  <link rel="stylesheet" href="/css/pages/transaction.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- @include partials/sidebar.html -->
+
+    <main class="app-main">
+      <div class="page page--5xl" id="page-content" hidden>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">การจัดการรับซื้อน้ำยาง</h1>
+            <p class="page-description">บันทึกข้อมูลการรับซื้อน้ำยางพารา คำนวณจำนวนเงิน และพิมพ์ใบเสร็จ</p>
+          </div>
+          <!-- นาฬิกาเวลาปัจจุบัน -->
+          <div class="live-clock">
+            <p class="live-clock-label">เวลาปัจจุบัน</p>
+            <p class="live-clock-time" id="live-clock">--:--:--</p>
+          </div>
+        </div>
+
+        <div class="card card--p8">
+          <div class="transaction-grid">
+            <!-- วันที่บันทึก (แสดงอย่างเดียว) -->
+            <div class="field">
+              <label class="field-label">วันที่บันทึก</label>
+              <div class="thai-date-box">
+                <span class="thai-date-text" id="record-date"></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- ราคากลางประจำวัน (เติมให้อัตโนมัติ แก้ไขเองได้) -->
+            <div class="field">
+              <label class="field-label">ราคากลางประจำวัน</label>
+              <div class="money-box">
+                <span class="money-unit">THB/KG</span>
+                <input type="number" min="0" step="0.01" class="money-input" id="market-price" placeholder="0.0">
+              </div>
+            </div>
+
+            <!-- เลขที่สมาชิก/ลูกจ้าง (ช่องค้นหาแบบเลือกได้) -->
+            <div>
+              <div class="field" id="seller-field">
+                <div class="field-label-row">
+                  <label class="field-label" for="seller-input">เลขที่สมาชิก</label>
+                  <span class="field-error" data-combobox-error hidden></span>
+                </div>
+                <div class="combobox">
+                  <input id="seller-input" class="input" role="combobox" aria-expanded="false" aria-controls="seller-listbox" autocomplete="off" placeholder="พิมพ์ชื่อหรือรหัส (M- / E-)">
+                  <ul id="seller-listbox" class="combobox-list" role="listbox" hidden></ul>
+                </div>
+              </div>
+              <span class="field-searching" id="seller-loading" hidden>กำลังค้นหา...</span>
+            </div>
+
+            <!-- เจ้าของสวน: ถ้าลูกจ้างมีเจ้าของสวนหลายคน แสดงเป็นช่องเลือก -->
+            <div class="field" id="owner-select-field" hidden>
+              <div class="field-label-row">
+                <label class="field-label" for="owner-select">เจ้าของสวน</label>
+              </div>
+              <select id="owner-select" class="select"></select>
+            </div>
+            <div class="field" id="owner-input-field">
+              <div class="field-label-row">
+                <label class="field-label" for="owner-input">เจ้าของสวน</label>
+              </div>
+              <input id="owner-input" class="input" readonly disabled placeholder="ระบบจะแสดงให้อัตโนมัติ">
+            </div>
+
+            <!-- ผู้ส่งน้ำยาง -->
+            <div class="span-2">
+              <div class="field">
+                <div class="field-label-row">
+                  <label class="field-label" for="delivered-by">รับน้ำยางจาก</label>
+                </div>
+                <input id="delivered-by" class="input" readonly disabled placeholder="ระบบจะแสดงให้อัตโนมัติ">
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="raw-weight">น้ำหนักน้ำยางสดสุทธิ (กก.)</label>
+              </div>
+              <input id="raw-weight" class="input" type="number" min="0" step="0.01" placeholder="0.00">
+            </div>
+
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="dry-percentage">% เนื้อยางแห้ง</label>
+              </div>
+              <input id="dry-percentage" class="input" type="number" min="0" max="100" step="0.01" placeholder="0.00">
+            </div>
+
+            <!-- น้ำหนักยางแห้ง = น้ำหนักสด × % เนื้อยาง ÷ 100 (คำนวณให้) -->
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="dry-weight">น้ำหนักยางแห้งสุทธิ (กก.)</label>
+              </div>
+              <input id="dry-weight" class="input" readonly disabled placeholder="0.00">
+            </div>
+
+            <div class="align-bottom">
+              <button type="button" class="btn btn-primary btn-block" id="confirm-button">ยืนยัน</button>
+            </div>
+          </div>
+
+          <p class="form-error transaction-error" id="form-error" hidden></p>
+
+          <!-- ยอดรวม + ปุ่มยกเลิก/พิมพ์ใบเสร็จ -->
+          <div class="transaction-footer">
+            <div>
+              <p class="total-label">จำนวนเงินรวม</p>
+              <p class="total-amount"><span id="total-amount">0.00</span> <span class="total-unit">บาท</span></p>
+            </div>
+            <div class="button-row">
+              <button type="button" class="btn btn-secondary" id="reset-button">ยกเลิก</button>
+              <button type="button" class="btn btn-primary" id="print-button" disabled>พิมพ์ใบเสร็จ</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ใบเสร็จสำหรับพิมพ์ (มีเมื่อบันทึกสำเร็จแล้ว) -->
+        <div id="receipt-container"></div>
+
+        <!-- หน้าต่างยืนยันการทำรายการ -->
+        <div class="modal-overlay" id="confirm-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title">ยืนยันการทำรายการ</h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-message" data-slot="message">ต้องการบันทึกรายการรับซื้อน้ำยางนี้ใช่หรือไม่?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+              <button type="button" class="btn btn-primary" data-action="confirm">ยืนยัน</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- @include partials/purchase-receipt.html -->
+
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/purchases.js"></script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<!--
+  pages/employees.html  (URL: /employees)
+  หน้า "การจัดการลูกจ้าง": ค้นหา / เพิ่ม / ดู / แก้ไข / ระงับ / ลบ ลูกจ้าง
+  การทำงาน: public/js/pages/employees.js   สไตล์: public/css/pages/people.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/pages/people.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- @include partials/sidebar.html -->
+
+    <main class="app-main">
+      <!-- ไอคอนโหลด ระหว่างรอข้อมูลลูกจ้าง -->
+      <div class="page-loading" id="page-loading">
+        <!-- @include partials/spinner-lg.html -->
+      </div>
+
+      <div class="page" id="page-content" hidden>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">การจัดการลูกจ้าง</h1>
+            <p class="page-description">จัดการข้อมูลลูกจ้าง</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="add-employee-button">+ เพิ่มลูกจ้างใหม่</button>
+        </div>
+
+        <!-- ช่องค้นหา -->
+        <div class="search-box">
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="employee-search">ค้นหาลูกจ้าง</label>
+            </div>
+            <input id="employee-search" class="input" placeholder="ค้นหาด้วยรหัส ชื่อ หรือเบอร์โทร">
+          </div>
+        </div>
+
+        <!-- ไม่พบข้อมูล -->
+        <div class="empty-state" id="employee-empty" hidden>ไม่พบข้อมูลลูกจ้าง</div>
+
+        <!-- ตารางลูกจ้าง (แถวสร้างจาก template "employee-row-template") -->
+        <div class="table-wrap" id="employee-table" hidden>
+          <table class="table employees-table">
+            <thead>
+              <tr>
+                <th class="col-code">รหัสลูกจ้าง</th>
+                <th class="col-name"><div class="col-box col-box--w36 col-box--head">ชื่อ-นามสกุล</div></th>
+                <th class="col-status">สถานะ</th>
+                <th class="col-actions">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="employee-rows"></tbody>
+          </table>
+        </div>
+
+        <!-- ================= หน้าต่างฟอร์มลูกจ้าง (เพิ่ม / ดู / แก้ไข) ================= -->
+        <div class="modal-overlay" id="employee-form-modal" hidden>
+          <div class="modal modal--2xl" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title" data-modal-title></h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <!-- ไอคอนโหลด ระหว่างดึงข้อมูลลูกจ้างแบบเต็ม (รวมรูปถ่าย) -->
+              <div class="modal-loading" id="employee-form-loading" hidden>
+                <!-- @include partials/spinner-lg.html -->
+              </div>
+
+              <form id="employee-form" class="stack-5">
+                <!-- รูปถ่าย -->
+                <div class="photo-row">
+                  <div class="photo-preview">
+                    <img id="employee-photo-img" alt="รูปถ่ายลูกจ้าง" width="80" height="80" loading="lazy" decoding="async" hidden>
+                    <span id="employee-photo-empty">ไม่มีรูป</span>
+                  </div>
+                  <div class="photo-upload" id="employee-photo-upload">
+                    <label class="field-label">รูปถ่าย</label>
+                    <input type="file" accept="image/*" class="file-input" id="employee-photo-input">
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="employee-first-name">ชื่อ<span class="field-required">*</span></label>
+                    </div>
+                    <input id="employee-first-name" class="input" required>
+                  </div>
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="employee-last-name">นามสกุล<span class="field-required">*</span></label>
+                    </div>
+                    <input id="employee-last-name" class="input" required>
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="employee-id-card">เลขบัตรประชาชน<span class="field-required">*</span></label>
+                    </div>
+                    <input id="employee-id-card" class="input" required inputmode="numeric" pattern="[0-9]{13}" title="เลขบัตรประชาชน 13 หลัก" minlength="13" maxlength="13">
+                  </div>
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="employee-dob">วันเกิด<span class="field-required">*</span></label>
+                    </div>
+                    <input id="employee-dob" class="input" type="date" required>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="employee-phone">เบอร์โทร<span class="field-required">*</span></label>
+                  </div>
+                  <input id="employee-phone" class="input" required inputmode="numeric" pattern="[0-9]{10}" title="เบอร์โทร 10 หลัก" minlength="10" maxlength="10">
+                </div>
+
+                <div class="field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="employee-address">ที่อยู่<span class="field-required">*</span></label>
+                  </div>
+                  <textarea id="employee-address" class="textarea" required rows="3"></textarea>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="employee-district">อำเภอ<span class="field-required">*</span></label>
+                    </div>
+                    <input id="employee-district" class="input" required>
+                  </div>
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="employee-province">จังหวัด<span class="field-required">*</span></label>
+                    </div>
+                    <input id="employee-province" class="input" required>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="employee-postal-code">รหัสไปรษณีย์<span class="field-required">*</span></label>
+                  </div>
+                  <input id="employee-postal-code" class="input" required inputmode="numeric" maxlength="5">
+                </div>
+
+                <!-- สัดส่วนแบ่งรายได้จากสัญญาจ้าง (แสดงเฉพาะโหมดดู/แก้ไข) -->
+                <div id="employee-contracts" hidden>
+                  <p class="contract-list-title">สัดส่วนแบ่งรายได้ (สัญญาจ้าง)</p>
+                  <p class="contract-list-empty" id="employee-contracts-empty">ยังไม่มีสัญญาจ้างของลูกจ้างคนนี้</p>
+                  <ul class="stack-2" id="employee-contracts-list"></ul>
+                </div>
+
+                <p class="form-error" id="employee-form-error" hidden></p>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <!-- ปุ่มของโหมด "ดูข้อมูล" -->
+              <button type="button" class="btn btn-secondary" id="employee-form-close">ปิด</button>
+              <button type="button" class="btn btn-primary" id="employee-form-edit">แก้ไขข้อมูล</button>
+              <!-- ปุ่มของโหมด "เพิ่ม/แก้ไข" -->
+              <button type="button" class="btn btn-secondary" id="employee-form-cancel">ยกเลิก</button>
+              <button type="submit" form="employee-form" class="btn btn-primary" id="employee-form-submit">บันทึก</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= หน้าต่างยืนยันระงับ / เปิดใช้งาน ================= -->
+        <div class="modal-overlay" id="employee-status-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title" data-modal-title></h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-message" data-mode="suspend">ต้องการระงับการใช้งานของ <strong data-slot="name"></strong> (<span data-slot="code"></span>) ใช่หรือไม่?</p>
+              <p class="modal-message" data-mode="activate">ต้องการเปิดใช้งาน <strong data-slot="name"></strong> (<span data-slot="code"></span>) อีกครั้งใช่หรือไม่?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+              <button type="button" class="btn btn-danger" data-action="confirm"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= หน้าต่างยืนยันการลบ ================= -->
+        <div class="modal-overlay" id="employee-delete-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title">ลบลูกจ้าง</h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-message">ต้องการลบข้อมูลของ <strong data-slot="name"></strong> (<span data-slot="code"></span>) อย่างถาวรใช่หรือไม่? การลบไม่สามารถย้อนกลับได้</p>
+              <p class="form-error" data-slot="error" hidden></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+              <button type="button" class="btn btn-danger" data-action="confirm">ยืนยันการลบ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบแถวในตารางลูกจ้าง -->
+  <template id="employee-row-template">
+    <tr>
+      <td><span class="cell-strong" data-slot="employeeCode"></span></td>
+      <td><div class="col-box col-box--w36 col-box--nowrap" data-slot="fullName"></div></td>
+      <td>
+        <span class="badge badge-success" data-slot="badge-active">ใช้งานอยู่</span>
+        <span class="badge badge-danger" data-slot="badge-inactive">ถูกระงับ</span>
+      </td>
+      <td>
+        <div class="row-actions">
+          <button type="button" class="btn btn-ghost" data-action="view">ดูข้อมูล</button>
+          <button type="button" class="btn btn-ghost" data-action="edit">แก้ไข</button>
+          <button type="button" class="btn" data-action="toggle-status"></button>
+          <button type="button" class="btn btn-danger" data-action="delete">ลบ</button>
+        </div>
+      </td>
+    </tr>
+  </template>
+
+  <!-- แม่แบบสัญญาจ้าง 1 รายการ ในหน้าต่างข้อมูลลูกจ้าง -->
+  <template id="employee-contract-template">
+    <li class="contract-list-item">
+      <div>
+        <p class="contract-list-name"><span data-slot="memberName"></span> <span class="contract-list-code">(<span data-slot="memberCode"></span>)</span></p>
+        <p class="contract-list-share">สมาชิก <span data-slot="memberShare"></span>% / ลูกจ้าง <span data-slot="employeeShare"></span>%</p>
+      </div>
+      <span class="badge badge-neutral" data-slot="badge-expired">สิ้นสุดสัญญาแล้ว</span>
+      <span class="badge badge-success" data-slot="badge-active">ใช้งานอยู่</span>
+      <span class="badge badge-danger" data-slot="badge-inactive">ถูกระงับ</span>
+    </li>
+  </template>
+
+  <!-- ข้อมูลเมนูด้านซ้ายที่เซิร์ฟเวอร์ฝังมา -->
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/employees.js"></script>
+</body>
+</html>

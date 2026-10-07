@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<!--
+  pages/dividends.html  (URL: /dividends)
+  หน้า "การจัดการคำนวณเงินปันผล": คำนวณปันผลจากน้ำหนักยางแห้งรวมในแต่ละปี แล้วจ่ายเข้ายอดสะสม
+  การทำงาน: public/js/pages/dividends.js   สไตล์: public/css/pages/dividends.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/pages/dividends.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- @include partials/sidebar.html -->
+
+    <main class="app-main">
+      <div class="page-loading" id="page-loading">
+        <!-- @include partials/spinner-lg.html -->
+      </div>
+
+      <div class="page" id="page-content" hidden>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">การจัดการคำนวณเงินปันผล</h1>
+            <p class="page-description">คำนวณเงินปันผลของสมาชิกจากน้ำหนักน้ำยางแห้งรวมในแต่ละปี</p>
+          </div>
+        </div>
+
+        <!-- ฟอร์มเลือกปี + อัตราปันผล -->
+        <form class="card card--p6 dividend-form" id="dividend-form">
+          <div class="filter-bar">
+            <div class="year-field">
+              <div class="field">
+                <div class="field-label-row">
+                  <label class="field-label" for="year-select">ประจำปี (เดือนพฤษภาคม-เดือนมีนาคม)</label>
+                </div>
+                <select id="year-select" class="select"></select>
+              </div>
+            </div>
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="rate-input">กำหนดอัตราเงินปันผล (บาท/กก.)</label>
+              </div>
+              <input id="rate-input" class="input rate-input" type="number" min="0" step="0.01" placeholder="เช่น 2.50">
+            </div>
+            <button type="submit" class="btn btn-primary btn-input-height">ตกลง</button>
+          </div>
+          <p class="dividend-note" id="already-paid-note" hidden>หมายเหตุ: ปันผลประจำปี <span data-slot="year"></span> มีการจ่ายไปแล้ว ยังคำนวณดูตัวเลขได้ตามปกติ แต่จะไม่สามารถกดจ่ายปันผลซ้ำสำหรับปีนี้ได้</p>
+          <p class="form-error" id="rate-error" hidden></p>
+        </form>
+
+        <!-- การ์ดสรุป 4 ใบ -->
+        <section class="stat-grid stat-grid--lg-4 dividend-stats">
+          <div class="stat-card">
+            <p class="stat-label">น้ำหนักยางแห้งรวม</p>
+            <p class="stat-value" id="stat-dry-weight"></p>
+            <p class="stat-hint">ประจำปี (เดือนพฤษภาคม-เดือนมีนาคม) <span data-slot="year"></span></p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">มูลค่าเงินปันผลรวม</p>
+            <p class="stat-value" id="stat-total-dividend"></p>
+            <p class="stat-hint">ประจำปี <span data-slot="year"></span></p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">อัตราเงินปันผล</p>
+            <p class="stat-value" id="stat-rate"></p>
+            <p class="stat-hint">ต่อน้ำหนักยางแห้ง 1 กก.</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">จำนวนสมาชิกทั้งหมด</p>
+            <p class="stat-value" id="stat-member-count"></p>
+            <p class="stat-hint">สมาชิกทั้งหมดในระบบ</p>
+          </div>
+        </section>
+
+        <!-- ตารางปันผล (แสดงหลังกด "ตกลง") -->
+        <section>
+          <h2 class="section-title">ตารางปันผล</h2>
+          <div class="empty-state" id="dividend-placeholder">เลือกปีและกรอกอัตราเงินปันผล จากนั้นกด “ตกลง” เพื่อคำนวณ</div>
+
+          <div id="dividend-result" hidden>
+            <div class="empty-state" id="dividend-empty" hidden>ไม่มีข้อมูลสมาชิก</div>
+            <div class="table-wrap" id="dividend-table" hidden>
+              <table class="table dividend-table">
+                <thead>
+                  <tr>
+                    <th class="col-name"><div class="col-box col-box--w36 col-box--head">ชื่อสมาชิก</div></th>
+                    <th class="col-code">รหัสสมาชิก</th>
+                    <th class="col-weight">น้ำหนักน้ำยางแห้งรวม (กก.)</th>
+                    <th class="col-rate">อัตราเงินปันผล (บาท/กก.)</th>
+                    <th class="col-amount">จำนวนเงิน (บาท)</th>
+                  </tr>
+                </thead>
+                <tbody id="dividend-rows"></tbody>
+              </table>
+            </div>
+            <div id="dividend-pagination"></div>
+
+            <p class="period-text">ช่วงเวลาที่จ่ายปันผล: <span id="applied-period"></span></p>
+            <div class="pay-row">
+              <span class="pay-status pay-status--warning" id="pay-blocked" hidden>ปันผลประจำปี <span data-slot="year"></span> จ่ายไปแล้ว ไม่สามารถจ่ายซ้ำได้</span>
+              <span class="pay-status pay-status--done" id="pay-done" hidden>จ่ายเงินปันผลเรียบร้อยแล้ว</span>
+              <button type="button" class="btn btn-primary" id="pay-button">จ่ายปันผล</button>
+            </div>
+            <p class="form-error pay-error" id="pay-error" hidden></p>
+          </div>
+        </section>
+
+        <!-- ประวัติการจ่ายปันผล -->
+        <section class="payout-history">
+          <h2 class="section-title">ประวัติการจ่ายปันผล</h2>
+          <div class="empty-state" id="payout-empty" hidden>ยังไม่มีประวัติการจ่ายปันผล</div>
+          <div class="table-wrap" id="payout-table" hidden>
+            <table class="table payout-table">
+              <thead>
+                <tr>
+                  <th class="col-date">วันที่จ่าย</th>
+                  <th class="col-year">ประจำปี</th>
+                  <th class="col-period"><div class="col-box col-box--w56 col-box--head">ช่วงเวลาที่จ่ายปันผล</div></th>
+                  <th class="col-rate">อัตรา (บาท/กก.)</th>
+                  <th class="col-count">สมาชิก (ราย)</th>
+                  <th class="col-total">ยอดรวม (บาท)</th>
+                  <th class="col-detail">รายละเอียด</th>
+                </tr>
+              </thead>
+              <tbody id="payout-rows"></tbody>
+            </table>
+          </div>
+
+          <!-- หน้าต่างรายละเอียดการจ่ายปันผลของปีที่เลือก -->
+          <div class="modal-overlay" id="payout-modal" hidden>
+            <div class="modal modal--4xl" role="dialog" aria-modal="true">
+              <div class="modal-header">
+                <h2 class="modal-title" data-modal-title></h2>
+                <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+              </div>
+              <div class="modal-body">
+                <dl class="payout-summary">
+                  <div>
+                    <dt>ช่วงเวลา</dt>
+                    <dd id="payout-period"></dd>
+                  </div>
+                  <div>
+                    <dt>อัตรา</dt>
+                    <dd class="num" id="payout-rate"></dd>
+                  </div>
+                  <div>
+                    <dt>ยางแห้งรวม</dt>
+                    <dd class="num" id="payout-weight"></dd>
+                  </div>
+                  <div>
+                    <dt>ยอดรวม</dt>
+                    <dd class="num-income" id="payout-total"></dd>
+                  </div>
+                </dl>
+                <div class="payout-detail-scroll">
+                  <div class="table-wrap">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>เลขที่</th>
+                          <th><div class="col-box col-box--w36 col-box--head">ชื่อสมาชิก</div></th>
+                          <th>ยางแห้ง (กก.)</th>
+                          <th>ปันผล (บาท)</th>
+                          <th>ยอดเงินสะสม ก่อน → หลัง</th>
+                        </tr>
+                      </thead>
+                      <tbody id="payout-detail-rows"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="payout-close">ปิด</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- หน้าต่างยืนยันการจ่ายปันผล -->
+        <div class="modal-overlay" id="confirm-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title">ยืนยันการทำรายการ</h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-message" data-slot="message"></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+              <button type="button" class="btn btn-primary" data-action="confirm">ยืนยัน</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบแถวตารางปันผล -->
+  <template id="dividend-row-template">
+    <tr>
+      <td><div class="col-box col-box--w36 col-box--nowrap cell-strong" data-slot="memberName"></div></td>
+      <td data-slot="memberCode"></td>
+      <td><span class="num" data-slot="dryWeightKg"></span></td>
+      <td><span class="num" data-slot="rate"></span></td>
+      <td><span class="num-income" data-slot="amount"></span></td>
+    </tr>
+  </template>
+
+  <!-- แม่แบบแถวประวัติการจ่ายปันผล -->
+  <template id="payout-row-template">
+    <tr>
+      <td><span class="cell-muted cell-nowrap" data-slot="paidAt"></span></td>
+      <td><span class="cell-strong" data-slot="payoutYear"></span></td>
+      <td>
+        <div class="col-box col-box--w56">
+          <span data-slot="period"></span>
+          <span class="cell-faint" data-slot="no-period">-</span>
+        </div>
+      </td>
+      <td><span class="num" data-slot="rate"></span></td>
+      <td><span class="num" data-slot="count"></span></td>
+      <td><span class="num-income" data-slot="total"></span></td>
+      <td><button type="button" class="btn btn-secondary btn-sm" data-action="detail">ดูรายละเอียด</button></td>
+    </tr>
+  </template>
+
+  <!-- แม่แบบแถวรายชื่อในหน้าต่างรายละเอียด -->
+  <template id="payout-detail-row-template">
+    <tr>
+      <td><span class="cell-muted" data-slot="dividendCode"></span></td>
+      <td>
+        <div class="col-box col-box--w36 col-box--nowrap">
+          <span class="cell-strong" data-slot="memberName"></span>
+          <span class="cell-subline" data-slot="memberCode"></span>
+        </div>
+      </td>
+      <td><span class="num" data-slot="dryWeightKg"></span></td>
+      <td><span class="num-income" data-slot="amount"></span></td>
+      <td><span class="num cell-muted cell-nowrap" data-slot="balances"></span></td>
+    </tr>
+  </template>
+
+  <!-- @include partials/pagination.html -->
+
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/dividends.js"></script>
+</body>
+</html>

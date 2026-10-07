@@ -1,0 +1,149 @@
+<!--
+  pages/partials/sidebar.html
+  เมนูด้านซ้ายของระบบพนักงาน (ใช้ในทุกหน้าหลังเข้าสู่ระบบ)
+  - กลุ่ม Staff / Reports แสดงทุกคน
+  - กลุ่ม Admin แสดงเฉพาะผู้ดูแลระบบ (JavaScript เปิดให้เมื่อ role = ADMIN)
+  - ส่วนล่าง: ชื่อผู้ใช้, ปุ่มเฟืองเปลี่ยนรหัสผ่าน (เฉพาะพนักงาน), ปุ่มออกจากระบบ
+  การทำงานทั้งหมดอยู่ใน public/js/components/sidebar.js
+-->
+<aside class="sidebar" id="app-sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">FL</div>
+    <div>
+      <p class="brand-name">สหกรณ์กองทุนสวนยางบ้านบางบอน</p>
+      <p class="brand-subtitle">การจัดการรับซื้อน้ำยางพารา</p>
+    </div>
+  </div>
+
+  <nav class="nav stack-4">
+    <!-- กลุ่มงานประจำของพนักงาน -->
+    <div>
+      <p class="nav-group-label">Staff</p>
+      <div class="stack-1">
+        <a class="nav-link" href="/purchases">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6M8 6l4-4 4 4M6 10h12l-1.5 10.5a2 2 0 0 1-2 1.5h-5a2 2 0 0 1-2-1.5L6 10Z"/></svg></span>
+          การจัดการรับซื้อน้ำยาง
+        </a>
+        <a class="nav-link" href="/withdrawals">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+          การจัดการเบิกเงิน
+        </a>
+        <a class="nav-link" href="/members">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          การจัดการสมาชิก
+        </a>
+        <a class="nav-link" href="/employees">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg></span>
+          การจัดการลูกจ้าง
+        </a>
+        <a class="nav-link" href="/contracts">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6M9 16h6M9 8h1M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg></span>
+          สัญญาจ้าง
+        </a>
+        <a class="nav-link" href="/reference-price">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+          ราคากลางประจำวัน
+        </a>
+      </div>
+    </div>
+
+    <!-- กลุ่มรายงาน -->
+    <div>
+      <p class="nav-group-label">Reports</p>
+      <div class="stack-1">
+        <a class="nav-link" href="/performance/purchase-summary">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18M7 15l3-4 3 3 5-7"/></svg></span>
+          ผลประกอบการรับซื้อน้ำยาง
+        </a>
+        <a class="nav-link" href="/dividends">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+          คำนวณเงินปันผล
+        </a>
+      </div>
+    </div>
+
+    <!-- กลุ่มผู้ดูแลระบบ (ซ่อนไว้ก่อน แสดงเมื่อ role = ADMIN) -->
+    <div id="sidebar-admin-group" hidden>
+      <p class="nav-group-label">Admin</p>
+      <div class="stack-1">
+        <a class="nav-link" href="/users">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
+          ตรวจสอบสิทธิ์ผู้ใช้งาน
+        </a>
+        <a class="nav-link" href="/audit-log">
+          <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2M21 12a9 9 0 1 1-9-9 9 9 0 0 1 9 9Z"/></svg></span>
+          ประวัติการใช้งาน
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <!-- ข้อมูลผู้ใช้ที่เข้าสู่ระบบอยู่ -->
+    <div class="sidebar-user" id="sidebar-user" hidden>
+      <div class="sidebar-user-info">
+        <p class="sidebar-user-name" id="sidebar-user-name"></p>
+        <p class="sidebar-user-role" id="sidebar-user-role"></p>
+      </div>
+      <!-- ปุ่มเฟือง: เปลี่ยนรหัสผ่าน (แสดงเฉพาะพนักงาน) จุดแดง = ยังใช้รหัสผ่านตั้งต้น -->
+      <button type="button" class="gear-button" id="change-password-button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82A1.65 1.65 0 0 0 3 13.09H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>
+        </svg>
+        <span class="gear-dot" id="default-password-dot" hidden></span>
+      </button>
+    </div>
+
+    <button type="button" class="sidebar-logout" id="logout-button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      <span id="logout-label">ออกจากระบบ</span>
+    </button>
+  </div>
+
+  <!-- หน้าต่างเปลี่ยนรหัสผ่าน -->
+  <div class="modal-overlay" id="change-password-modal" hidden>
+    <div class="modal modal--sm" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h2 class="modal-title">เปลี่ยนรหัสผ่าน</h2>
+        <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="change-password-form" class="stack-4">
+          <div class="password-field">
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="current-password">รหัสผ่านปัจจุบัน<span class="field-required">*</span></label>
+              </div>
+              <input id="current-password" class="input" type="password" required autocomplete="current-password">
+            </div>
+            <!-- @include partials/password-toggle.html -->
+          </div>
+          <div class="password-field">
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="new-password">รหัสผ่านใหม่<span class="field-required">*</span></label>
+              </div>
+              <input id="new-password" class="input" type="password" required minlength="6" autocomplete="new-password">
+            </div>
+            <!-- @include partials/password-toggle.html -->
+          </div>
+          <div class="password-field">
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="confirm-password">ยืนยันรหัสผ่านใหม่<span class="field-required">*</span></label>
+              </div>
+              <input id="confirm-password" class="input" type="password" required minlength="6" autocomplete="new-password">
+            </div>
+            <!-- @include partials/password-toggle.html -->
+          </div>
+          <p class="form-error" id="change-password-error" hidden></p>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="change-password-cancel">ยกเลิก</button>
+        <button type="submit" form="change-password-form" class="btn btn-primary" id="change-password-submit">บันทึก</button>
+      </div>
+    </div>
+  </div>
+</aside>

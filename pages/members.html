@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<!--
+  pages/members.html  (URL: /members)
+  หน้า "การจัดการสมาชิก": ค้นหา / เพิ่ม / ดู / แก้ไข / ระงับ / ลบ สมาชิก
+  การทำงาน: public/js/pages/members.js   สไตล์: public/css/pages/people.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/pages/people.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- @include partials/sidebar.html -->
+
+    <main class="app-main">
+      <!-- ไอคอนโหลด ระหว่างรอข้อมูลสมาชิก -->
+      <div class="page-loading" id="page-loading">
+        <!-- @include partials/spinner-lg.html -->
+      </div>
+
+      <div class="page" id="page-content" hidden>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">การจัดการสมาชิก</h1>
+            <p class="page-description">จัดการข้อมูลสมาชิกผู้ขายน้ำยางพารา</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="add-member-button">+ เพิ่มสมาชิกใหม่</button>
+        </div>
+
+        <!-- ช่องค้นหา -->
+        <div class="search-box">
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="member-search">ค้นหาสมาชิก</label>
+            </div>
+            <input id="member-search" class="input" placeholder="ค้นหาด้วยรหัส ชื่อ หรือเบอร์โทร">
+          </div>
+        </div>
+
+        <!-- ไม่พบข้อมูล -->
+        <div class="empty-state" id="member-empty" hidden>ไม่พบข้อมูลสมาชิก</div>
+
+        <!-- ตารางสมาชิก (แถวสร้างจาก template "member-row-template") -->
+        <div class="table-wrap" id="member-table" hidden>
+          <table class="table members-table">
+            <thead>
+              <tr>
+                <th class="col-code">รหัสสมาชิก</th>
+                <th class="col-name"><div class="col-box col-box--w36 col-box--head">ชื่อ-นามสกุล</div></th>
+                <th class="col-id-card">เลขบัตรประชาชน</th>
+                <th class="col-wallet">ยอดเงินสะสม</th>
+                <th class="col-status">สถานะ</th>
+                <th class="col-actions">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="member-rows"></tbody>
+          </table>
+        </div>
+
+        <!-- ================= หน้าต่างฟอร์มสมาชิก (เพิ่ม / ดู / แก้ไข) ================= -->
+        <div class="modal-overlay" id="member-form-modal" hidden>
+          <div class="modal modal--2xl" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title" data-modal-title></h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <!-- ไอคอนโหลด ระหว่างดึงข้อมูลสมาชิกแบบเต็ม (รวมรูปถ่าย) -->
+              <div class="modal-loading" id="member-form-loading" hidden>
+                <!-- @include partials/spinner-lg.html -->
+              </div>
+
+              <form id="member-form" class="stack-5">
+                <!-- รูปถ่าย -->
+                <div class="photo-row">
+                  <div class="photo-preview">
+                    <img id="member-photo-img" alt="รูปถ่ายสมาชิก" width="80" height="80" loading="lazy" decoding="async" hidden>
+                    <span id="member-photo-empty">ไม่มีรูป</span>
+                  </div>
+                  <div class="photo-upload" id="member-photo-upload">
+                    <label class="field-label">รูปถ่าย</label>
+                    <input type="file" accept="image/*" class="file-input" id="member-photo-input">
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="member-first-name">ชื่อ<span class="field-required">*</span></label>
+                    </div>
+                    <input id="member-first-name" class="input" required>
+                  </div>
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="member-last-name">นามสกุล<span class="field-required">*</span></label>
+                    </div>
+                    <input id="member-last-name" class="input" required>
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="member-id-card">เลขบัตรประชาชน<span class="field-required">*</span></label>
+                    </div>
+                    <input id="member-id-card" class="input" required inputmode="numeric" pattern="[0-9]{13}" title="เลขบัตรประชาชน 13 หลัก" minlength="13" maxlength="13">
+                  </div>
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="member-dob">วันเกิด<span class="field-required">*</span></label>
+                    </div>
+                    <input id="member-dob" class="input" type="date" required>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="member-phone">เบอร์โทร<span class="field-required">*</span></label>
+                  </div>
+                  <input id="member-phone" class="input" required inputmode="numeric" pattern="[0-9]{10}" title="เบอร์โทร 10 หลัก" minlength="10" maxlength="10">
+                </div>
+
+                <div class="field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="member-address">ที่อยู่<span class="field-required">*</span></label>
+                  </div>
+                  <textarea id="member-address" class="textarea" required rows="3"></textarea>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="member-district">อำเภอ<span class="field-required">*</span></label>
+                    </div>
+                    <input id="member-district" class="input" required>
+                  </div>
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="member-province">จังหวัด<span class="field-required">*</span></label>
+                    </div>
+                    <input id="member-province" class="input" required>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="member-postal-code">รหัสไปรษณีย์<span class="field-required">*</span></label>
+                  </div>
+                  <input id="member-postal-code" class="input" required inputmode="numeric" maxlength="5">
+                </div>
+
+                <p class="form-error" id="member-form-error" hidden></p>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <!-- ปุ่มของโหมด "ดูข้อมูล" -->
+              <button type="button" class="btn btn-secondary" id="member-form-close">ปิด</button>
+              <button type="button" class="btn btn-primary" id="member-form-edit">แก้ไขข้อมูล</button>
+              <!-- ปุ่มของโหมด "เพิ่ม/แก้ไข" -->
+              <button type="button" class="btn btn-secondary" id="member-form-cancel">ยกเลิก</button>
+              <button type="submit" form="member-form" class="btn btn-primary" id="member-form-submit">บันทึก</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= หน้าต่างยืนยันระงับ / เปิดใช้งาน ================= -->
+        <div class="modal-overlay" id="member-status-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title" data-modal-title></h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-message" data-mode="suspend">ต้องการระงับการใช้งานของ <strong data-slot="name"></strong> (<span data-slot="code"></span>) ใช่หรือไม่?</p>
+              <p class="modal-message" data-mode="activate">ต้องการเปิดใช้งาน <strong data-slot="name"></strong> (<span data-slot="code"></span>) อีกครั้งใช่หรือไม่?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+              <button type="button" class="btn btn-danger" data-action="confirm"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= หน้าต่างยืนยันการลบ ================= -->
+        <div class="modal-overlay" id="member-delete-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title">ลบสมาชิก</h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-message">ต้องการลบข้อมูลของ <strong data-slot="name"></strong> (<span data-slot="code"></span>) อย่างถาวรใช่หรือไม่? การลบไม่สามารถย้อนกลับได้</p>
+              <p class="form-error" data-slot="error" hidden></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+              <button type="button" class="btn btn-danger" data-action="confirm">ยืนยันการลบ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบแถวในตารางสมาชิก -->
+  <template id="member-row-template">
+    <tr>
+      <td><span class="cell-strong" data-slot="memberCode"></span></td>
+      <td><div class="col-box col-box--w36 col-box--nowrap" data-slot="fullName"></div></td>
+      <td><span class="mono" data-slot="idCardNumber"></span></td>
+      <td data-slot="walletBalance"></td>
+      <td>
+        <span class="badge badge-success" data-slot="badge-active">ใช้งานอยู่</span>
+        <span class="badge badge-danger" data-slot="badge-inactive">ถูกระงับ</span>
+      </td>
+      <td>
+        <div class="row-actions">
+          <button type="button" class="btn btn-ghost" data-action="view">ดูข้อมูล</button>
+          <button type="button" class="btn btn-ghost" data-action="edit">แก้ไข</button>
+          <button type="button" class="btn" data-action="toggle-status"></button>
+          <button type="button" class="btn btn-danger" data-action="delete">ลบ</button>
+        </div>
+      </td>
+    </tr>
+  </template>
+
+  <!-- ข้อมูลเมนูด้านซ้ายที่เซิร์ฟเวอร์ฝังมา -->
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/members.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!--
+  pages/login.html  (URL: /login)
+  หน้าเข้าสู่ระบบของพนักงาน/ผู้ดูแลระบบ
+  การทำงาน: public/js/pages/login.js   สไตล์: public/css/pages/login.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/pages/login.css">
+</head>
+<body>
+  <div class="login-screen">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">FL</div>
+        <h1 class="login-title">เข้าสู่ระบบ</h1>
+        <p class="login-subtitle">สหกรณ์กองทุนสวนยางบ้านบางบอน</p>
+      </div>
+
+      <form id="login-form" class="stack-4">
+        <!-- ชื่อผู้ใช้งาน -->
+        <div class="field">
+          <div class="field-label-row">
+            <label class="field-label" for="username">ชื่อผู้ใช้งาน<span class="field-required">*</span></label>
+          </div>
+          <input id="username" class="input" required autofocus autocomplete="username">
+        </div>
+
+        <!-- รหัสผ่าน (มีปุ่มรูปตาแสดง/ซ่อน) -->
+        <div class="password-field">
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="password">รหัสผ่าน<span class="field-required">*</span></label>
+            </div>
+            <input id="password" class="input" type="password" required autocomplete="current-password">
+          </div>
+          <!-- @include partials/password-toggle.html -->
+        </div>
+
+        <!-- ข้อความเมื่อเข้าสู่ระบบไม่สำเร็จ -->
+        <p class="form-error" id="login-error" hidden></p>
+
+        <button type="submit" class="btn btn-primary btn-block" id="login-submit">เข้าสู่ระบบ</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/js/pages/login.js"></script>
+</body>
+</html>

@@ -1,39 +1,31 @@
 {
-  "name": "field-latex-project",
+  "name": "field-latex-project-html",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "postinstall": "prisma generate"
+    "dev": "node --watch --env-file=.env server/server.js",
+    "start": "node --env-file=.env server/server.js --production",
+    "build:vendor": "node scripts/build-vendor.js",
+    "postinstall": "prisma generate && node scripts/build-vendor.js"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
     "exceljs": "^4.4.0",
-    "next": "16.2.11",
+    "express": "^5.2.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.10.1",
     "thai-address-database": "^0.0.31"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.11",
-    "prisma": "6.19.3",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "esbuild": "^0.28.2",
+    "prisma": "6.19.3"
   },
   "allowScripts": {
-    "sharp@0.34.5": true,
-    "unrs-resolver@1.12.2": true,
     "@prisma/client@6.19.3": true,
     "@prisma/engines@6.19.3": true,
-    "prisma@6.19.3": true
+    "prisma@6.19.3": true,
+    "esbuild@0.28.2": true
   }
 }

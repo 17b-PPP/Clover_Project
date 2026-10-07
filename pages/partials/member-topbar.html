@@ -1,0 +1,64 @@
+<!--
+  pages/partials/member-topbar.html
+  แถบด้านบนของทุกหน้าในพอร์ทัลสมาชิก:
+  - คำทักทาย + เวลาที่อ่านข้อมูล
+  - กล่องราคากลางน้ำยางประจำวัน
+  - กระดิ่งแจ้งเตือน (เงินเข้า / เบิกเงิน / ปันผล)
+  การทำงาน: public/js/components/member-topbar.js และ notification-bell.js
+-->
+<header class="member-topbar">
+  <div class="member-topbar-inner">
+    <div>
+      <h1 class="member-greeting">สวัสดี คุณ<span id="topbar-name"></span></h1>
+      <p class="member-fetched-at">ข้อมูลล่าสุด ณ <span id="topbar-fetched-at"></span> น.</p>
+    </div>
+
+    <div class="member-topbar-actions">
+      <!-- ราคากลางประจำวัน -->
+      <div class="market-price-box">
+        <p class="market-price-label">ราคากลางน้ำยางประจำวัน</p>
+        <div id="market-price-present" hidden>
+          <p class="market-price-value"><span id="market-price-value"></span><span class="market-price-unit"> / กก.</span></p>
+          <p class="market-price-date">ประจำวันที่ <span id="market-price-date"></span></p>
+        </div>
+        <p class="market-price-missing" id="market-price-missing" hidden>ยังไม่มีข้อมูลราคากลาง</p>
+      </div>
+
+      <!-- กระดิ่งแจ้งเตือน -->
+      <div class="bell" id="notification-bell">
+        <button type="button" class="bell-button" id="bell-button" aria-expanded="false" aria-label="การแจ้งเตือน">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+          </svg>
+          <span class="bell-badge" id="bell-badge" hidden></span>
+        </button>
+
+        <div class="bell-panel" id="bell-panel" hidden>
+          <div class="bell-panel-header">
+            <p class="bell-panel-title">การแจ้งเตือน</p>
+          </div>
+          <p class="bell-empty" id="bell-empty" hidden>ยังไม่มีการแจ้งเตือน</p>
+          <ul class="bell-list" id="bell-list" hidden></ul>
+          <a href="/member/finance" class="bell-footer-link" id="bell-finance-link">ดูประวัติทางการเงินทั้งหมด</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- แม่แบบรายการแจ้งเตือน 1 รายการ -->
+<template id="bell-item-template">
+  <li class="bell-item">
+    <span class="bell-item-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path data-slot="icon-path"/></svg>
+    </span>
+    <div class="bell-item-body">
+      <div class="bell-item-head">
+        <p class="bell-item-title" data-slot="title"></p>
+        <span class="bell-item-dot" data-slot="new-dot" hidden></span>
+      </div>
+      <p class="bell-item-amount" data-slot="amount"></p>
+      <p class="bell-item-meta" data-slot="meta"></p>
+    </div>
+  </li>
+</template>

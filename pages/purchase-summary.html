@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<!--
+  pages/purchase-summary.html  (URL: /performance/purchase-summary)
+  หน้า "ผลประกอบการการรับซื้อน้ำยางสด": การ์ดสรุป กราฟแนวโน้มรายวัน รายการรับซื้อ
+  และดาวน์โหลดรายงาน Excel
+  การทำงาน: public/js/pages/purchase-summary.js   สไตล์: public/css/pages/purchase-summary.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/receipt.css">
+  <link rel="stylesheet" href="/css/pages/purchase-summary.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- @include partials/sidebar.html -->
+
+    <main class="app-main">
+      <div class="page-loading" id="page-loading">
+        <!-- @include partials/spinner-lg.html -->
+      </div>
+
+      <div class="page" id="page-content" hidden>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">ผลประกอบการการรับซื้อน้ำยางสด</h1>
+            <p class="page-description">สรุปปริมาณ ราคา และยอดเงินการรับซื้อน้ำยางพารา</p>
+          </div>
+          <!-- ดาวน์โหลดรายงาน Excel ตามช่วงวันที่ที่เลือก -->
+          <a class="export-link" id="export-link" href="/api/performance/purchase-summary/export" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/>
+            </svg>
+            พิมพ์รายงาน (Excel)
+          </a>
+        </div>
+
+        <!-- ตัวกรอง: ช่วงวันที่ + สมาชิก -->
+        <div class="filter-bar summary-filter">
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="date-from">จากวันที่</label>
+            </div>
+            <input id="date-from" class="input" type="date">
+          </div>
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="date-to">ถึงวันที่</label>
+            </div>
+            <input id="date-to" class="input" type="date">
+          </div>
+          <div class="member-search-box">
+            <div class="field" id="member-search-field">
+              <div class="field-label-row">
+                <label class="field-label" for="member-search-input">ค้นหาชื่อ/รหัสสมาชิก</label>
+                <span class="field-error" data-combobox-error hidden></span>
+              </div>
+              <div class="combobox">
+                <input id="member-search-input" class="input" role="combobox" aria-expanded="false" aria-controls="member-search-listbox" autocomplete="off" placeholder="พิมพ์ชื่อหรือรหัสสมาชิก">
+                <ul id="member-search-listbox" class="combobox-list" role="listbox" hidden></ul>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-icon-square" id="reset-filters" aria-label="ล้างการเลือกวันที่" title="ล้างการเลือกวันที่" disabled>
+            <!-- @include partials/reset-icon.html -->
+          </button>
+        </div>
+
+        <!-- การ์ดสรุป 8 ใบ -->
+        <section class="stat-grid stat-grid--lg-3 stat-grid--xl-4 summary-section">
+          <div class="stat-card">
+            <p class="stat-label">ปริมาณการรับซื้อรวม</p>
+            <p class="stat-value" id="stat-raw-weight"></p>
+            <p class="stat-hint">น้ำหนักน้ำยางสดรวมทั้งช่วง</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">ปริมาณน้ำยางแห้งรวม</p>
+            <p class="stat-value" id="stat-dry-weight"></p>
+            <p class="stat-hint" id="stat-dry-weight-hint"></p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">ราคาเฉลี่ยรับซื้อรายวัน</p>
+            <p class="stat-value" id="stat-avg-price"></p>
+            <p class="stat-hint">เฉลี่ยจากราคากลางแต่ละวัน</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">จำนวนบิลที่ออก</p>
+            <p class="stat-value" id="stat-bill-count"></p>
+            <p class="stat-hint">จำนวนรายการรับซื้อ</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">จำนวนสมาชิกที่ส่ง</p>
+            <p class="stat-value" id="stat-member-count"></p>
+            <p class="stat-hint">นับตามรหัสสมาชิกไม่ซ้ำ</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">ยอดเงินรวม</p>
+            <p class="stat-value" id="stat-total-amount"></p>
+            <p class="stat-hint">มูลค่ารับซื้อทั้งหมด (ก่อนหักเบิกเงิน)</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">ยอดเบิกเงินทั้งหมด</p>
+            <p class="stat-value" id="stat-withdrawn"></p>
+            <p class="stat-hint">ยอดที่สมาชิกเบิกเงินสะสมออกไป</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">ยอดเงินคงเหลือสุทธิ</p>
+            <p class="stat-value" id="stat-net-amount"></p>
+            <p class="stat-hint">ยอดเงินรวม หักด้วยยอดเบิกเงินแล้ว</p>
+          </div>
+        </section>
+
+        <!-- กราฟแนวโน้มรายวัน -->
+        <section class="summary-section">
+          <h2 class="section-title">แนวโน้มรายวัน</h2>
+          <div class="empty-state" id="trend-empty" hidden>ไม่มีข้อมูลในช่วงเวลาที่เลือก</div>
+          <div class="card card--p6 chart-box" id="trend-chart" hidden></div>
+        </section>
+
+        <!-- รายการรับซื้อ -->
+        <section>
+          <h2 class="section-title">รายการรับซื้อล่าสุด</h2>
+          <div class="empty-state" id="recent-empty" hidden>ไม่พบรายการรับซื้อในช่วงเวลาที่เลือก</div>
+          <div class="table-wrap" id="recent-table" hidden>
+            <table class="table recent-table">
+              <thead>
+                <tr>
+                  <th class="col-date">วันที่/เวลา</th>
+                  <th class="col-name"><div class="col-box col-box--w36 col-box--head">ชื่อสมาชิก</div></th>
+                  <th class="col-code">รหัสสมาชิก</th>
+                  <th class="col-weight">น้ำหนัก (กก.)</th>
+                  <th class="col-drc">DRC (%)</th>
+                  <th class="col-price">ราคา/กก.</th>
+                  <th class="col-amount">จำนวนเงิน</th>
+                  <th class="col-receipt">ใบเสร็จ</th>
+                </tr>
+              </thead>
+              <tbody id="recent-rows"></tbody>
+            </table>
+          </div>
+          <!-- @include partials/receipt-modal.html -->
+          <div id="recent-pagination"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบแถวรายการรับซื้อ -->
+  <template id="recent-row-template">
+    <tr>
+      <td>
+        <span class="cell-muted cell-nowrap" data-slot="date"></span>
+        <span class="cell-subline"><span data-slot="time"></span> น.</span>
+      </td>
+      <td><div class="col-box col-box--w36 col-box--nowrap cell-strong" data-slot="memberName"></div></td>
+      <td data-slot="memberCode"></td>
+      <td><span class="num" data-slot="rawWeightKg"></span></td>
+      <td><span class="num" data-slot="dryPercentage"></span></td>
+      <td><span class="num" data-slot="marketPrice"></span></td>
+      <td><span class="num" data-slot="totalAmount"></span></td>
+      <td>
+        <button type="button" class="btn btn-secondary btn-sm btn-receipt" data-action="receipt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 3h9l3 3v15H6z"/>
+            <path d="M15 3v4h4"/>
+            <path d="M9 13h6M9 17h6"/>
+          </svg>
+          ใบเสร็จ
+        </button>
+      </td>
+    </tr>
+  </template>
+
+  <!-- @include partials/purchase-receipt.html -->
+  <!-- @include partials/pagination.html -->
+
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/purchase-summary.js"></script>
+</body>
+</html>

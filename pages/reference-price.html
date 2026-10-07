@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+  pages/reference-price.html  (URL: /reference-price)
+  หน้า "ราคากลางประจำวัน": กำหนดราคากลางรับซื้อน้ำยางของแต่ละวัน + ดูประวัติการบันทึกราคา
+  การทำงาน: public/js/pages/reference-price.js   สไตล์: public/css/pages/reference-price.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/pages/reference-price.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- @include partials/sidebar.html -->
+
+    <main class="app-main">
+      <div class="page page--4xl" id="page-content" hidden>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">ราคากลางประจำวัน</h1>
+            <p class="page-description">กำหนดราคากลางรับซื้อน้ำยางของแต่ละวัน ระบบจะเติมราคานี้ให้อัตโนมัติในหน้ารับซื้อ</p>
+          </div>
+        </div>
+
+        <!-- ฟอร์มบันทึกราคา -->
+        <form class="price-form" id="price-form">
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="price-date">วันที่<span class="field-required">*</span></label>
+            </div>
+            <input id="price-date" class="input" type="date" required>
+          </div>
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="price-value">ราคากลาง (บาท/กก.)<span class="field-required">*</span></label>
+            </div>
+            <input id="price-value" class="input" type="number" min="0" step="0.01" required placeholder="0.00">
+          </div>
+          <button type="submit" class="btn btn-primary" id="price-submit">บันทึก</button>
+          <p class="form-error" id="price-error" hidden></p>
+        </form>
+
+        <h2 class="section-title history-title">ประวัติการบันทึกราคา</h2>
+
+        <div class="empty-state" id="log-empty" hidden>ยังไม่มีประวัติการบันทึกราคา</div>
+
+        <div id="log-section" hidden>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>วันที่ของราคา</th>
+                  <th>ราคาที่บันทึก (บาท/กก.)</th>
+                  <th>บันทึกเมื่อ</th>
+                </tr>
+              </thead>
+              <tbody id="log-rows"></tbody>
+            </table>
+          </div>
+          <div id="log-pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบแถวประวัติราคา -->
+  <template id="log-row-template">
+    <tr>
+      <td data-slot="date"></td>
+      <td data-slot="price"></td>
+      <td data-slot="recordedAt"></td>
+    </tr>
+  </template>
+
+  <!-- @include partials/pagination.html -->
+
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/reference-price.js"></script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!--
+  pages/member-finance.html  (URL: /member/finance)
+  หน้า "ประวัติทางการเงิน" ของสมาชิก: รายรับจากการขาย เงินปันผล และการเบิกเงิน
+  กรองตามประเภทรายการ/ช่วงวันที่ได้ พร้อมกราฟรายได้รายเดือน
+  การทำงาน: public/js/pages/member-finance.js   สไตล์: public/css/member.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/member.css">
+</head>
+<body>
+  <div class="app-shell app-shell--member">
+    <!-- @include partials/member-sidebar.html -->
+
+    <main class="app-main">
+      <div class="page-loading" id="page-loading">
+        <!-- @include partials/spinner-lg.html -->
+      </div>
+
+      <div id="page-content" hidden>
+        <!-- @include partials/member-topbar.html -->
+
+        <div class="page">
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">ประวัติทางการเงิน</h1>
+              <p class="page-description">รายรับจากการขายน้ำยาง เงินปันผล และรายการเบิกเงินของคุณ</p>
+            </div>
+          </div>
+
+          <!-- การ์ดกระเป๋าเงิน (แบบกะทัดรัด) + ยอดที่เบิกไปแล้ว -->
+          <div class="finance-cards">
+            <!-- @include partials/wallet-card.html -->
+            <div class="stat-card stat-card--compact">
+              <p class="stat-label">ยอดเงินที่เบิกไปแล้ว (บาท)</p>
+              <p class="stat-value" id="total-withdrawn"></p>
+              <p class="stat-hint">รวมทุกรายการเบิกเงินของคุณ</p>
+            </div>
+          </div>
+
+          <!-- ตัวกรอง: ประเภทรายการ + ช่วงวันที่ -->
+          <div class="filter-bar member-filter">
+            <div class="field">
+              <span class="field-label">ประเภทรายการ</span>
+              <div class="segmented" id="type-filter">
+                <button type="button" class="segmented-button" data-type="ALL" aria-pressed="true">ทั้งหมด</button>
+                <button type="button" class="segmented-button" data-type="PURCHASE" aria-pressed="false">ขายน้ำยาง</button>
+                <button type="button" class="segmented-button" data-type="WITHDRAWAL" aria-pressed="false">เบิกเงิน</button>
+                <button type="button" class="segmented-button" data-type="DIVIDEND" aria-pressed="false">ปันผล</button>
+              </div>
+            </div>
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="date-from">จากวันที่</label>
+              </div>
+              <input id="date-from" class="input" type="date">
+            </div>
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="date-to">ถึงวันที่</label>
+              </div>
+              <input id="date-to" class="input" type="date">
+            </div>
+            <button type="button" class="btn btn-secondary btn-icon-square" id="reset-filters" aria-label="ล้างตัวกรอง" title="ล้างตัวกรอง" disabled>
+              <!-- @include partials/reset-icon.html -->
+            </button>
+          </div>
+
+          <!-- กราฟรายได้รายเดือน (แสดงเฉพาะเมื่อดู "ทั้งหมด" หรือ "ขายน้ำยาง") -->
+          <section class="member-section" id="income-chart-section">
+            <div class="card card--p6">
+              <h2 class="chart-card-title">รายได้จากการขายน้ำยางในแต่ละเดือน</h2>
+              <div class="empty-state" id="income-chart-empty" hidden>ไม่มีข้อมูลในช่วงเวลาที่เลือก</div>
+              <div class="chart-area" id="income-chart" hidden></div>
+            </div>
+          </section>
+
+          <!-- ตารางประวัติทางการเงิน -->
+          <div class="empty-state" id="finance-empty" hidden>ยังไม่มีประวัติทางการเงิน</div>
+          <div class="table-wrap" id="finance-table" hidden>
+            <table class="table finance-table">
+              <thead>
+                <tr>
+                  <th class="col-date">วัน/เดือน/ปี</th>
+                  <th class="col-type">ประเภทรายการ</th>
+                  <th class="col-code">เลขที่รายการ</th>
+                  <th class="col-detail"><div class="col-box col-box--w72 col-box--head">รายละเอียด</div></th>
+                  <th class="col-amount">จำนวนเงิน (บาท)</th>
+                </tr>
+              </thead>
+              <tbody id="finance-rows"></tbody>
+            </table>
+          </div>
+          <div id="finance-pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบแถวประวัติทางการเงิน -->
+  <template id="finance-row-template">
+    <tr>
+      <td><span class="cell-muted cell-nowrap" data-slot="date"></span></td>
+      <td>
+        <span class="badge badge-success" data-slot="badge-purchase">ขายน้ำยาง</span>
+        <span class="badge badge-success" data-slot="badge-dividend">เงินปันผล</span>
+        <span class="badge badge-neutral" data-slot="badge-withdrawal">เบิกเงิน</span>
+      </td>
+      <td><span class="cell-muted" data-slot="code"></span></td>
+      <td><div class="col-box col-box--w72" data-slot="details"></div></td>
+      <td><span data-slot="amount"></span></td>
+    </tr>
+  </template>
+
+  <!-- แม่แบบบรรทัดรายละเอียด (ตัวเล็ก) -->
+  <template id="detail-line-template">
+    <p class="detail-line detail-line--muted"></p>
+  </template>
+
+  <!-- @include partials/pagination.html -->
+
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/member-finance.js"></script>
+</body>
+</html>

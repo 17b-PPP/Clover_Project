@@ -1,0 +1,366 @@
+/* =============================================================================
+   public/css/base.css
+   -----------------------------------------------------------------------------
+   สไตล์พื้นฐานที่ทุกหน้าใช้ร่วมกัน:
+     1. ตัวแปรสี/เงา (ค่าเดียวกับ Tailwind CSS v4 ที่โปรเจคเดิมใช้ หน้าตาจึงเหมือนเดิม)
+     2. ฟอนต์ Noto Sans Thai (ไฟล์ฟอนต์เก็บไว้ในโปรเจค ไม่ต้องโหลดจากอินเทอร์เน็ต)
+     3. การรีเซ็ตค่าเริ่มต้นของเบราว์เซอร์ (แบบเดียวกับ preflight ของ Tailwind)
+     4. แอนิเมชันที่ใช้ร่วมกัน และกฎตอนสั่งพิมพ์ใบเสร็จ
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   1) ตัวแปรสี — ค่าแบบ HEX ใช้กับเบราว์เซอร์ทั่วไป
+   ----------------------------------------------------------------------------- */
+:root {
+  --red-50: #fef2f2;
+  --red-400: #ff6568;
+  --red-500: #fb2c36;
+  --red-600: #e40014;
+  --red-700: #bf000f;
+  --amber-50: #fffbeb;
+  --amber-600: #dd7400;
+  --amber-700: #b75000;
+  --emerald-50: #ecfdf5;
+  --emerald-100: #d0fae5;
+  --emerald-200: #a4f4cf;
+  --emerald-600: #009767;
+  --emerald-700: #007956;
+  --emerald-800: #005f46;
+  --rose-50: #fff1f2;
+  --rose-600: #e70044;
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cad5e2;
+  --slate-400: #90a1b9;
+  --slate-500: #62748e;
+  --slate-600: #45556c;
+  --slate-700: #314158;
+  --slate-900: #0f172b;
+  --white: #fff;
+
+  /* สีโปร่งแสง (ใช้กับขอบ วงแหวน และพื้นหลังจาง ๆ) */
+  --emerald-50-a50: #ecfdf580;
+  --emerald-600-a20: #00976733;
+  --emerald-600-a40: #00976766;
+  --emerald-600-a60: #00976799;
+  --red-600-a20: #e4001433;
+  --slate-50-a80: #f8fafccc;
+  --slate-500-a20: #62748e33;
+  --slate-900-a5: #0f172b0d;
+  --slate-900-a50: #0f172b80;
+
+  /* สีพื้นหลัง/ตัวอักษรหลักของหน้า (จาก globals.css เดิม) */
+  --background: #ffffff;
+  --foreground: #0f172a;
+
+  /* เงา */
+  --shadow-sm: 0 1px 3px 0 #0000001a, 0 1px 2px -1px #0000001a;
+  --shadow-lg: 0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a;
+  --shadow-2xl: 0 25px 50px -12px #00000040;
+
+  /* ฟอนต์ */
+  --font-thai: "Noto Sans Thai", "Noto Sans Thai Fallback";
+  --font-sans: var(--font-thai), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+
+  /* ความเร็วการเปลี่ยนสีเมื่อเอาเมาส์ชี้ */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* เบราว์เซอร์ใหม่ที่รองรับสีแบบ lab() จะใช้ค่าที่แม่นยำกว่า (เหมือน Tailwind v4) */
+@supports (color: lab(0% 0 0)) {
+  :root {
+    --red-50: lab(96.5005% 4.18511 1.52329);
+    --red-400: lab(63.7053% 60.7449 31.3109);
+    --red-500: lab(55.4814% 75.0732 48.8528);
+    --red-600: lab(48.4493% 77.4328 61.5452);
+    --red-700: lab(40.4273% 67.2623 53.7441);
+    --amber-50: lab(98.6252% -0.635982 8.42309);
+    --amber-600: lab(60.3514% 40.5624 87.1228);
+    --amber-700: lab(47.2709% 42.9082 69.2966);
+    --emerald-50: lab(97.8462% -6.94963 1.85487);
+    --emerald-100: lab(94.9004% -17.0769 5.63836);
+    --emerald-200: lab(90.2247% -31.039 9.47084);
+    --emerald-600: lab(55.0481% -49.9246 15.93);
+    --emerald-700: lab(44.4871% -41.0396 11.0361);
+    --emerald-800: lab(35.3675% -33.1188 8.04002);
+    --rose-50: lab(96.2369% 4.94152 1.28012);
+    --rose-600: lab(49.1882% 81.577 36.0311);
+    --slate-50: lab(98.1434% -0.369549 -1.05968);
+    --slate-100: lab(96.286% -0.852466 -2.46847);
+    --slate-200: lab(91.7353% -0.998765 -4.76968);
+    --slate-300: lab(84.7652% -1.94535 -7.93337);
+    --slate-400: lab(65.5349% -2.25151 -14.5072);
+    --slate-500: lab(48.0876% -2.03595 -16.5814);
+    --slate-600: lab(35.5623% -1.74978 -15.4316);
+    --slate-700: lab(26.9569% -1.47018 -15.6993);
+    --slate-900: lab(7.78673% 1.82346 -15.0537);
+  }
+}
+
+/* สีโปร่งแสงแบบผสมสี (color-mix) สำหรับเบราว์เซอร์ที่รองรับ */
+@supports (color: color-mix(in lab, red, red)) {
+  :root {
+    --emerald-50-a50: color-mix(in oklab, var(--emerald-50) 50%, transparent);
+    --emerald-600-a20: color-mix(in oklab, var(--emerald-600) 20%, transparent);
+    --emerald-600-a40: color-mix(in oklab, var(--emerald-600) 40%, transparent);
+    --emerald-600-a60: color-mix(in oklab, var(--emerald-600) 60%, transparent);
+    --red-600-a20: color-mix(in oklab, var(--red-600) 20%, transparent);
+    --slate-50-a80: color-mix(in oklab, var(--slate-50) 80%, transparent);
+    --slate-500-a20: color-mix(in oklab, var(--slate-500) 20%, transparent);
+    --slate-900-a5: color-mix(in oklab, var(--slate-900) 5%, transparent);
+    --slate-900-a50: color-mix(in oklab, var(--slate-900) 50%, transparent);
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   2) ฟอนต์ Noto Sans Thai (ไฟล์เดียวรองรับน้ำหนัก 400–700)
+      แยกเป็น 3 ไฟล์ตามชุดตัวอักษร เบราว์เซอร์โหลดเฉพาะไฟล์ที่หน้านั้นใช้จริง
+   ----------------------------------------------------------------------------- */
+/* ตัวอักษรไทย */
+@font-face {
+  font-family: "Noto Sans Thai";
+  font-style: normal;
+  font-weight: 400 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("/fonts/noto-sans-thai-thai.woff2") format("woff2");
+  unicode-range: U+2D7, U+303, U+331, U+E01-E5B, U+200C-200D, U+25CC;
+}
+
+/* ตัวอักษรละตินเพิ่มเติม (มีวรรณยุกต์ ฯลฯ) */
+@font-face {
+  font-family: "Noto Sans Thai";
+  font-style: normal;
+  font-weight: 400 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("/fonts/noto-sans-thai-latin-ext.woff2") format("woff2");
+  unicode-range: U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2D7, U+2DD-2FF, U+304,
+    U+308, U+329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ตัวอักษรอังกฤษ ตัวเลข และสัญลักษณ์พื้นฐาน */
+@font-face {
+  font-family: "Noto Sans Thai";
+  font-style: normal;
+  font-weight: 400 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("/fonts/noto-sans-thai-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC,
+    U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+/* ฟอนต์สำรองระหว่างรอโหลด (ปรับขนาด Arial ให้ใกล้เคียง เพื่อไม่ให้หน้ากระโดด) */
+@font-face {
+  font-family: "Noto Sans Thai Fallback";
+  src: local(Arial);
+  ascent-override: 99.79%;
+  descent-override: 42.32%;
+  line-gap-override: 0%;
+  size-adjust: 106.33%;
+}
+
+/* -----------------------------------------------------------------------------
+   3) รีเซ็ตค่าเริ่มต้นของเบราว์เซอร์
+   ----------------------------------------------------------------------------- */
+*,
+::after,
+::before,
+::backdrop,
+::file-selector-button {
+  box-sizing: border-box;
+  border: 0 solid;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  line-height: 1.5;
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+  /* ตัวอักษรคมชัด (antialiased) */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+table {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+
+ol,
+ul,
+menu {
+  list-style: none;
+}
+
+img,
+svg,
+video,
+canvas {
+  vertical-align: middle;
+  display: block;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+button,
+input,
+select,
+optgroup,
+textarea,
+::file-selector-button {
+  font: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  opacity: 1;
+  background-color: transparent;
+  border-radius: 0;
+}
+
+::file-selector-button {
+  margin-inline-end: 4px;
+}
+
+::placeholder {
+  opacity: 1;
+  color: color-mix(in oklab, currentcolor 50%, transparent);
+}
+
+textarea {
+  resize: vertical;
+}
+
+::-webkit-date-and-time-value {
+  min-height: 1lh;
+  text-align: inherit;
+}
+
+::-webkit-datetime-edit {
+  display: inline-flex;
+  padding-block: 0;
+}
+
+::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+::-webkit-datetime-edit-year-field,
+::-webkit-datetime-edit-month-field,
+::-webkit-datetime-edit-day-field {
+  padding-block: 0;
+}
+
+::-webkit-calendar-picker-indicator {
+  line-height: 1;
+}
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+button,
+input:where([type="button"], [type="reset"], [type="submit"]),
+::file-selector-button {
+  appearance: button;
+}
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/* องค์ประกอบที่มี attribute hidden ต้องซ่อนเสมอ (JavaScript ใช้สลับการแสดงผล) */
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none !important;
+}
+
+/* -----------------------------------------------------------------------------
+   4) แอนิเมชันที่ใช้ร่วมกัน
+   ----------------------------------------------------------------------------- */
+
+/* หน้าต่าง (modal) ค่อย ๆ ปรากฏขึ้น */
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ไอคอนโหลดหมุน */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   5) ตอนสั่งพิมพ์ (Ctrl+P / ปุ่มพิมพ์ใบเสร็จ)
+      ซ่อนทุกอย่าง ยกเว้นส่วนใบเสร็จ (.receipt-print-area)
+   ----------------------------------------------------------------------------- */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .receipt-print-area,
+  .receipt-print-area * {
+    visibility: visible;
+  }
+  .receipt-print-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}

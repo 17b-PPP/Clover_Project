@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<!--
+  pages/member-dashboard.html  (URL: /member/dashboard)
+  หน้าหลักของสมาชิก: กระเป๋าเงิน, ลูกจ้างที่ส่งน้ำยางแทน, ภาพรวมน้ำยาง/การเงิน (กรองช่วงวันที่ได้),
+  และเงินปันผล
+  การทำงาน: public/js/pages/member-dashboard.js   สไตล์: public/css/member.css
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/member.css">
+</head>
+<body>
+  <div class="app-shell app-shell--member">
+    <!-- @include partials/member-sidebar.html -->
+
+    <main class="app-main">
+      <div class="page-loading" id="page-loading">
+        <!-- @include partials/spinner-lg.html -->
+      </div>
+
+      <div id="page-content" hidden>
+        <!-- @include partials/member-topbar.html -->
+
+        <div class="page">
+          <div class="column-6">
+            <!-- กระเป๋าเงิน + ข้อมูลลูกจ้าง -->
+            <section class="two-card-grid">
+              <!-- @include partials/wallet-card.html -->
+
+              <div class="card card--p6">
+                <div class="info-card-head">
+                  <p class="info-card-label">ข้อมูลลูกจ้าง</p>
+                  <span class="info-card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>
+                    </svg>
+                  </span>
+                </div>
+                <p class="employee-empty" id="employee-empty" hidden>ยังไม่มีลูกจ้างที่รับซื้อแทนในขณะนี้</p>
+                <ul class="employee-list stack-2" id="employee-list" hidden></ul>
+              </div>
+            </section>
+
+            <!-- ภาพรวม (กรองตามช่วงวันที่) -->
+            <div class="column-6">
+              <div class="filter-bar">
+                <div class="field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="date-from">จากวันที่</label>
+                  </div>
+                  <input id="date-from" class="input" type="date">
+                </div>
+                <div class="field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="date-to">ถึงวันที่</label>
+                  </div>
+                  <input id="date-to" class="input" type="date">
+                </div>
+                <button type="button" class="btn btn-secondary btn-icon-square" id="reset-dates" aria-label="ล้างการเลือกวันที่" title="ล้างการเลือกวันที่" disabled>
+                  <!-- @include partials/reset-icon.html -->
+                </button>
+              </div>
+
+              <!-- เกี่ยวกับน้ำยาง -->
+              <section class="card card--p6">
+                <h2 class="info-section-title">เกี่ยวกับน้ำยาง</h2>
+                <div class="info-grid">
+                  <div class="info-box">
+                    <p class="info-box-label">น้ำหนักน้ำยางสดรวม (กิโลกรัม)</p>
+                    <p class="info-box-value" id="total-raw-weight"></p>
+                  </div>
+                  <div class="info-box">
+                    <p class="info-box-label">ปริมาณน้ำยางแห้งรวม</p>
+                    <p class="info-box-value" id="total-dry-weight"></p>
+                  </div>
+                  <div class="info-box">
+                    <p class="info-box-label">ขายน้ำยางสดทั้งหมด</p>
+                    <p class="info-box-value" id="sale-count"></p>
+                  </div>
+                </div>
+              </section>
+
+              <!-- การเงิน -->
+              <section class="card card--p6">
+                <h2 class="info-section-title">การเงิน</h2>
+                <div class="info-grid">
+                  <div class="info-box">
+                    <p class="info-box-label">ยอดเงินรวมที่ขายได้ (บาท)</p>
+                    <p class="info-box-value">
+                      <span class="sales-split">
+                        <!-- ยอดขายรวมทั้งหมด (รวมส่วนของลูกจ้าง) -->
+                        <span class="sales-split-value" id="total-sales"></span>
+                        <!-- ยอดที่เข้ากระเป๋าเงินของสมาชิกเอง (ไม่รวมส่วนของลูกจ้าง) -->
+                        <span class="sales-split-mine">
+                          <span class="sales-split-label">ยอดเงินรวมของฉัน (บาท)</span>
+                          <span class="sales-split-value" id="my-sales"></span>
+                        </span>
+                      </span>
+                    </p>
+                  </div>
+                  <div class="info-box">
+                    <p class="info-box-label">ยอดเบิก (บาท)</p>
+                    <p class="info-box-value" id="total-withdrawn"></p>
+                  </div>
+                  <div class="info-box">
+                    <p class="info-box-label">ยอดเงินลูกจ้าง (บาท)</p>
+                    <p class="info-box-value" id="employee-sales"></p>
+                  </div>
+                </div>
+              </section>
+
+              <!-- เงินปันผล -->
+              <div class="card card--p6">
+                <p class="info-card-label">เงินปันผล</p>
+                <div class="info-grid info-grid--2">
+                  <div class="info-box">
+                    <p class="info-box-label">ยอดปันผลสะสม (บาท)</p>
+                    <p class="info-box-value" id="dividend-balance"></p>
+                  </div>
+                  <div class="info-box">
+                    <div class="dividend-box-head">
+                      <p class="info-box-label">ปันผลประจำปี</p>
+                      <select class="mini-select" id="dividend-year"></select>
+                    </div>
+                    <p class="info-box-value" id="dividend-year-amount"></p>
+                    <p class="dividend-period" id="dividend-year-period" hidden></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบลูกจ้าง 1 คนในการ์ดข้อมูลลูกจ้าง -->
+  <template id="employee-item-template">
+    <li class="employee-item">
+      <div class="employee-item-head">
+        <p class="employee-item-name" data-slot="name"></p>
+        <span class="employee-item-code" data-slot="code"></span>
+      </div>
+      <div class="employee-item-meta">
+        <span>โทร <span data-slot="phone"></span></span>
+        <span class="num" data-slot="shares"></span>
+      </div>
+    </li>
+  </template>
+
+  <!-- แม่แบบรายการยอดเงินลูกจ้าง -->
+  <template id="employee-sales-template">
+    <span class="employee-sales">
+      <span class="employee-sales-row employee-sales-row--total">
+        <span>รวมทั้งหมด</span>
+        <span class="employee-sales-amount" data-slot="total"></span>
+      </span>
+    </span>
+  </template>
+  <template id="employee-sales-row-template">
+    <span class="employee-sales-row employee-sales-row--item">
+      <span class="employee-sales-name" data-slot="name"></span>
+      <span class="employee-sales-amount" data-slot="amount"></span>
+    </span>
+  </template>
+
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/member-dashboard.js"></script>
+</body>
+</html>

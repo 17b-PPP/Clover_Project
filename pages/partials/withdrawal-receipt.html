@@ -1,0 +1,67 @@
+<!--
+  pages/partials/withdrawal-receipt.html
+  แม่แบบ "ใบเสร็จเบิกเงิน" (ใช้ในหน้าการจัดการเบิกเงิน)
+  JavaScript ที่เติมข้อมูล: public/js/components/withdrawal-receipt.js
+-->
+<template id="withdrawal-receipt-template">
+  <div class="receipt-print-area">
+    <div class="receipt">
+      <div class="receipt-head">
+        <div class="receipt-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 8 12 3 3 8l9 5 9-5Z"/>
+            <path d="M3 8v8l9 5 9-5V8M12 13v8"/>
+          </svg>
+        </div>
+        <h1 class="receipt-org">สหกรณ์กองทุนสวนยางบ้านบางบอนจำกัด</h1>
+        <p class="receipt-title">ใบเสร็จเบิกเงิน</p>
+        <p class="receipt-subtitle">OFFICIAL_WITHDRAWAL_RECEIPT</p>
+      </div>
+
+      <div class="receipt-info stack-3">
+        <div class="receipt-row">
+          <span>เลขที่สมาชิก: <span class="receipt-code" data-slot="memberCode"></span></span>
+          <span>เลขที่: <span data-slot="receiptNumber"></span></span>
+        </div>
+        <div class="receipt-row">
+          <span>ชื่อสมาชิก: <span data-slot="memberName"></span></span>
+          <span class="receipt-row-right">วันที่: <span data-slot="date"></span> เวลา: <span data-slot="time"></span></span>
+        </div>
+      </div>
+
+      <div class="receipt-grid">
+        <div class="receipt-box">
+          <p class="receipt-box-label">ยอดเงินสะสมก่อนเบิก</p>
+          <p class="receipt-box-value"><span data-slot="balanceBefore"></span> ฿</p>
+        </div>
+        <div class="receipt-box">
+          <p class="receipt-box-label">ยอดคงเหลือหลังเบิก</p>
+          <p class="receipt-box-value"><span data-slot="balanceAfter"></span> ฿</p>
+        </div>
+      </div>
+
+      <div class="receipt-total">
+        <span class="receipt-total-label">จำนวนเงินที่เบิก</span>
+        <span class="receipt-total-value"><span data-slot="amount"></span> ฿</span>
+      </div>
+
+      <div class="receipt-signatures">
+        <div>
+          <div class="receipt-signature-space"></div>
+          <div class="receipt-signature-line">ผู้เบิกเงิน/ผู้รับเงิน</div>
+        </div>
+        <div>
+          <div class="receipt-signature-space"></div>
+          <div class="receipt-signature-line">ผู้จ่ายเงิน</div>
+        </div>
+      </div>
+
+      <div class="receipt-seal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-4Z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</template>

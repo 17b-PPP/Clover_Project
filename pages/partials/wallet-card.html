@@ -1,0 +1,21 @@
+<!--
+  pages/partials/wallet-card.html
+  การ์ด "กระเป๋าเงินของฉัน" ของสมาชิก (ยอดเงินสะสม + เงินที่ได้ในเดือนนี้)
+  JavaScript เติมตัวเลขที่ #wallet-balance และ #wallet-monthly
+  (หน้าประวัติทางการเงินเพิ่มคลาส wallet-card--compact ให้การ์ดเล็กลง)
+-->
+<div class="wallet-card" id="wallet-card">
+  <div class="wallet-head">
+    <p class="wallet-label">กระเป๋าเงินของฉัน (บาท)</p>
+    <span class="wallet-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7.5ZM3 7.5 15 4M16 13h1.5"/>
+      </svg>
+    </span>
+  </div>
+  <p class="wallet-balance" id="wallet-balance"></p>
+  <div class="wallet-month">
+    <p class="wallet-month-label">เดือนนี้ได้เงิน (บาท)</p>
+    <p class="wallet-month-value" id="wallet-monthly"></p>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<!--
+  pages/partials/receipt-modal.html
+  หน้าต่างดูใบเสร็จรับเงินย้อนหลัง (ใช้ในหน้าผลประกอบการ และประวัติการขายของสมาชิก)
+  - ใบเสร็จบนจอแสดงใน #receipt-modal-body
+  - สำเนาสำหรับพิมพ์วางไว้ใน #receipt-print-container (นอกหน้าต่าง เพื่อให้พิมพ์ได้สวย)
+  การทำงาน: public/js/components/receipt-viewer.js
+-->
+<div class="modal-overlay" id="receipt-modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h2 class="modal-title" data-modal-title></h2>
+      <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+    </div>
+    <div class="modal-body" id="receipt-modal-body"></div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" id="receipt-modal-close">ปิด</button>
+      <button type="button" class="btn btn-primary" id="receipt-modal-print">พิมพ์ใบเสร็จ</button>
+    </div>
+  </div>
+</div>
+<div id="receipt-print-container"></div>

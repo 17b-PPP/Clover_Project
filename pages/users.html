@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<!--
+  pages/users.html  (URL: /users — เฉพาะผู้ดูแลระบบ)
+  หน้า "ตรวจสอบสิทธิ์ผู้ใช้งาน": จัดการบัญชีพนักงาน/ผู้ดูแลระบบ
+  การทำงาน: public/js/pages/users.js
+-->
+<html lang="th">
+<head>
+  <!-- @include partials/head.html -->
+  <link rel="stylesheet" href="/css/layout.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- @include partials/sidebar.html -->
+
+    <main class="app-main">
+      <div class="page" id="page-content" hidden>
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">ตรวจสอบสิทธิ์ผู้ใช้งาน</h1>
+            <p class="page-description">จัดการบัญชีผู้ใช้งานและบทบาทสำหรับการเข้าถึงระบบ</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="add-user-button">+ เพิ่มผู้ใช้งานใหม่</button>
+        </div>
+
+        <!-- ช่องค้นหา -->
+        <div class="search-box">
+          <div class="field">
+            <div class="field-label-row">
+              <label class="field-label" for="user-search">ค้นหาผู้ใช้งาน</label>
+            </div>
+            <input id="user-search" class="input" placeholder="ค้นหาด้วยชื่อ ชื่อผู้ใช้งาน หรืออีเมล">
+          </div>
+        </div>
+
+        <div class="empty-state" id="user-empty" hidden>ไม่พบข้อมูลผู้ใช้งาน</div>
+
+        <!-- ตารางผู้ใช้งาน -->
+        <div class="table-wrap" id="user-table" hidden>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>บทบาท</th>
+                <th>ชื่อ-นามสกุล</th>
+                <th>ชื่อผู้ใช้งาน</th>
+                <th>อีเมล</th>
+                <th>สถานะ</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="user-rows"></tbody>
+          </table>
+        </div>
+
+        <!-- ================= หน้าต่างฟอร์มผู้ใช้งาน (เพิ่ม / ดู / แก้ไข) ================= -->
+        <div class="modal-overlay" id="user-form-modal" hidden>
+          <div class="modal modal--2xl" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title" data-modal-title></h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <form id="user-form" class="stack-5">
+                <div class="form-grid-2">
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="user-first-name">ชื่อ<span class="field-required">*</span></label>
+                    </div>
+                    <input id="user-first-name" class="input" required>
+                  </div>
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="user-last-name">นามสกุล<span class="field-required">*</span></label>
+                    </div>
+                    <input id="user-last-name" class="input" required>
+                  </div>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="user-phone">เบอร์โทร<span class="field-required">*</span></label>
+                    </div>
+                    <input id="user-phone" class="input" required inputmode="numeric" pattern="[0-9]{10}" title="เบอร์โทร 10 หลัก" minlength="10" maxlength="10">
+                  </div>
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="user-dob">วันเกิด<span class="field-required">*</span></label>
+                    </div>
+                    <input id="user-dob" class="input" type="date" required>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="user-email">อีเมล<span class="field-required">*</span></label>
+                  </div>
+                  <input id="user-email" class="input" type="email" required>
+                </div>
+
+                <div class="field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="user-username">ชื่อผู้ใช้งาน<span class="field-required">*</span></label>
+                  </div>
+                  <input id="user-username" class="input" required>
+                </div>
+
+                <!-- รหัสผ่าน (ซ่อนในโหมดดูข้อมูล) ชื่อช่องเปลี่ยนตามโหมด -->
+                <div id="user-password-section">
+                  <div class="field">
+                    <div class="field-label-row">
+                      <label class="field-label" for="user-password" id="user-password-label"></label>
+                    </div>
+                    <input id="user-password" class="input" type="password" minlength="6" autocomplete="new-password">
+                  </div>
+                  <p class="field-hint" id="user-password-hint">หากเว้นว่าง ระบบจะตั้งรหัสผ่านเริ่มต้นเป็นวันเกิดในรูปแบบ วว/ดด/ปปปป (8 หลัก) เช่น 01012000</p>
+                </div>
+
+                <div class="field">
+                  <div class="field-label-row">
+                    <label class="field-label" for="user-role">บทบาท<span class="field-required">*</span></label>
+                  </div>
+                  <select id="user-role" class="select" required>
+                    <option value="STAFF">พนักงาน (Staff)</option>
+                    <option value="ADMIN">ผู้ดูแลระบบ (Admin)</option>
+                  </select>
+                </div>
+
+                <p class="form-error" id="user-form-error" hidden></p>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="user-form-close">ปิด</button>
+              <button type="button" class="btn btn-primary" id="user-form-edit">แก้ไขข้อมูล</button>
+              <button type="button" class="btn btn-secondary" id="user-form-cancel">ยกเลิก</button>
+              <button type="submit" form="user-form" class="btn btn-primary" id="user-form-submit">บันทึก</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= หน้าต่างยืนยันระงับ / เปิดใช้งาน ================= -->
+        <div class="modal-overlay" id="user-status-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title" data-modal-title></h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-message" data-mode="suspend">ต้องการระงับการใช้งานของ <strong data-slot="name"></strong> (<span data-slot="code"></span>) ใช่หรือไม่?</p>
+              <p class="modal-message" data-mode="activate">ต้องการเปิดใช้งาน <strong data-slot="name"></strong> (<span data-slot="code"></span>) อีกครั้งใช่หรือไม่?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+              <button type="button" class="btn btn-danger" data-action="confirm"></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= หน้าต่างยืนยันการลบ ================= -->
+        <div class="modal-overlay" id="user-delete-modal" hidden>
+          <div class="modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+              <h2 class="modal-title">ลบบัญชีผู้ใช้งาน</h2>
+              <button type="button" class="modal-close" data-modal-close aria-label="ปิด">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-message">ต้องการลบบัญชีผู้ใช้งาน <strong data-slot="name"></strong> (<span data-slot="code"></span>) อย่างถาวรใช่หรือไม่? การลบไม่สามารถย้อนกลับได้</p>
+              <p class="form-error" data-slot="error" hidden></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+              <button type="button" class="btn btn-danger" data-action="confirm">ยืนยันการลบ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- แม่แบบแถวในตารางผู้ใช้งาน -->
+  <template id="user-row-template">
+    <tr>
+      <td>
+        <span class="badge badge-success" data-slot="role-admin">ผู้ดูแลระบบ</span>
+        <span class="badge badge-neutral" data-slot="role-staff">พนักงาน</span>
+      </td>
+      <td><span class="cell-strong" data-slot="fullName"></span></td>
+      <td data-slot="username"></td>
+      <td data-slot="email"></td>
+      <td>
+        <span class="badge badge-success" data-slot="badge-active">ใช้งานอยู่</span>
+        <span class="badge badge-danger" data-slot="badge-inactive">ถูกระงับ</span>
+      </td>
+      <td>
+        <div class="row-actions">
+          <button type="button" class="btn btn-ghost" data-action="view">ดูข้อมูล</button>
+          <button type="button" class="btn btn-ghost" data-action="edit">แก้ไข</button>
+          <button type="button" class="btn" data-action="toggle-status"></button>
+          <button type="button" class="btn btn-danger" data-action="delete">ลบ</button>
+        </div>
+      </td>
+    </tr>
+  </template>
+
+  <script type="application/json" id="layout-data">@@LAYOUT_DATA@@</script>
+  <script type="module" src="/js/pages/users.js"></script>
+</body>
+</html>

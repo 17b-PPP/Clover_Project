@@ -10,7 +10,22 @@
   margin-top: 3rem;
 }
 
-/* การ์ด "จำนวนรายการเบิกเงินวันนี้" กว้างไม่เกิน 20rem */
+/* การ์ดสรุปรายการเบิกเงินของวันนี้ (จำนวนรายการ + ยอดเงินรวม) เคียงข้างกัน */
+.withdrawal-stats {
+  margin-bottom: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  max-width: 42rem;
+}
+
+@media (max-width: 40rem) {
+  .withdrawal-stats {
+    grid-template-columns: 1fr;
+    max-width: 20rem;
+  }
+}
+
 .today-count {
   margin-bottom: 1.5rem;
   max-width: 20rem;

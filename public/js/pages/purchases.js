@@ -124,8 +124,13 @@ const sellerLookup = createDebouncedLookup(
   (code) => `/api/purchases/lookup/${encodeURIComponent(code)}`,
   (lookupState) => {
     // เมื่อข้อมูลผู้ขายเปลี่ยน ให้เลือกเจ้าของสวนเริ่มต้นตามข้อมูลใหม่
-    if (lookupState.data !== state.seller.data) {
-      state.selectedMemberId = lookupState.data?.memberId ?? "";
+    if (lookupState.data) {
+      state.selectedMemberId =
+        lookupState.data.memberId ??
+        lookupState.data.ownerOptions?.[0]?.memberId ??
+        "";
+    } else if (!lookupState.loading) {
+      state.selectedMemberId = "";
     }
     state.seller = lookupState;
     render();
@@ -134,9 +139,9 @@ const sellerLookup = createDebouncedLookup(
 
 const sellerCombobox = createCombobox(byId("seller-field"), {
   emptyMessage: "ไม่พบสมาชิกหรือลูกจ้างที่ตรงกัน",
-  onChange: (value) => {
+  onChange: (value, { immediate } = {}) => {
     state.sellerCode = value;
-    sellerLookup.setCode(value);
+    sellerLookup.setCode(value, { immediate });
   },
 });
 
@@ -178,7 +183,7 @@ function render() {
     ownerSelect.disabled = locked;
   }
   const selectedOwner = ownerOptions.find((o) => o.memberId === state.selectedMemberId) ?? null;
-  ownerInput.value = selectedOwner?.ownerName ?? "";
+  ownerInput.value = selectedOwner?.ownerName ?? seller.data?.ownerName ?? "";
 
   deliveredByInput.value = seller.data?.deliveredByName ?? "";
 

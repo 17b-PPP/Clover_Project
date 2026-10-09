@@ -16,7 +16,7 @@
 
 // buildUrl(code) = สร้าง URL สำหรับค้นหา
 // onChange(state) = ถูกเรียกทุกครั้งที่สถานะเปลี่ยน
-export function createDebouncedLookup(buildUrl, onChange) {
+export function createDebouncedLookup(buildUrl, onChange, debounceDelay = 250) {
   let trimmed = "";
   // ผลการค้นหาล่าสุด (เก็บไว้แม้รหัสจะเปลี่ยน เหมือนของเดิม)
   let result = { code: "", error: null, data: null };
@@ -31,8 +31,9 @@ export function createDebouncedLookup(buildUrl, onChange) {
 
   return {
     // แจ้งรหัสใหม่ (ช่องว่างหน้า/หลังถูกตัดออก)
-    setCode(code) {
-      const next = code.trim();
+    // immediate: true = ค้นหาทันทีไม่ต้องรอ debounce (เช่น เมื่อเลือกจาก dropdown หรือกด Enter)
+    setCode(code, { immediate = false } = {}) {
+      const next = (code || "").trim();
       if (next === trimmed) return;
       trimmed = next;
 
@@ -40,24 +41,35 @@ export function createDebouncedLookup(buildUrl, onChange) {
       clearTimeout(timer);
       const token = ++requestToken;
 
-      if (next) {
-        timer = setTimeout(() => {
-          fetch(buildUrl(next))
-            .then(async (res) => {
-              const body = await res.json();
-              if (token !== requestToken) return;
-              result = res.ok
-                ? { code: next, error: null, data: body }
-                : { code: next, error: body.error, data: null };
-              onChange(currentState());
-            })
-            .catch(() => {
-              if (token !== requestToken) return;
-              result = { code: next, error: "ไม่สามารถค้นหาข้อมูลได้", data: null };
-              onChange(currentState());
-            });
-        }, 400);
+      if (!next) {
+        result = { code: "", error: null, data: null };
+        onChange(currentState());
+        return;
       }
+
+      const executeFetch = () => {
+        fetch(buildUrl(next))
+          .then(async (res) => {
+            const body = await res.json();
+            if (token !== requestToken) return;
+            result = res.ok
+              ? { code: next, error: null, data: body }
+              : { code: next, error: body.error ?? "ไม่สามารถค้นหาข้อมูลได้", data: null };
+            onChange(currentState());
+          })
+          .catch(() => {
+            if (token !== requestToken) return;
+            result = { code: next, error: "ไม่สามารถค้นหาข้อมูลได้", data: null };
+            onChange(currentState());
+          });
+      };
+
+      if (immediate) {
+        executeFetch();
+      } else {
+        timer = setTimeout(executeFetch, debounceDelay);
+      }
+
       onChange(currentState());
     },
 

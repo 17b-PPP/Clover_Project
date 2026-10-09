@@ -102,6 +102,13 @@ export async function payDividend(input) {
     throw new DividendError("กรุณาระบุช่วงเวลาที่จ่ายปันผล");
   }
 
+  const currentBuddhistYear = buddhistYearOf(new Date());
+  if (input.buddhistYear > currentBuddhistYear) {
+    throw new DividendError(
+      `ยังไม่ถึงปี พ.ศ. ${input.buddhistYear} ในปัจจุบัน ไม่สามารถจ่ายเงินปันผลล่วงหน้าได้`
+    );
+  }
+
   const alreadyPaid = await prisma.dividendPayment.findFirst({
     where: { buddhistYear: input.buddhistYear },
     select: { id: true },

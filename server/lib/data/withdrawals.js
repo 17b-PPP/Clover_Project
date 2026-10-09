@@ -38,8 +38,27 @@ export class WithdrawalError extends Error {}
 // ค้นหาสมาชิกจากรหัส พร้อมยอดเงินสะสมปัจจุบัน
 export async function lookupMember(code) {
   const trimmed = code.trim();
-  const member = await prisma.member.findUnique({
-    where: { memberCode: trimmed },
+  if (!trimmed) {
+    throw new WithdrawalError("กรุณากรอกรหัสสมาชิก");
+  }
+
+  const upper = trimmed.toUpperCase();
+  const normalizedM = upper.replace(/^M-?(\d+)$/, (_, num) => `M-${num.padStart(4, "0")}`);
+  const pureNum = /^\d+$/.test(trimmed) ? trimmed.padStart(4, "0") : null;
+
+  const candidateCodes = [
+    trimmed,
+    upper,
+    normalizedM,
+    pureNum ? `M-${pureNum}` : null,
+  ].filter(Boolean);
+
+  const member = await prisma.member.findFirst({
+    where: {
+      OR: candidateCodes.map((c) => ({
+        memberCode: { equals: c, mode: "insensitive" },
+      })),
+    },
   });
   if (!member) {
     throw new WithdrawalError("ไม่พบรหัสสมาชิกนี้ในระบบ");

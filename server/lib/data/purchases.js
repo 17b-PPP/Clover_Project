@@ -57,10 +57,37 @@ export class SellerLookupError extends Error {}
 //   preferredMemberId = เจ้าของสวนที่ผู้ใช้เลือกไว้ (ถ้ามีหลายคน)
 export async function lookupSeller(code, preferredMemberId) {
   const trimmed = code.trim();
+  if (!trimmed) {
+    throw new SellerLookupError("กรุณากรอกรหัสสมาชิกหรือรหัสลูกจ้าง");
+  }
+
+  // ปรับรูปแบบรหัสให้ยืดหยุ่น เช่น m-0001 -> M-0001, m0001 -> M-0001, 1 -> M-0001
+  const upper = trimmed.toUpperCase();
+  const normalizedM = upper.replace(/^M-?(\d+)$/, (_, num) => `M-${num.padStart(4, "0")}`);
+  const normalizedE = upper.replace(/^E-?(\d+)$/, (_, num) => `E-${num.padStart(4, "0")}`);
+  const pureNum = /^\d+$/.test(trimmed) ? trimmed.padStart(4, "0") : null;
+
+  const candidateMemberCodes = [
+    trimmed,
+    upper,
+    normalizedM,
+    pureNum ? `M-${pureNum}` : null,
+  ].filter(Boolean);
+
+  const candidateEmployeeCodes = [
+    trimmed,
+    upper,
+    normalizedE,
+    pureNum ? `E-${pureNum}` : null,
+  ].filter(Boolean);
 
   // 1) ลองหาเป็นรหัสสมาชิกก่อน
-  const member = await prisma.member.findUnique({
-    where: { memberCode: trimmed },
+  const member = await prisma.member.findFirst({
+    where: {
+      OR: candidateMemberCodes.map((c) => ({
+        memberCode: { equals: c, mode: "insensitive" },
+      })),
+    },
   });
   if (member) {
     if (member.status !== "Active") {
@@ -83,8 +110,12 @@ export async function lookupSeller(code, preferredMemberId) {
   }
 
   // 2) ถ้าไม่ใช่สมาชิก ลองหาเป็นรหัสลูกจ้าง
-  const employee = await prisma.employee.findUnique({
-    where: { employeeCode: trimmed },
+  const employee = await prisma.employee.findFirst({
+    where: {
+      OR: candidateEmployeeCodes.map((c) => ({
+        employeeCode: { equals: c, mode: "insensitive" },
+      })),
+    },
   });
   if (employee) {
     if (employee.status !== "Active") {

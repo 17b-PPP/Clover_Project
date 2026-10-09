@@ -78,9 +78,9 @@ const memberLookup = createDebouncedLookup(
 
 const memberCombobox = createCombobox(byId("member-field"), {
   emptyMessage: "ไม่พบสมาชิกที่ตรงกัน",
-  onChange: (value) => {
+  onChange: (value, { immediate } = {}) => {
     state.memberCode = value;
-    memberLookup.setCode(value);
+    memberLookup.setCode(value, { immediate });
   },
 });
 
@@ -175,8 +175,12 @@ function createHistoryRow(withdrawal) {
 // วาดส่วนประวัติทั้งหมด (การ์ดวันนี้ + ตาราง + ตัวแบ่งหน้า)
 function renderHistory() {
   const today = todayBangkok();
-  const todayCount = state.withdrawals.filter((w) => bangkokDateKey(w.createdAt) === today).length;
+  const todayWithdrawals = state.withdrawals.filter((w) => bangkokDateKey(w.createdAt) === today);
+  const todayCount = todayWithdrawals.length;
+  const todayTotal = todayWithdrawals.reduce((sum, w) => sum + Number(w.amount || 0), 0);
+
   byId("today-count").textContent = `${formatNumber(todayCount, 0)} บิล`;
+  byId("today-total-amount").textContent = `${formatNumber(todayTotal)} บาท`;
 
   const filtered = filteredWithdrawals();
   const pageItems = paginate(filtered, state.page, PAGE_SIZE);

@@ -13,6 +13,15 @@
 // ตามมาเห็นค่า NODE_ENV ที่ถูกต้อง (เช่น การตั้งค่า cookie แบบ secure)
 // =============================================================================
 
+// Load .env automatically if not already loaded (e.g. when started without --env-file)
+if (typeof process.loadEnvFile === "function") {
+  try {
+    process.loadEnvFile();
+  } catch {
+    // .env may already be loaded or not present
+  }
+}
+
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = process.argv.includes("--production")
     ? "production"
@@ -20,3 +29,4 @@ if (!process.env.NODE_ENV) {
 }
 
 export const isProduction = process.env.NODE_ENV === "production";
+

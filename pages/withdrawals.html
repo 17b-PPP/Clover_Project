@@ -92,11 +92,15 @@
         <section class="withdrawal-history">
           <h2 class="section-title">ประวัติการเบิกเงิน</h2>
 
-          <!-- จำนวนบิลเบิกเงินของวันนี้ -->
-          <div class="today-count">
+          <!-- สรุปรายการเบิกเงินของวันนี้: จำนวนบิล + ยอดเบิกเงินรวม -->
+          <div class="withdrawal-stats">
             <div class="stat-card">
               <p class="stat-label">จำนวนรายการเบิกเงินวันนี้</p>
               <p class="stat-value" id="today-count"></p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-label">ยอดเบิกเงินรวม</p>
+              <p class="stat-value" id="today-total-amount"></p>
             </div>
           </div>
 

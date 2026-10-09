@@ -15,17 +15,18 @@
 //       <ul id="xxx-listbox" class="combobox-list" role="listbox" hidden></ul>
 //     </div>
 //   </div>
-//
-// การทำงาน (เหมือนคอมโพเนนต์ Combobox เดิมทุกประการ):
-//   - value  = ค่าที่เลือกอยู่ (เช่น รหัสสมาชิก), query = ข้อความที่พิมพ์ในช่อง
-//   - พิมพ์ → กรองรายการที่มีข้อความนั้น / ลบจนว่าง → ล้างค่าที่เลือก
-//   - ลูกศรขึ้น/ลง เลื่อนไฮไลต์, Enter เลือก, Esc ปิดรายการ
-//   - ออกจากช่อง (blur) → ปิดรายการ และคืนข้อความเป็นชื่อของตัวที่เลือกอยู่
 // =============================================================================
+
+function normalizeText(text) {
+  return String(text || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
 
 // root    = องค์ประกอบ .field ที่ครอบ combobox
 // options = [{ value, label }, ...]
-// onChange(value) = ถูกเรียกเมื่อค่าที่เลือกเปลี่ยน
+// onChange(value, meta) = ถูกเรียกเมื่อค่าที่เลือกเปลี่ยน
 export function createCombobox(
   root,
   { options = [], value = "", onChange, emptyMessage = "ไม่พบข้อมูลที่ตรงกัน" } = {}
@@ -33,6 +34,11 @@ export function createCombobox(
   const input = root.querySelector('input[role="combobox"]');
   const list = root.querySelector('[role="listbox"]');
   const errorElement = root.querySelector("[data-combobox-error]");
+
+  // ป้องกันการ blur เมื่อคลิกหรือเลื่อน scroll ใน list
+  list.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+  });
 
   // สถานะภายใน
   const state = {
@@ -46,16 +52,76 @@ export function createCombobox(
 
   // ตัวเลือกที่ตรงกับ value ปัจจุบัน (หรือ null)
   function selectedOption() {
-    return state.options.find((o) => o.value === state.value) ?? null;
+    if (!state.value) return null;
+    const valNorm = normalizeText(state.value);
+    const valNoDash = valNorm.replace(/-/g, "");
+    return (
+      state.options.find((o) => {
+        const v = normalizeText(o.value);
+        return v === valNorm || v.replace(/-/g, "") === valNoDash;
+      }) ?? null
+    );
+  }
+
+  // หา option ที่ตรงกับข้อความที่พิมพ์ (ตรงกับ value, code, หรือ label)
+  function findMatchingOption(queryText) {
+    const q = normalizeText(queryText);
+    if (!q) return null;
+    const qNoDash = q.replace(/-/g, "");
+
+    // 1. ตรงกับ value หรือ code เต็มเป๊ะ
+    const exactVal = state.options.find((o) => {
+      const v = normalizeText(o.value);
+      return v === q || v.replace(/-/g, "") === qNoDash;
+    });
+    if (exactVal) return exactVal;
+
+    // 2. ตรงกับ label เป๊ะ
+    const exactLabel = state.options.find((o) => normalizeText(o.label) === q);
+    if (exactLabel) return exactLabel;
+
+    // 3. เริ่มต้นด้วยรหัสหรือชื่อ
+    const startsWithMatch = state.options.find((o) => {
+      const l = normalizeText(o.label);
+      const v = normalizeText(o.value);
+      return l.startsWith(q) || v.startsWith(q);
+    });
+    if (startsWithMatch) return startsWithMatch;
+
+    return null;
   }
 
   // รายการที่ผ่านการกรองด้วยข้อความที่พิมพ์
   // ถ้าช่องว่าง หรือข้อความตรงกับชื่อของตัวที่เลือกอยู่ → แสดงทั้งหมด
   function filteredOptions() {
-    const q = state.query.trim().toLowerCase();
+    const q = normalizeText(state.query);
     const selected = selectedOption();
-    if (!q || q === selected?.label.toLowerCase()) return state.options;
-    return state.options.filter((o) => o.label.toLowerCase().includes(q));
+    if (!q || (selected && q === normalizeText(selected.label))) {
+      return state.options;
+    }
+    const qNoDash = q.replace(/-/g, "");
+    return state.options.filter((o) => {
+      const labelNorm = normalizeText(o.label);
+      const valNorm = normalizeText(o.value);
+      const valNoDash = valNorm.replace(/-/g, "");
+      return (
+        labelNorm.includes(q) ||
+        valNorm.includes(q) ||
+        valNoDash.includes(qNoDash)
+      );
+    });
+  }
+
+  // เลื่อน highlight โดยไม่ลบ/สร้าง DOM ใหม่
+  function setHighlight(index) {
+    state.highlightedIndex = index;
+    const items = list.querySelectorAll(".combobox-option");
+    items.forEach((item, i) => {
+      item.classList.toggle("is-highlighted", i === index);
+      if (i === index) {
+        item.scrollIntoView({ block: "nearest" });
+      }
+    });
   }
 
   // วาดรายการตัวเลือกใหม่ตามสถานะปัจจุบัน
@@ -77,6 +143,10 @@ export function createCombobox(
       return;
     }
 
+    if (state.highlightedIndex >= items.length) {
+      state.highlightedIndex = Math.max(0, items.length - 1);
+    }
+
     list.replaceChildren(
       ...items.map((option, index) => {
         const item = document.createElement("li");
@@ -87,15 +157,16 @@ export function createCombobox(
         if (option.value === state.value) item.classList.add("is-selected");
         item.textContent = option.label;
 
-        // ใช้ mousedown + preventDefault เพื่อไม่ให้ช่องกรอกเสียโฟกัสก่อนเลือก
-        item.addEventListener("mousedown", (event) => {
-          event.preventDefault();
-          selectOption(option);
-        });
+        // ไฮไลต์ด้วย class เมื่อเอาเมาส์ชี้ (ไม่ replaceChildren ซ้ำ)
         item.addEventListener("mouseenter", () => {
-          state.highlightedIndex = index;
-          renderList();
+          setHighlight(index);
         });
+
+        // คลิกเลือกตัวเลือก
+        item.addEventListener("click", () => {
+          selectOption(option, { immediate: true });
+        });
+
         return item;
       })
     );
@@ -108,11 +179,11 @@ export function createCombobox(
   }
 
   // เลือกตัวเลือก: แจ้งค่าใหม่ออกไป แล้วแสดงชื่อในช่อง และปิดรายการ
-  function selectOption(option) {
+  function selectOption(option, { immediate = true } = {}) {
     state.value = option.value;
-    onChange?.(option.value);
     setQuery(option.label);
     state.open = false;
+    onChange?.(option.value, { immediate });
     renderList();
   }
 
@@ -123,21 +194,57 @@ export function createCombobox(
     setQuery(input.value);
     state.open = true;
     state.highlightedIndex = 0;
-    if (input.value === "") {
+
+    if (input.value.trim() === "") {
       state.value = "";
-      onChange?.("");
+      onChange?.("", { immediate: true });
+    } else {
+      // ตรวจสอบว่าสิ่งที่พิมพ์ตรงกับตัวเลือกใดโดยตรงหรือไม่ (เช่น พิมพ์รหัส M-0001 หรือ E-0004)
+      const match = findMatchingOption(input.value);
+      if (match) {
+        state.value = match.value;
+        onChange?.(match.value, { immediate: false });
+      }
     }
+
     renderList();
   });
 
   input.addEventListener("focus", () => {
     state.open = true;
+    state.highlightedIndex = 0;
     renderList();
   });
 
   input.addEventListener("blur", () => {
     state.open = false;
-    setQuery(selectedOption()?.label ?? "");
+    const currentText = input.value.trim();
+
+    if (!currentText) {
+      state.value = "";
+      setQuery("");
+      onChange?.("", { immediate: true });
+    } else {
+      // หากสิ่งที่พิมพ์ตรงกับตัวเลือกใดตัวเลือกหนึ่ง ให้เลือกตัวเลือกนั้น
+      const match = findMatchingOption(currentText);
+      if (match) {
+        selectOption(match, { immediate: true });
+      } else if (state.value) {
+        // หากมีค่าเดิมที่เลือกไว้แล้ว ให้คืนรูปเป็น label ของตัวเลือกนั้น
+        const current = selectedOption();
+        setQuery(current?.label ?? state.value);
+      } else {
+        // หากพิมพ์รหัสเช่น M-0001 หรือ E-0004 แต่ไม่มีในลิสต์ options (เช่น โหลดไม่ครบ)
+        // ให้ส่งค่านั้นออกไปค้นหากับ API
+        if (/^[me]-?\d+$/i.test(currentText)) {
+          state.value = currentText.toUpperCase();
+          onChange?.(state.value, { immediate: true });
+        } else {
+          setQuery("");
+        }
+      }
+    }
+
     renderList();
   });
 
@@ -147,24 +254,47 @@ export function createCombobox(
       renderList();
       return;
     }
-    if (!state.open) return;
 
     const items = filteredOptions();
+
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      state.highlightedIndex = Math.min(state.highlightedIndex + 1, items.length - 1);
-      renderList();
+      if (!state.open) {
+        state.open = true;
+        renderList();
+      } else if (items.length > 0) {
+        const nextIndex = Math.min(state.highlightedIndex + 1, items.length - 1);
+        setHighlight(nextIndex);
+      }
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      state.highlightedIndex = Math.max(state.highlightedIndex - 1, 0);
-      renderList();
+      if (!state.open) {
+        state.open = true;
+        renderList();
+      } else if (items.length > 0) {
+        const prevIndex = Math.max(state.highlightedIndex - 1, 0);
+        setHighlight(prevIndex);
+      }
     } else if (event.key === "Enter") {
       event.preventDefault();
-      const option = items[state.highlightedIndex];
-      if (option) selectOption(option);
+      if (state.open && items.length > 0) {
+        const option = items[state.highlightedIndex] ?? items[0];
+        if (option) selectOption(option, { immediate: true });
+      } else {
+        const match = findMatchingOption(input.value.trim());
+        if (match) {
+          selectOption(match, { immediate: true });
+        } else if (/^[me]-?\d+$/i.test(input.value.trim())) {
+          state.value = input.value.trim().toUpperCase();
+          onChange?.(state.value, { immediate: true });
+          state.open = false;
+          renderList();
+        }
+      }
     } else if (event.key === "Escape") {
       state.open = false;
-      setQuery(selectedOption()?.label ?? "");
+      const current = selectedOption();
+      setQuery(current?.label ?? "");
       renderList();
     }
   });
@@ -177,11 +307,11 @@ export function createCombobox(
   // ---------------------------------------------------------------------------
   return {
     // เปลี่ยนค่าที่เลือกจากภายนอก (เช่น ปุ่มล้างฟอร์ม)
-    // ถ้าค่าเปลี่ยนจริง ข้อความในช่องจะถูกตั้งเป็นชื่อของตัวเลือกใหม่
     setValue(newValue) {
       if (newValue === state.value) return;
       state.value = newValue;
-      setQuery(selectedOption()?.label ?? "");
+      const selected = selectedOption();
+      setQuery(selected?.label ?? newValue ?? "");
       renderList();
     },
 
@@ -190,13 +320,20 @@ export function createCombobox(
       state.value = newValue;
       state.open = false;
       state.highlightedIndex = 0;
-      setQuery(selectedOption()?.label ?? "");
+      const selected = selectedOption();
+      setQuery(selected?.label ?? newValue ?? "");
       renderList();
     },
 
     // เปลี่ยนรายการตัวเลือก
     setOptions(newOptions) {
       state.options = newOptions;
+      if (state.value) {
+        const selected = selectedOption();
+        if (selected) {
+          setQuery(selected.label);
+        }
+      }
       renderList();
     },
 

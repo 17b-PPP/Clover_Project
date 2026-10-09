@@ -27,6 +27,8 @@ const DIVIDEND_PERIOD_LABEL = "พฤษภาคม - มีนาคม";
 
 const yearSelect = byId("year-select");
 const rateInput = byId("rate-input");
+const calcSubmitBtn = byId("calc-submit-btn");
+const lockBanner = byId("dividend-lock-banner");
 const page = byId("page-content");
 
 // -----------------------------------------------------------------------------
@@ -44,16 +46,46 @@ const state = {
   selectedPayout: null, // ประวัติที่เปิดดูรายละเอียด
 };
 
-// ปีที่เลือกได้: ปีปัจจุบัน + ทุกปีที่มีการรับซื้อ (ใหม่สุดก่อน)
+// ปีที่เลือกได้: ปีปัจจุบัน + ทุกปีที่มีการรับซื้อหรือจ่ายเงินปันผลในอดีต (ไม่เกินปีปัจจุบันจริง)
 function availableYears() {
   const currentBuddhistYear = new Date().getUTCFullYear() + 543;
   const set = new Set([currentBuddhistYear]);
-  for (const purchase of state.data.purchases) set.add(purchase.buddhistYear);
+  for (const purchase of state.data.purchases) {
+    if (purchase.buddhistYear <= currentBuddhistYear) set.add(purchase.buddhistYear);
+  }
+  for (const year of state.data.paidYears) {
+    if (year <= currentBuddhistYear) set.add(year);
+  }
   return [...set].sort((a, b) => b - a);
+}
+
+// เลือกปีเริ่มต้น: ใช้ปีปัจจุบันเสมอ (เช่น ในปี 2569 จะเลือก 2569 และเมื่อถึงปี 2570 ระบบจะสลับเป็นปี 2570 ให้อัตโนมัติ)
+function defaultYear(years) {
+  const currentBuddhistYear = new Date().getUTCFullYear() + 543;
+  if (years.includes(currentBuddhistYear)) return currentBuddhistYear;
+  return years[0];
 }
 
 // ปีที่เลือกเคยจ่ายปันผลไปแล้วหรือไม่
 const yearAlreadyPaid = () => state.data.paidYears.includes(state.year);
+
+// ข้อมูลการจ่ายปันผลของปีที่เลือก (ถ้าเคยจ่ายแล้ว)
+function getPaidInfoForYear(year) {
+  const yearPayments = state.data.payments.filter((p) => p.buddhistYear === year);
+  if (yearPayments.length === 0) return null;
+  const rate = yearPayments[0].rate;
+  const periodLabel = yearPayments[0].periodLabel;
+  const totalAmount = yearPayments.reduce((sum, p) => sum + p.amount, 0);
+  const totalDryWeightKg = yearPayments.reduce((sum, p) => sum + p.dryWeightKg, 0);
+  return {
+    rate,
+    periodLabel,
+    totalAmount,
+    totalDryWeightKg,
+    count: yearPayments.length,
+    payments: yearPayments,
+  };
+}
 
 // น้ำหนักยางแห้งรวมของสมาชิกแต่ละคน เฉพาะปีที่เลือก
 function dryWeightByMember() {
@@ -66,8 +98,20 @@ function dryWeightByMember() {
 }
 
 // แถวของตารางปันผล: สมาชิกทุกคน พร้อมน้ำหนักและเงินปันผล
-function dividendRows(weights) {
+function dividendRows(weights, paidMap = null) {
   return state.data.members.map((member) => {
+    if (paidMap) {
+      const payment = paidMap.get(member.memberId);
+      const dryWeightKg = payment ? payment.dryWeightKg : 0;
+      const amount = payment ? payment.amount : 0;
+      return {
+        memberId: member.memberId,
+        memberCode: member.memberCode,
+        memberName: member.memberName,
+        dryWeightKg,
+        amount,
+      };
+    }
     const dryWeightKg = weights.get(member.memberId) ?? 0;
     return {
       memberId: member.memberId,
@@ -84,11 +128,25 @@ function dividendRows(weights) {
 // -----------------------------------------------------------------------------
 function render() {
   const years = availableYears();
-  const weights = dryWeightByMember();
-  const totalDryWeight = [...weights.values()].reduce((sum, w) => sum + w, 0);
-  const rows = dividendRows(weights);
-  const totalDividend = state.appliedRate === null ? null : totalDryWeight * state.appliedRate;
   const alreadyPaid = yearAlreadyPaid();
+  const paidInfo = alreadyPaid ? getPaidInfoForYear(state.year) : null;
+
+  if (alreadyPaid && paidInfo) {
+    state.appliedRate = paidInfo.rate;
+    state.appliedPeriodLabel = paidInfo.periodLabel ?? DIVIDEND_PERIOD_LABEL;
+  }
+
+  const weights = dryWeightByMember();
+  const totalDryWeight = alreadyPaid && paidInfo
+    ? paidInfo.totalDryWeightKg
+    : [...weights.values()].reduce((sum, w) => sum + w, 0);
+  const paidMap = alreadyPaid && paidInfo
+    ? new Map(paidInfo.payments.map((p) => [p.memberId, p]))
+    : null;
+  const rows = dividendRows(weights, paidMap);
+  const totalDividend = alreadyPaid && paidInfo
+    ? paidInfo.totalAmount
+    : (state.appliedRate === null ? null : totalDryWeight * state.appliedRate);
 
   // ตัวเลือกปี
   const yearKey = years.join(",");
@@ -98,7 +156,9 @@ function render() {
       ...years.map((y) => {
         const option = document.createElement("option");
         option.value = String(y);
-        option.textContent = String(y);
+        option.textContent = state.data.paidYears.includes(y)
+          ? `${y} (จ่ายแล้ว)`
+          : String(y);
         return option;
       })
     );
@@ -107,8 +167,20 @@ function render() {
 
   // ปี พ.ศ. ในข้อความต่าง ๆ ของหน้า
   setSlot(page, "year", String(state.year));
+  setSlot(lockBanner, "next-year", String(state.year + 1));
 
-  byId("already-paid-note").hidden = !alreadyPaid;
+  // แบนเนอร์ล็อกระบบและสถานะช่องกรอก
+  if (alreadyPaid) {
+    lockBanner.hidden = false;
+    rateInput.value = state.appliedRate !== null ? formatNumber(state.appliedRate) : "";
+    rateInput.disabled = true;
+    calcSubmitBtn.disabled = true;
+  } else {
+    lockBanner.hidden = true;
+    rateInput.disabled = false;
+    calcSubmitBtn.disabled = false;
+  }
+
   byId("rate-error").textContent = state.error ?? "";
   byId("rate-error").hidden = !state.error;
 
@@ -120,7 +192,7 @@ function render() {
     state.appliedRate === null ? "-" : `${formatNumber(state.appliedRate)} บาท/กก.`;
   byId("stat-member-count").textContent = formatNumber(state.data.members.length, 0);
 
-  // ตารางปันผล (ก่อนกด "ตกลง" แสดงคำแนะนำแทน)
+  // ตารางปันผล (ก่อนกด "ตกลง" แสดงคำแนะนำแทน เว้นแต่เป็นปีที่จ่ายแล้วจะแสดงผลอัตโนมัติ)
   const applied = state.appliedRate !== null;
   byId("dividend-placeholder").hidden = applied;
   byId("dividend-result").hidden = !applied;
@@ -149,8 +221,10 @@ function render() {
     });
 
     byId("applied-period").textContent = state.appliedPeriodLabel;
-    byId("pay-blocked").hidden = !(alreadyPaid && !state.paid);
+    byId("pay-locked").hidden = !alreadyPaid;
+    byId("pay-blocked").hidden = true;
     byId("pay-done").hidden = !state.paid;
+    byId("pay-button").hidden = alreadyPaid;
     byId("pay-button").disabled = state.paid || alreadyPaid;
     byId("pay-error").textContent = state.payError ?? "";
     byId("pay-error").hidden = !state.payError;
@@ -170,11 +244,30 @@ function render() {
 yearSelect.addEventListener("change", () => {
   state.year = Number(yearSelect.value);
   state.page = 1;
+  state.error = null;
+  state.payError = null;
+  state.paid = false;
+  if (yearAlreadyPaid()) {
+    const paidInfo = getPaidInfoForYear(state.year);
+    state.appliedRate = paidInfo?.rate ?? null;
+    state.appliedPeriodLabel = paidInfo?.periodLabel ?? DIVIDEND_PERIOD_LABEL;
+  } else {
+    state.appliedRate = null;
+    state.appliedPeriodLabel = "";
+    rateInput.value = "";
+  }
   render();
 });
 
 byId("dividend-form").addEventListener("submit", (event) => {
   event.preventDefault();
+  const currentBuddhistYear = new Date().getUTCFullYear() + 543;
+  if (state.year > currentBuddhistYear) {
+    state.error = `ยังไม่ถึงปี พ.ศ. ${state.year} ในปัจจุบัน จึงยังไม่สามารถคำนวณเงินปันผลได้`;
+    render();
+    return;
+  }
+  if (yearAlreadyPaid()) return;
   const value = Number(rateInput.value);
   if (!rateInput.value.trim() || Number.isNaN(value) || value <= 0) {
     state.error = "กรุณากรอกอัตราเงินปันผลเป็นตัวเลขมากกว่า 0";
@@ -194,6 +287,12 @@ byId("dividend-form").addEventListener("submit", (event) => {
 // จ่ายปันผล
 // -----------------------------------------------------------------------------
 async function handlePayDividend() {
+  const currentBuddhistYear = new Date().getUTCFullYear() + 543;
+  if (state.year > currentBuddhistYear) {
+    state.payError = `ยังไม่ถึงปี พ.ศ. ${state.year} ในปัจจุบัน ไม่สามารถจ่ายเงินปันผลได้`;
+    render();
+    return;
+  }
   state.payError = null;
   render();
   try {
@@ -211,6 +310,9 @@ async function handlePayDividend() {
       throw new Error(data.error ?? "ไม่สามารถจ่ายเงินปันผลได้");
     }
     state.paid = true;
+    if (!state.data.paidYears.includes(state.year)) {
+      state.data.paidYears.push(state.year);
+    }
     render();
     refreshData(); // โหลดข้อมูลใหม่เบื้องหลัง (ไม่ต้องรอ)
   } catch (error) {
@@ -332,7 +434,13 @@ function openPayout(payout) {
 try {
   const { data } = await loadPageData("dividends");
   state.data = data;
-  state.year = availableYears()[0];
+  const years = availableYears();
+  state.year = defaultYear(years);
+  if (yearAlreadyPaid()) {
+    const paidInfo = getPaidInfoForYear(state.year);
+    state.appliedRate = paidInfo?.rate ?? null;
+    state.appliedPeriodLabel = paidInfo?.periodLabel ?? DIVIDEND_PERIOD_LABEL;
+  }
   render();
   byId("page-loading").hidden = true;
   page.hidden = false;

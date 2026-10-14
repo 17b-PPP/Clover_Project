@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>คู่มืออธิบายการทำงานของโค้ดทั้งระบบ — Clover Project</title>
+  <style>
+    /* ─── Reset & Base Settings ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 13.5px; }
+    body {
+      font-family: 'Segoe UI', 'Sarabun', 'Noto Sans Thai', Tahoma, sans-serif;
+      color: #1e293b;
+      line-height: 1.7;
+      background: #f8fafc;
+      padding: 2rem;
+    }
+
+    /* ─── Page & Print (A4 Setup) ─── */
+    @page {
+      size: A4;
+      margin: 16mm 14mm 16mm 14mm;
+    }
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+        font-size: 11.5px;
+        line-height: 1.6;
+      }
+      .container {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+      .page-break { page-break-before: always; }
+      .no-print { display: none !important; }
+      h1, h2, h3, h4 { page-break-after: avoid; }
+      table, pre, .callout, .diagram-box, .stat-card { page-break-inside: avoid; }
+    }
+
+    /* ─── Container ─── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 3rem 3.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    }
+
+    /* ─── Cover Page ─── */
+    .cover {
+      text-align: center;
+      padding: 4.5rem 2rem 4rem;
+      border-bottom: 3px solid #059669;
+      margin-bottom: 2.5rem;
+    }
+    .cover .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, #10b981, #047857);
+      color: #fff;
+      border-radius: 18px;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .cover h1 {
+      font-size: 2.1rem;
+      color: #0f172a;
+      margin-bottom: 0.6rem;
+      font-weight: 700;
+    }
+    .cover .subtitle {
+      font-size: 1.15rem;
+      color: #059669;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+    }
+    .cover .desc {
+      font-size: 0.95rem;
+      color: #64748b;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    .cover .meta {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      line-height: 1.8;
+    }
+
+    /* ─── Table of Contents (TOC) ─── */
+    .toc {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .toc h2 {
+      font-size: 1.25rem;
+      color: #065f46;
+      border-bottom: 2px solid #86efac;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      margin-top: 0;
+    }
+    .toc ol {
+      padding-left: 1.5rem;
+      columns: 2;
+      column-gap: 2rem;
+    }
+    .toc li {
+      margin-bottom: 0.45rem;
+      font-weight: 500;
+    }
+    .toc a {
+      color: #047857;
+      text-decoration: none;
+    }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ─── Typography & Headings ─── */
+    h2 {
+      font-size: 1.45rem;
+      color: #065f46;
+      border-bottom: 2px solid #d1fae5;
+      padding-bottom: 0.4rem;
+      margin: 2.4rem 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    h3 {
+      font-size: 1.15rem;
+      color: #047857;
+      margin: 1.5rem 0 0.6rem;
+    }
+    h4 {
+      font-size: 1rem;
+      color: #334155;
+      margin: 1.1rem 0 0.4rem;
+    }
+    p { margin-bottom: 0.8rem; text-align: justify; }
+    ul, ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.35rem; }
+
+    /* ─── Tables ─── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.88rem;
+    }
+    th {
+      background: #f0fdf4;
+      color: #065f46;
+      text-align: left;
+      padding: 0.65rem 0.8rem;
+      border: 1px solid #d1fae5;
+      font-weight: 600;
+    }
+    td {
+      padding: 0.55rem 0.8rem;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f8fafc; }
+
+    /* ─── Code & Pre ─── */
+    code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      color: #047857;
+    }
+    pre {
+      background: #0f172a;
+      color: #f1f5f9;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.8rem 0 1.2rem;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: #f1f5f9;
+    }
+
+    /* ─── Callout Boxes ─── */
+    .callout {
+      border-left: 4px solid #10b981;
+      background: #f0fdf4;
+      padding: 0.9rem 1.2rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0 1.4rem;
+      font-size: 0.9rem;
+    }
+    .callout.warn {
+      border-left-color: #f59e0b;
+      background: #fffbeb;
+    }
+    .callout.info {
+      border-left-color: #3b82f6;
+      background: #eff6ff;
+    }
+    .callout strong { display: block; margin-bottom: 0.25rem; color: #0f172a; }
+
+    /* ─── Diagram Boxes ─── */
+    .diagram-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1.2rem 1.5rem;
+      margin: 1.2rem 0 1.5rem;
+    }
+    .diagram-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.8rem;
+      text-align: center;
+    }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0.5rem 0;
+    }
+    .flow-node {
+      background: #fff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.82rem;
+      text-align: center;
+      flex: 1;
+      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    }
+    .flow-node.green {
+      border-color: #10b981;
+      background: #f0fdf4;
+      color: #065f46;
+      font-weight: 600;
+    }
+    .flow-node.blue {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      color: #1e40af;
+      font-weight: 600;
+    }
+    .flow-arrow {
+      color: #94a3b8;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    /* ─── Badges ─── */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-pk { background: #fee2e2; color: #b91c1c; }
+    .badge-fk { background: #dbeafe; color: #1d4ed8; }
+    .badge-uq { background: #ede9fe; color: #6d28d9; }
+    .badge-success { background: #d1fae5; color: #047857; }
+
+    /* ─── Formula Box ─── */
+    .formula-card {
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      padding: 1rem 1.4rem;
+      margin: 0.8rem 0 1.2rem;
+    }
+    .formula-card .title {
+      font-weight: 700;
+      color: #065f46;
+      margin-bottom: 0.4rem;
+      font-size: 0.92rem;
+    }
+    .formula-card .math {
+      font-family: 'Cambria Math', 'Georgia', serif;
+      font-size: 1.05rem;
+      color: #0f172a;
+      background: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px dashed #6ee7b7;
+      display: inline-block;
+      margin: 0.3rem 0;
+    }
+
+    /* ─── Footer ─── */
+    .doc-footer {
+      margin-top: 3.5rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid #d1fae5;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════ COVER PAGE ═══════════════════════════════════ -->
+  <div class="cover">
+    <div class="logo-badge">FL</div>
+    <h1>คู่มืออธิบายการทำงานของโค้ดทั้งระบบ</h1>
+    <div class="subtitle">Clover Project — ระบบบริหารจัดการสหกรณ์รับซื้อน้ำยางพารา (Field Latex)</div>
+    <div class="desc">
+      เอกสารฉบับสมบูรณ์สำหรับนักพัฒนาและผู้เริ่มต้น อธิบายโครงสร้างสถาปัตยกรรม ฐานข้อมูล ระบบเซิร์ฟเวอร์
+      การเชื่อมโยง API หน้าบ้าน และตรรกะทางธุรกิจอย่างละเอียด
+    </div>
+    <div class="meta">
+      <strong>เทคโนโลยีหลัก:</strong> Node.js • Express • PostgreSQL • Prisma ORM • Vanilla HTML/CSS/JS<br/>
+      <strong>เวอร์ชันเอกสาร:</strong> 1.0 (อัปเดตระบบล็อกเงินปันผลและการเบิกเงิน)<br/>
+      <strong>วันที่จัดทำ:</strong> ตุลาคม 2569
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ TOC ═══════════════════════════════════ -->
+  <div class="toc">
+    <h2>สารบัญเนื้อหา</h2>
+    <ol>
+      <li><a href="#sec1">ภาพรวมสถาปัตยกรรมระบบ (Architecture)</a></li>
+      <li><a href="#sec2">ฐานข้อมูล 10 ตารางและการเชื่อมโยง (Database)</a></li>
+      <li><a href="#sec3">ระบบหลังบ้าน (Backend Server & Middleware)</a></li>
+      <li><a href="#sec4">ระบบความปลอดภัย & Dual-Session</a></li>
+      <li><a href="#sec5">ชั้นตรรกะข้อมูลและ API Endpoints (Data Layer)</a></li>
+      <li><a href="#sec6">ระบบหน้าบ้าน (HTML, CSS & DOM Engine)</a></li>
+      <li><a href="#sec7">ส่วนประกอบที่นำมาใช้ร่วมกัน (Shared Modules)</a></li>
+      <li><a href="#sec8">สูตรคำนวณและตรรกะทางธุรกิจที่สำคัญ</a></li>
+    </ol>
+  </div>
+
+  <!-- ═══════════════════════════════════ SECTION 1 ═══════════════════════════════════ -->
+  <h2 id="sec1">1. ภาพรวมสถาปัตยกรรมระบบ (System Architecture)</h2>
+  <p>
+    ระบบ <strong>Clover Project</strong> ถูกออกแบบขึ้นเพื่อบริหารงานสหกรณ์กองทุนสวนยาง ครอบคลุมงานรับซื้อน้ำยางสดประจำวัน,
+    การแบ่งรายได้ระหว่างเจ้าของสวนกับลูกจ้างกรีดยาง, การเบิกเงินสะสม, การจ่ายเงินปันผลประจำปี และระบบพอร์ทัลสำหรับสมาชิก
+    สถาปัตยกรรมของโปรเจกต์เป็นแบบ <strong>Monolithic Architecture</strong> ที่ทำงานบน Node.js + Express
+    โดยแยกการทำงานออกเป็น 4 ชั้นหลักอย่างชัดเจน:
+  </p>
+
+  <div class="diagram-box">
+    <div class="diagram-title">วงจรการรับส่งข้อมูล (Request-Response Lifecycle)</div>
+    <div class="flow-step">
+      <div class="flow-node green">1. Client (Browser)<br/><small>HTML5, CSS, ES Modules</small></div>
+      <div class="flow-arrow">➔</div>
+      <div class="flow-node">2. Express Server<br/><small>server.js (Port 3000)</small></div>
+      <div class="flow-arrow">➔</div>
+      <div class="flow-node green">3. Access Guard<br/><small>ตรวจสิทธิ์ Cookie Session</small></div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-arrow" style="margin-left:auto; margin-right:3rem;">⬇</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-node blue">6. Database<br/><small>PostgreSQL (10 Tables)</small></div>
+      <div class="flow-arrow">⬅</div>
+      <div class="flow-node blue">5. Prisma ORM<br/><small>Query & Transactions</small></div>
+      <div class="flow-arrow">⬅</div>
+      <div class="flow-node">4. Data Layer & Routes<br/><small>Business Logic</small></div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:25%">เลเยอร์</th>
+        <th style="width:35%">เทคโนโลยี / ไฟล์หลัก</th>
+        <th style="width:40%">หน้าที่ความรับผิดชอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Presentation Layer</strong></td>
+        <td><code>pages/*.html</code>, <code>public/js/pages/*</code>, <code>public/css/*</code></td>
+        <td>แสดงผล UI, ผูกข้อมูลผ่าน Template Tag, รับ Action จากผู้ใช้ และติดต่อ API ด้วย Fetch</td>
+      </tr>
+      <tr>
+        <td><strong>Routing & Guard</strong></td>
+        <td><code>server/routes/*</code>, <code>access-guard.js</code></td>
+        <td>ตรวจสอบการยืนยันตัวตน, ดักสิทธิ์ ADMIN/STAFF/MEMBER และแปลง Request Body</td>
+      </tr>
+      <tr>
+        <td><strong>Data Layer</strong></td>
+        <td><code>server/lib/data/*</code></td>
+        <td>คำนวณสูตรธุรกิจ, ควบคุมความถูกต้อง (Validation), รัน Database Transactions</td>
+      </tr>
+      <tr>
+        <td><strong>Database Layer</strong></td>
+        <td>PostgreSQL via <code>@prisma/client</code></td>
+        <td>จัดเก็บข้อมูลถาวร, ควบคุม Foreign Key Constraints, Unique Constraints</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═══════════════════════════════════ SECTION 2 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec2">2. ฐานข้อมูล 10 ตารางและการเชื่อมโยง (Database & Relationships)</h2>
+  <p>
+    ฐานข้อมูลถูกนิยามในไฟล์ <code>prisma/schema.prisma</code> ประกอบด้วยทั้งหมด 10 ตาราง
+    โดยมี <strong>Member (สมาชิก)</strong> เป็นหัวใจศูนย์กลางของระบบการเงิน:
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ชื่อตาราง (Model)</th>
+        <th>บทบาทหน้าที่</th>
+        <th>คีย์หลัก (PK) & ข้อกำหนด (Constraints)</th>
+        <th>ความสัมพันธ์ (Relations)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Member</strong></td>
+        <td>สมาชิกเจ้าของสวนยาง เก็บค่ายอดเงินกระเป๋าสะสม (<code>walletBalance</code>) และปันผลสะสม (<code>dividendBalance</code>)</td>
+        <td><span class="badge badge-pk">PK</span> id<br/><span class="badge badge-uq">UQ</span> memberCode, idCardNumber</td>
+        <td>1:N กับ MePair, Purchase, Withdrawal, DividendPayment</td>
+      </tr>
+      <tr>
+        <td><strong>Employee</strong></td>
+        <td>ลูกจ้างกรีดยางและส่งน้ำยางหน้างานแทนสมาชิก</td>
+        <td><span class="badge badge-pk">PK</span> id<br/><span class="badge badge-uq">UQ</span> employeeCode, idCardNumber</td>
+        <td>1:N กับ MePair, 0..1:N กับ Purchase</td>
+      </tr>
+      <tr>
+        <td><strong>MePair</strong></td>
+        <td>สัญญาจับคู่สมาชิก-ลูกจ้าง พร้อมสัดส่วนรายได้ (<code>memberShare</code> + <code>employeeShare</code> = 100)</td>
+        <td><span class="badge badge-pk">PK</span> id<br/><span class="badge badge-uq">UQ</span> pairCode</td>
+        <td><span class="badge badge-fk">FK</span> memberId ➔ Member<br/><span class="badge badge-fk">FK</span> employeeId ➔ Employee</td>
+      </tr>
+      <tr>
+        <td><strong>Purchase</strong></td>
+        <td>บันทึกการรับซื้อน้ำยางสดประจำวัน คำนวณน้ำหนักแห้ง ยอดรวม และส่วนแบ่งรายได้</td>
+        <td><span class="badge badge-pk">PK</span> id<br/><span class="badge badge-uq">UQ</span> purchaseCode</td>
+        <td><span class="badge badge-fk">FK</span> memberId ➔ Member<br/><span class="badge badge-fk">FK</span> employeeId ➔ Employee (nullable)</td>
+      </tr>
+      <tr>
+        <td><strong>Withdrawal</strong></td>
+        <td>บันทึกการเบิกเงินสดจากยอดสะสมของสมาชิก</td>
+        <td><span class="badge badge-pk">PK</span> id<br/><span class="badge badge-uq">UQ</span> withdrawalCode</td>
+        <td><span class="badge badge-fk">FK</span> memberId ➔ Member</td>
+      </tr>
+      <tr>
+        <td><strong>DividendPayment</strong></td>
+        <td>ประวัติการจ่ายเงินปันผลประจำปี พ.ศ. ให้สมาชิก (1 แถวต่อสมาชิกต่อปี)</td>
+        <td><span class="badge badge-pk">PK</span> id<br/><span class="badge badge-uq">UQ</span> dividendCode, <code>[memberId, buddhistYear]</code></td>
+        <td><span class="badge badge-fk">FK</span> memberId ➔ Member</td>
+      </tr>
+      <tr>
+        <td><strong>Staff</strong></td>
+        <td>บัญชีเจ้าหน้าที่/ผู้ดูแลระบบ (Role: <code>STAFF</code> หรือ <code>ADMIN</code>)</td>
+        <td><span class="badge badge-pk">PK</span> id<br/><span class="badge badge-uq">UQ</span> staffCode, username, email</td>
+        <td>1:N กับ ActivityLog</td>
+      </tr>
+      <tr>
+        <td><strong>ActivityLog</strong></td>
+        <td>บันทึก Audit Log กิจกรรมการทำงานของเจ้าหน้าที่ (Login, Create, Update, Delete)</td>
+        <td><span class="badge badge-pk">PK</span> logId (BigInt)</td>
+        <td><span class="badge badge-fk">FK</span> staffId ➔ Staff</td>
+      </tr>
+      <tr>
+        <td><strong>ReferencePrice</strong></td>
+        <td>ราคากลางประจำวัน กำหนดโดย Admin (1 วันมี 1 ราคา)</td>
+        <td><span class="badge badge-pk">PK</span> id<br/><span class="badge badge-uq">UQ</span> date</td>
+        <td>Standalone (เชื่อมโยงตามวันที่)</td>
+      </tr>
+      <tr>
+        <td><strong>ReferencePriceHistory</strong></td>
+        <td>ประวัติการบันทึกหรือเปลี่ยนราคากลาง (Insert-only)</td>
+        <td><span class="badge badge-pk">PK</span> id</td>
+        <td>Standalone (เชื่อมโยงตามวันที่)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <strong>ข้อกำหนดความปลอดภัยของฐานข้อมูล (Database Constraints):</strong>
+    ตาราง <code>DividendPayment</code> มีการกำหนด <code>@@unique([memberId, buddhistYear])</code> ซึ่งรับประกันในระดับฐานข้อมูลว่าสมาชิก 1 คนจะไม่มีทางได้รับเงินปันผลซ้ำสองครั้งในรอบปี พ.ศ. เดียวกัน แม้จะมีการส่งคำขอพร้อมกัน (Concurrency) ก็ตาม
+  </div>
+
+  <!-- ═══════════════════════════════════ SECTION 3 & 4 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec3">3. ระบบหลังบ้าน (Backend Server & Middleware)</h2>
+  <p>
+    เซิร์ฟเวอร์เริ่มต้นทำงานจากไฟล์ <code>server/server.js</code> ซึ่งมีลำดับการประมวลผลคำขอ (Middleware Pipeline) ดังนี้:
+  </p>
+
+  <ol>
+    <li><strong>โหลดค่าคอนฟิก (<code>server/env.js</code>):</strong> ตรวจสอบไฟล์ <code>.env</code> และตั้งค่าโหมดการทำงาน <code>NODE_ENV</code></li>
+    <li><strong>ให้บริการไฟล์คงที่ (Static Assets):</strong> ให้บริการไฟล์จาก <code>public/</code> (CSS, JS, Fonts, Images) และ <code>shared/</code> ผ่าน <code>express.static</code></li>
+    <li><strong>อ่านเนื้อหา Body:</strong> เปิดรับ Body แบบข้อความดิบขนาดสูงสุด 50MB (<code>express.text({ limit: "50mb" })</code>) เพื่อรองรับการอัปโหลดรูปภาพแบบ Base64 และแปลงเป็น JSON ผ่าน <code>readJsonBody()</code></li>
+    <li><strong>ดักตรวจสิทธิ์ (<code>server/middleware/access-guard.js</code>):</strong> ตรวจสอบ Cookie และสิทธิ์การเข้าถึงก่อนอนุญาตให้ผ่านไปยัง Route</li>
+    <li><strong>เราต์ API (<code>server/routes/api.routes.js</code>):</strong> นำส่งคำขอไปยัง API Controller ต่าง ๆ ภายใต้พาธ <code>/api/*</code></li>
+    <li><strong>เราต์หน้าเว็บ HTML (<code>server/routes/pages.routes.js</code>):</strong> ส่งหน้าเว็บ HTML พร้อมแทรก Layout Data</li>
+    <li><strong>ดักจับข้อผิดพลาดส่วนกลาง:</strong> หน้า 404 Not Found และ Global 500 Error Handler</li>
+  </ol>
+
+  <h2 id="sec4">4. ระบบความปลอดภัย & Dual-Session (ระบบเซสชัน 2 ระดับ)</h2>
+  <p>
+    ระบบ Clover Project มีจุดเด่นด้านความปลอดภัย คือการแยก Cookie เซสชันและอัลกอริทึมการเข้ารหัสระหว่าง <strong>เจ้าหน้าที่</strong> และ <strong>สมาชิก</strong> ออกจากกันโดยสิ้นเชิง:
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>คุณสมบัติ</th>
+        <th>ฝั่งเจ้าหน้าที่ (Staff / Admin)</th>
+        <th>ฝั่งสมาชิก (Member Portal)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>ชื่อ Cookie</strong></td>
+        <td><code>session</code></td>
+        <td><code>member_session</code></td>
+      </tr>
+      <tr>
+        <td><strong>ข้อมูลการยืนยันตัวตน</strong></td>
+        <td>Username + Password (scrypt hash + salt)</td>
+        <td>เลขบัตรประชาชน 13 หลัก + วันเกิด 8 หลัก (ววดดปปปป)</td>
+      </tr>
+      <tr>
+        <td><strong>กุญแจเซ็น Token (HMAC)</strong></td>
+        <td><code>SESSION_SECRET</code> โดยตรง</td>
+        <td><code>HMAC(SESSION_SECRET, "member-session-v1")</code> (Derived Key)</td>
+      </tr>
+      <tr>
+        <td><strong>การคุ้มครอง Cookie</strong></td>
+        <td><code>HttpOnly</code>, <code>SameSite=Lax</code>, อายุ 7 วัน</td>
+        <td><code>HttpOnly</code>, <code>SameSite=Lax</code>, อายุ 7 วัน</td>
+      </tr>
+      <tr>
+        <td><strong>สิทธิ์การเข้าถึง</strong></td>
+        <td>เข้าถึงหน้าจัดการสหกรณ์ทั้งหมด (ADMIN เข้าหน้า Users และ Audit Log ได้)</td>
+        <td>เข้าถึงได้เฉพาะแดชบอร์ดของตนเอง (<code>/member/*</code>)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <strong>ทำไมต้องใช้ Derived Secret สำหรับสมาชิก?</strong><br/>
+    การนำ <code>SESSION_SECRET</code> มาสร้างกุญแจย่อยเฉพาะสมาชิก ทำให้แม้สมาชิกจะพยายามนำ Token ของตนเองไปเปลี่ยนชื่อ Cookie เป็น <code>session</code> เพื่อเข้าใช้งานในฐานะเจ้าหน้าที่ ระบบตรวจสอบของเจ้าหน้าที่จะถอดรหัสลายเซ็นดิจิทัลไม่ผ่านทันที ถือเป็นการป้องกันการยกระดับสิทธิ์ (Privilege Escalation) อย่างเด็ดขาด
+  </div>
+
+  <!-- ═══════════════════════════════════ SECTION 5 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec5">5. ชั้นตรรกะข้อมูลและ API Endpoints (Data Layer)</h2>
+  <p>
+    ไฟล์ใน <code>server/lib/data/*</code> ทำหน้าที่เป็นคลังตรรกะข้อมูล (Service Layer)
+    ที่ติดต่อกับฐานข้อมูลผ่าน Prisma และส่งผลลัพธ์กลับไปยัง API Routes:
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>โมดูล Data</th>
+        <th>ฟังก์ชันสำคัญ</th>
+        <th>ตรรกะการทำงาน</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>members.js</code></td>
+        <td><code>getMembers()</code><br/><code>createMember()</code><br/><code>updateMember()</code><br/><code>setMemberStatus()</code></td>
+        <td>- ออกรหัสอัตโนมัติ <code>M-XXXX</code> (ต่อท้ายด้วยเลข 4 หลัก)<br/>- ตรวจสอบความถูกต้องของเลขบัตร 13 หลัก และเบอร์โทร 10 หลัก ป้องกันข้อมูลซ้ำ<br/>- แยก <code>photoUrl</code> ออกจากการดึงรายชื่อปกติเพื่อเพิ่มความเร็วในการโหลดตาราง</td>
+      </tr>
+      <tr>
+        <td><code>employees.js</code></td>
+        <td><code>getEmployees()</code><br/><code>createEmployee()</code><br/><code>setEmployeeStatus()</code></td>
+        <td>- ออกรหัสอัตโนมัติ <code>E-XXXX</code><br/>- โครงสร้างเหมือนสมาชิก แต่ไม่มีกระเป๋าเงินสะสม</td>
+      </tr>
+      <tr>
+        <td><code>contracts.js</code></td>
+        <td><code>createContract()</code><br/><code>updateContractShares()</code><br/><code>getContractHistory()</code></td>
+        <td>- ตรวจสอบว่าทั้งสมาชิกและลูกจ้างมีสถานะ Active<br/>- ตรวจสอบว่าคู่นี้ยังไม่มีสัญญาเดิมที่เปิดใช้งานอยู่<br/>- ออกรหัสสัญญา <code>C-XXXX</code> และเก็บประวัติสัดส่วนย้อนหลัง</td>
+      </tr>
+      <tr>
+        <td><code>purchases.js</code></td>
+        <td><code>lookupSeller()</code><br/><code>createPurchase()</code></td>
+        <td>- ค้นหาผู้ขายรองรับทั้งรหัส M และ E (กรอกตัวเลขเดี่ยว ๆ เช่น <code>1</code> ได้)<br/>- คำนวณน้ำหนักยางแห้งสุทธิและยอดเงินรวม<br/>- ทำงานใน <code>prisma.$transaction</code>: บันทึกบิล <code>P-XXXX</code> พร้อมโอนยอดเงินเข้ากระเป๋าเงินสมาชิก (<code>walletBalance</code>) อัตโนมัติ</td>
+      </tr>
+      <tr>
+        <td><code>withdrawals.js</code></td>
+        <td><code>lookupMember()</code><br/><code>createWithdrawal()</code></td>
+        <td>- ตรวจสอบยอดเงินสะสมในกระเป๋าว่าเพียงพอกับยอดที่ต้องการเบิก<br/>- ทำงานใน <code>prisma.$transaction</code>: บันทึกบิลเบิก <code>W-XXXX</code> และตัดยอดเงินออกจากกระเป๋าเงินสมาชิกพร้อมกัน</td>
+      </tr>
+      <tr>
+        <td><code>dividends.js</code></td>
+        <td><code>getDividendData()</code><br/><code>payDividend()</code></td>
+        <td>- คำนวณผลรวมน้ำหนักยางแห้งสะสมทั้งปี พ.ศ. ของสมาชิกทุกคน<br/>- ป้องกันการจ่ายเงินปันผลซ้ำในปีเดียวกัน และห้ามจ่ายปันผลในปีอนาคต<br/>- สั่งจ่ายใน Transaction เดียว: สร้างประวัติ <code>D-XXXX</code> และบวกเงินเข้าทั้ง <code>walletBalance</code> และ <code>dividendBalance</code> ของสมาชิกทุกคน</td>
+      </tr>
+      <tr>
+        <td><code>reference-price.js</code></td>
+        <td><code>getReferencePriceForDate()</code><br/><code>upsertReferencePrice()</code></td>
+        <td>- บันทึกราคากลางประจำวัน (1 วันมีได้ 1 ราคา)<br/>- บันทึกประวัติการปรับราคาลงตาราง <code>ReferencePriceHistory</code> ทุกครั้ง</td>
+      </tr>
+      <tr>
+        <td><code>member-portal.js</code></td>
+        <td><code>requireMemberPortal()</code><br/><code>getMemberFinanceHistory()</code></td>
+        <td>- ตรวจสอบ Session สมาชิก หากถูกระงับจะบังคับ Logout ทันที<br/>- รวมประวัติการขาย, การเบิกเงิน, และเงินปันผลเป็น Timeline การเงินเดียว</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ═══════════════════════════════════ SECTION 6 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec6">6. ระบบหน้าบ้าน (HTML, CSS & DOM Engine)</h2>
+  <p>
+    ระบบหน้าบ้านได้รับการพัฒนาโดยไม่ใช้เฟรมเวิร์กขนาดใหญ่ แต่ใช้ <strong>Native Web Standards</strong>
+    ที่เน้นความเร็ว ความเบา และความปลอดภัยสูงสุด:
+  </p>
+
+  <h3>6.1 การประกอบหน้าเว็บ (Server-Side HTML Includes)</h3>
+  <p>
+    ในไฟล์ <code>pages/*.html</code> มีการใช้คำสั่ง <code>&lt;!-- @include partials/... --&gt;</code>
+    ซึ่งเซิร์ฟเวอร์ Express จะอ่านและนำชิ้นส่วน HTML มาประกอบก่อนส่งไปยังเบราว์เซอร์:
+  </p>
+  <ul>
+    <li><code>partials/head.html</code>: นำเข้าฟอนต์ Noto Sans Thai และ CSS สไตล์กลาง</li>
+    <li><code>partials/sidebar.html</code>: เมนูแถบข้างของฝั่งเจ้าหน้าที่ พร้อมแสดงจุดแจ้งเตือนรหัสผ่านเริ่มต้น</li>
+    <li><code>partials/member-sidebar.html</code>: เมนูแถบข้างและข้อมูลโปรไฟล์ของสมาชิก</li>
+    <li><code>partials/pagination.html</code>: ตัวแบ่งหน้าตาราง (Pagination Template)</li>
+  </ul>
+
+  <h3>6.2 กลไก Template & Data Slot (<code>public/js/core/dom.js</code>)</h3>
+  <p>
+    แทนที่จะใช้ <code>innerHTML</code> ซึ่งเสี่ยงต่อการถูกแฮ็กด้วย Cross-Site Scripting (XSS)
+    ระบบเลือกใช้ HTML <code>&lt;template&gt;</code> ร่วมกับ <code>data-slot</code>:
+  </p>
+
+  <pre><code>// 1. คัดลอกแถวตารางจาก Template ใน HTML
+const row = cloneTemplate("member-row-template");
+
+// 2. แทรกข้อความอย่างปลอดภัยผ่าน textContent
+setSlot(row, "memberCode", member.memberCode);
+setSlot(row, "fullName", `${member.firstName} ${member.lastName}`);
+
+// 3. ผูก Event Listener กับปุ่มที่ระบุ data-action
+action(row, "edit").addEventListener("click", () => openEditModal(member));
+
+tableBody.appendChild(row);</code></pre>
+
+  <h3>6.3 การจัดระเบียบ CSS Design System</h3>
+  <p>CSS ถูกแยกออกเป็นสัดส่วนชัดเจนในโฟลเดอร์ <code>public/css/</code>:</p>
+  <ul>
+    <li><strong><code>base.css</code>:</strong> กำหนดค่าตัวแปรสีทั้งหมด (Tailwind v4 Semantic Tokens), Font, CSS Reset และกฎการพิมพ์ <code>@media print</code></li>
+    <li><strong><code>components.css</code>:</strong> คลาส UI กลาง เช่น ปุ่ม (<code>.btn</code>), อินพุต (<code>.input</code>), ตาราง (<code>.table</code>), ป็อปอัป (<code>.modal</code>), ป้ายสถานะ (<code>.badge</code>)</li>
+    <li><strong><code>layout.css</code>:</strong> โครงร่างหน้าจอ 2 คอลัมน์ (Sidebar ซ้าย + Content ขวา)</li>
+    <li><strong><code>receipt.css</code>:</strong> แบบฟอร์มใบเสร็จรับเงิน รองรับการสั่งพิมพ์จริงลงกระดาษ</li>
+    <li><strong><code>member.css</code>:</strong> สไตล์เฉพาะของพอร์ทัลสมาชิก (การ์ดกระเป๋าเงินสีเขียว, กระดิ่งแจ้งเตือน)</li>
+  </ul>
+
+  <!-- ═══════════════════════════════════ SECTION 7 & 8 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 id="sec7">7. ส่วนประกอบที่นำมาใช้ร่วมกัน (Shared Modules)</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ชื่อโมดูล / ไฟล์</th>
+        <th>ประเภท</th>
+        <th>การนำไปใช้งานร่วมกัน</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong><code>shared/format.js</code></strong></td>
+        <td>Universal JS</td>
+        <td>ใช้ทั้ง <strong>Client</strong> และ <strong>Server</strong>: จัดรูปแบบเงินบาท (<code>฿1,234.50</code>), วันที่ภาษาไทย พ.ศ. (<code>7 ต.ค. 2569</code>), เวลาประเทศไทย (<code>Asia/Bangkok</code>), แปลงช่วงเดือน</td>
+      </tr>
+      <tr>
+        <td><strong><code>dom.js</code></strong></td>
+        <td>Core Client JS</td>
+        <td>ทุกหน้าเว็บใช้ฟังก์ชัน <code>byId()</code>, <code>cloneTemplate()</code>, <code>setSlot()</code>, <code>action()</code>, <code>setVisible()</code> ในการควบคุม UI</td>
+      </tr>
+      <tr>
+        <td><strong><code>combobox.js</code></strong></td>
+        <td>UI Component</td>
+        <td>ช่องเลือกข้อมูลอัจฉริยะ ใช้ในหน้ารับซื้อน้ำยาง, หน้าเบิกเงิน, หน้าสัญญาจ้าง, หน้าสรุปผลประกอบการ รองรับการพิมพ์ค้นหาและคีย์บอร์ด ARIA</td>
+      </tr>
+      <tr>
+        <td><strong><code>debounced-lookup.js</code></strong></td>
+        <td>Component Helper</td>
+        <td>ระบบค้นหาข้อมูลหน่วงเวลา 250ms พร้อม Token ป้องกันคำขอแข่งกัน ใช้ในหน้ารับซื้อ (ค้นหาผู้ขาย) และหน้าเบิกเงิน (ค้นหาสมาชิก)</td>
+      </tr>
+      <tr>
+        <td><strong><code>receipt.css</code></strong></td>
+        <td>Print Stylesheet</td>
+        <td>ใช้ร่วมกันในหน้ารับซื้อ, หน้าเบิกเงิน, หน้าสรุปผลประกอบการ และหน้าประวัติการขายของสมาชิก รองรับการพิมพ์จริงผ่านเครื่องพิมพ์</td>
+      </tr>
+      <tr>
+        <td><strong><code>status-dialogs.js</code></strong></td>
+        <td>UI Dialogs</td>
+        <td>ใช้ร่วมกันในหน้าสมาชิก, ลูกจ้าง, สัญญาจ้าง, และผู้ใช้งาน สำหรับกล่องยืนยันการระงับ/เปิดใช้งาน และลบข้อมูล</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="sec8">8. สูตรคำนวณและตรรกะทางธุรกิจที่สำคัญ</h2>
+
+  <div class="formula-card">
+    <div class="title">1. การคำนวณการรับซื้อน้ำยางสด (Purchase Calculation)</div>
+    <div>น้ำหนักเนื้อยางแห้งสุทธิ:</div>
+    <div class="math">dryWeightKg = (rawWeightKg × dryPercentage) ÷ 100</div>
+    <div>ยอดเงินรวมทั้งสิ้น:</div>
+    <div class="math">totalAmount = dryWeightKg × marketPrice</div>
+    <p style="margin-top:0.5rem; font-size:0.85rem;">
+      <strong>การจัดสรรเงินตามสัญญา MePair:</strong><br/>
+      • <strong>สมาชิกขายเอง:</strong> เจ้าของสวนได้รับ <code>totalAmount</code> (100%) โอนเข้า <code>walletBalance</code><br/>
+      • <strong>ลูกจ้างส่งแทน:</strong> ลูกจ้างได้รับสดทันที = <code>totalAmount × (employeeShare ÷ 100)</code><br/>
+      เจ้าของสวนได้รับเข้ากระเป๋าเงินสะสม = <code>totalAmount - ส่วนของลูกจ้าง</code>
+    </p>
+  </div>
+
+  <div class="formula-card">
+    <div class="title">2. การเบิกเงินสะสมของสมาชิก (Withdrawal Calculation)</div>
+    <div>ยอดเงินคงเหลือในกระเป๋าหลังเบิก:</div>
+    <div class="math">balanceAfter = walletBalance - amount</div>
+    <p style="margin-top:0.5rem; font-size:0.85rem;">
+      <strong>เงื่อนไขการเบิก:</strong> จำนวนเงินที่เบิกต้องมากกว่า 0 และต้องไม่เกินยอดสะสมคงเหลือ (<code>walletBalance</code>)
+      โดยระบบจะตัดยอดเงินและบันทึกประวัติพร้อมกันใน Database Transaction
+    </p>
+  </div>
+
+  <div class="formula-card">
+    <div class="title">3. การคำนวณเงินปันผลประจำปี (Dividend Calculation)</div>
+    <div>ยอดเงินปันผลของสมาชิกแต่ละราย:</div>
+    <div class="math">amount = ∑(dryWeightKg ของสมาชิกในปี พ.ศ. นั้น) × rate (บาท/กก.)</div>
+    <p style="margin-top:0.5rem; font-size:0.85rem;">
+      <strong>ระบบล็อกเงินปันผล:</strong> เมื่อมีการกดจ่ายปันผลประจำปีแล้ว ระบบจะบันทึกลงตาราง <code>DividendPayment</code>
+      และแสดงแบนเนอร์ล็อกหน้าจอคำนวณเงินปันผลของปีนั้นไว้ทันที จนกว่าปฏิทินจะเปลี่ยนเข้าสู่ปี พ.ศ. ถัดไปจริง ๆ จึงจะปลดล็อกให้คำนวณรอบใหม่
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════ FOOTER ═══════════════════════════════════ -->
+  <div class="doc-footer">
+    คู่มือเอกสารอธิบายระบบ Clover Project (Field Latex Cooperative System)<br/>
+    สร้างเพื่อการเรียนรู้และพัฒนาต่อยอด • จัดทำเมื่อ 13 ตุลาคม 2569
+  </div>
+
+</div>
+
+</body>
+</html>

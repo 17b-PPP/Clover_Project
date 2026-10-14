@@ -15,3 +15,8 @@ npm-debug.log*
 # ตั้งค่าเฉพาะเครื่องของ Claude Code
 .claude/settings.local.json
 .claude/worktrees/
+
+# ไฟล์ตกค้างจากการบิลด์ Next.js เดิม
+.next/
+next-env.d.ts
+tsconfig.tsbuildinfo

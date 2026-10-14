@@ -37,17 +37,10 @@
 
 .login-logo {
   margin-bottom: 0.75rem;
-  display: flex;
-  height: 2.75rem;
-  width: 2.75rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.5rem;
-  background-color: var(--emerald-700);
-  font-size: 1rem;
-  line-height: 1.5;
-  font-weight: 700;
-  color: var(--white);
+  display: block;
+  height: 4.5rem;
+  width: 4.5rem;
+  object-fit: contain;
 }
 
 .login-title {

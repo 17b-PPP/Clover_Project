@@ -3,11 +3,10 @@
 // -----------------------------------------------------------------------------
 // การทำงานของหน้า "การจัดการสัญญาจ้าง" (pages/contracts.html)
 //
-//   - ตารางสัญญา: ค้นหาได้ และเลือกแสดง/ซ่อนสัญญาที่สิ้นสุดแล้ว
+//   - ตารางสัญญา: ค้นหาได้
 //   - เพิ่มสัญญา: เลือกเจ้าของสวน + ลูกจ้าง และกรอก % ของลูกจ้าง
 //     (% ของเจ้าของสวน = 100 − % ลูกจ้าง คำนวณให้อัตโนมัติ)
 //   - ดูข้อมูล / แก้ไขสัดส่วน / ระงับ-เปิดใช้งาน / ลบ / ดูประวัติสัดส่วน
-//   - สัญญาที่สิ้นสุดแล้ว ทำได้แค่ดูข้อมูลและดูประวัติ
 // =============================================================================
 
 import { action, byId, cloneTemplate, setSlot } from "../core/dom.js";
@@ -28,7 +27,6 @@ const state = {
   members: [], // ตัวเลือกสมาชิก { id, memberCode, firstName, lastName, status }
   employees: [], // ตัวเลือกลูกจ้าง { id, employeeCode, firstName, lastName, status }
   search: "",
-  showExpired: false,
   form: { open: false, mode: "add", entity: null },
 };
 
@@ -36,22 +34,15 @@ const state = {
 const memberName = (c) => `${c.member.firstName} ${c.member.lastName}`;
 const employeeName = (c) => `${c.employee.firstName} ${c.employee.lastName}`;
 
-// สัญญาที่มีวันสิ้นสุดและเลยวันนั้นมาแล้ว
-function isExpired(contract) {
-  return (
-    contract.contractEndDate !== null && new Date(contract.contractEndDate) <= new Date()
-  );
-}
-
 // -----------------------------------------------------------------------------
 // ตารางสัญญาจ้าง
 // -----------------------------------------------------------------------------
 
-// กรอง: (1) ซ่อนสัญญาที่มีวันสิ้นสุดถ้าไม่ได้ติ๊ก (2) ค้นหาจากรหัส/ชื่อ/รหัสคู่สัญญา
+// กรอง: แสดงเฉพาะสัญญาปัจจุบัน (ยังไม่สิ้นสุด) และค้นหาจากรหัส/ชื่อ/รหัสคู่สัญญา
 function filteredContracts() {
   const q = state.search.trim().toLowerCase();
   return state.contracts
-    .filter((c) => state.showExpired || c.contractEndDate === null)
+    .filter((c) => c.contractEndDate === null)
     .filter((c) => {
       if (!q) return true;
       return [
@@ -71,7 +62,6 @@ function filteredContracts() {
 
 function createRow(contract) {
   const row = cloneTemplate("contract-row-template");
-  const expired = isExpired(contract);
   const isActive = contract.status === "Active";
 
   setSlot(row, "pairCode", contract.pairCode);
@@ -79,20 +69,16 @@ function createRow(contract) {
   setSlot(row, "employeeName", employeeName(contract));
   setSlot(row, "shares", `${contract.memberShare}% / ${contract.employeeShare}%`);
 
-  // ป้ายสถานะ: สิ้นสุดสัญญาแล้ว > ใช้งานอยู่ > ถูกระงับ
-  row.querySelector('[data-slot="badge-expired"]').hidden = !expired;
-  row.querySelector('[data-slot="badge-active"]').hidden = expired || !isActive;
-  row.querySelector('[data-slot="badge-inactive"]').hidden = expired || isActive;
+  // ป้ายสถานะ: ใช้งานอยู่ / ถูกระงับ
+  row.querySelector('[data-slot="badge-active"]').hidden = !isActive;
+  row.querySelector('[data-slot="badge-inactive"]').hidden = isActive;
 
-  // สัญญาที่สิ้นสุดแล้ว ซ่อนปุ่มแก้ไข/ระงับ/ลบ
   const editButton = action(row, "edit");
   const toggleButton = action(row, "toggle-status");
   const deleteButton = action(row, "delete");
-  editButton.hidden = expired;
-  toggleButton.hidden = expired;
   toggleButton.classList.add(isActive ? "btn-danger" : "btn-secondary");
   toggleButton.textContent = isActive ? "ระงับ" : "เปิดใช้งาน";
-  deleteButton.hidden = expired || contract.status !== "Inactive";
+  deleteButton.hidden = contract.status !== "Inactive";
 
   action(row, "view").addEventListener("click", () =>
     updateForm({ entity: contract, mode: "view", open: true })
@@ -429,11 +415,6 @@ byId("add-contract-button").addEventListener("click", () =>
 
 byId("contract-search").addEventListener("input", (event) => {
   state.search = event.target.value;
-  renderTable();
-});
-
-byId("show-expired").addEventListener("change", (event) => {
-  state.showExpired = event.target.checked;
   renderTable();
 });
 

@@ -10,9 +10,9 @@
 //   4. พิมพ์ใบเสร็จได้ — กด "ยกเลิก" เพื่อเริ่มรายการใหม่
 //
 // ส่วนประวัติการเบิกเงิน (ด้านล่างของหน้า):
-//   - การ์ดจำนวนบิลเบิกเงินของวันนี้
+//   - การ์ดสรุปจำนวนบิลและยอดเบิกเงินรวม คำนวณตามตัวกรองช่วงวันที่และคำค้นหา
 //   - ค้นหาจากชื่อสมาชิก / รหัสสมาชิก / เลขที่รายการ และกรองช่วงวันที่
-//     (ค่าเริ่มต้น: วันที่คงที่ → วันนี้) แบ่งหน้าละ 10 รายการ
+//     (ค่าเริ่มต้น: วันที่คงที่ → วันนี้ แสดงข้อมูลทั้งหมด) แบ่งหน้าละ 10 รายการ
 //   - เบิกเงินสำเร็จแล้วจะโหลดข้อมูลหน้าใหม่ ให้ประวัติแสดงรายการล่าสุดทันที
 // =============================================================================
 
@@ -20,6 +20,7 @@ import { byId, cloneTemplate, setSlot } from "../core/dom.js";
 import { loadPageData, showPageLoadError } from "../core/page-data.js";
 import {
   DEFAULT_DATE_FROM,
+  formatDate,
   formatDateTimeThai,
   formatNumber,
   todayBangkok,
@@ -172,17 +173,47 @@ function createHistoryRow(withdrawal) {
   return row;
 }
 
-// วาดส่วนประวัติทั้งหมด (การ์ดวันนี้ + ตาราง + ตัวแบ่งหน้า)
+// ข้อความกำกับช่วงวันที่ใต้การ์ดสรุป
+function getDateRangeHint() {
+  const { dateFrom, dateTo } = state;
+  const isDefaultRange = dateFrom === DEFAULT_DATE_FROM && dateTo === todayBangkok();
+
+  if (!dateFrom && !dateTo) {
+    return "ข้อมูลทั้งหมดในระบบ";
+  }
+  if (isDefaultRange) {
+    return "ข้อมูลทั้งหมดในระบบ";
+  }
+  if (dateFrom && dateTo && dateFrom === dateTo) {
+    return `ประจำวันที่ ${formatDate(dateFrom)}`;
+  }
+  if (dateFrom && dateTo) {
+    return `${formatDate(dateFrom)} – ${formatDate(dateTo)}`;
+  }
+  if (dateFrom) {
+    return `ตั้งแต่ ${formatDate(dateFrom)}`;
+  }
+  if (dateTo) {
+    return `ถึงวันที่ ${formatDate(dateTo)}`;
+  }
+  return "";
+}
+
+// วาดส่วนประวัติทั้งหมด (การ์ดสรุป + ตาราง + ตัวแบ่งหน้า)
 function renderHistory() {
-  const today = todayBangkok();
-  const todayWithdrawals = state.withdrawals.filter((w) => bangkokDateKey(w.createdAt) === today);
-  const todayCount = todayWithdrawals.length;
-  const todayTotal = todayWithdrawals.reduce((sum, w) => sum + Number(w.amount || 0), 0);
-
-  byId("today-count").textContent = `${formatNumber(todayCount, 0)} บิล`;
-  byId("today-total-amount").textContent = `${formatNumber(todayTotal)} บาท`;
-
   const filtered = filteredWithdrawals();
+  const totalCount = filtered.length;
+  const totalAmount = filtered.reduce((sum, w) => sum + Number(w.amount || 0), 0);
+
+  byId("today-count").textContent = `${formatNumber(totalCount, 0)} บิล`;
+  byId("today-total-amount").textContent = `${formatNumber(totalAmount)} บาท`;
+
+  const dateHint = getDateRangeHint();
+  const countHint = document.getElementById("stat-count-hint");
+  const totalHint = document.getElementById("stat-total-hint");
+  if (countHint) countHint.textContent = dateHint;
+  if (totalHint) totalHint.textContent = dateHint;
+
   const pageItems = paginate(filtered, state.page, PAGE_SIZE);
   byId("history-empty").hidden = pageItems.length !== 0;
   byId("history-table").hidden = pageItems.length === 0;
@@ -196,6 +227,7 @@ function renderHistory() {
     },
   });
 
+  const today = todayBangkok();
   // ปุ่มล้างใช้ได้เมื่อมีคำค้นหา หรือช่วงวันที่ไม่ใช่ค่าเริ่มต้น
   resetFiltersButton.disabled =
     !state.search && state.dateFrom === DEFAULT_DATE_FROM && state.dateTo === today;
@@ -210,8 +242,24 @@ function setFilter(changes) {
 }
 
 historySearchInput.addEventListener("input", () => setFilter({ search: historySearchInput.value }));
-dateFromInput.addEventListener("input", () => setFilter({ dateFrom: dateFromInput.value }));
-dateToInput.addEventListener("input", () => setFilter({ dateTo: dateToInput.value }));
+dateFromInput.addEventListener("input", () => {
+  const from = dateFromInput.value;
+  if (from && state.dateTo && from > state.dateTo) {
+    dateToInput.value = from;
+    setFilter({ dateFrom: from, dateTo: from });
+  } else {
+    setFilter({ dateFrom: from });
+  }
+});
+dateToInput.addEventListener("input", () => {
+  const to = dateToInput.value;
+  if (to && state.dateFrom && to < state.dateFrom) {
+    dateFromInput.value = to;
+    setFilter({ dateFrom: to, dateTo: to });
+  } else {
+    setFilter({ dateTo: to });
+  }
+});
 // ปุ่มล้าง: ล้างคำค้นหา และกลับไปช่วงวันที่เริ่มต้น
 resetFiltersButton.addEventListener("click", () => {
   const defaults = { search: "", dateFrom: DEFAULT_DATE_FROM, dateTo: todayBangkok() };

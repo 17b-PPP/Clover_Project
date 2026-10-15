@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เอกสารอธิบายระบบคำนวณเงินปันผลและแนวข้อสอบป้องกันโครงงาน — Clover Project</title>
+  <style>
+    /* ─── Reset & Base Settings ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 13px; }
+    body {
+      font-family: 'Segoe UI', 'Sarabun', 'Noto Sans Thai', Tahoma, sans-serif;
+      color: #1e293b;
+      line-height: 1.68;
+      background: #f8fafc;
+      padding: 2rem;
+    }
+
+    /* ─── Page & Print Setup (A4) ─── */
+    @page {
+      size: A4;
+      margin: 15mm 14mm 15mm 14mm;
+    }
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+        font-size: 11px;
+        line-height: 1.55;
+      }
+      .container {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+      .page-break { page-break-before: always; }
+      .no-print { display: none !important; }
+      h1, h2, h3, h4 { page-break-after: avoid; }
+      .qa-card, .logic-card, table, pre, .callout { page-break-inside: avoid; }
+    }
+
+    /* ─── Container ─── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 3rem 3.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+    }
+
+    /* ─── Cover Page ─── */
+    .cover {
+      text-align: center;
+      padding: 3.5rem 2rem 3rem;
+      border-bottom: 3px solid #047857;
+      margin-bottom: 2.5rem;
+    }
+    .cover .badge-role {
+      display: inline-block;
+      background: #d1fae5;
+      color: #065f46;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 1.2rem;
+    }
+    .cover h1 {
+      font-size: 2.2rem;
+      color: #0f172a;
+      margin-bottom: 0.6rem;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+    .cover .subtitle {
+      font-size: 1.15rem;
+      color: #059669;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .cover .desc {
+      font-size: 0.95rem;
+      color: #475569;
+      max-width: 680px;
+      margin: 0 auto 1.8rem;
+    }
+    .cover .meta {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+
+    /* ─── Table of Contents ─── */
+    .toc {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 1.4rem 1.8rem;
+      margin-bottom: 2.5rem;
+    }
+    .toc h2 {
+      font-size: 1.2rem;
+      color: #065f46;
+      border-bottom: 2px solid #86efac;
+      padding-bottom: 0.4rem;
+      margin: 0 0 0.8rem;
+    }
+    .toc ul {
+      list-style: none;
+      padding-left: 0;
+      columns: 2;
+      column-gap: 1.8rem;
+    }
+    .toc li {
+      margin-bottom: 0.45rem;
+      font-size: 0.9rem;
+    }
+    .toc a {
+      color: #047857;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ─── Section Headings ─── */
+    h2.part-header {
+      font-size: 1.5rem;
+      color: #ffffff;
+      background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+      padding: 0.8rem 1.2rem;
+      border-radius: 8px;
+      margin: 3rem 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    h3.sub-header {
+      font-size: 1.2rem;
+      color: #065f46;
+      border-bottom: 2px solid #a7f3d0;
+      padding-bottom: 0.35rem;
+      margin: 1.8rem 0 0.9rem;
+    }
+    h4 {
+      font-size: 1rem;
+      color: #1e293b;
+      margin: 1.2rem 0 0.5rem;
+    }
+
+    /* ─── Cards & Boxes ─── */
+    .logic-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1.3rem 1.5rem;
+      margin-bottom: 1.4rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .logic-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .logic-card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .qa-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1.3rem 1.5rem;
+      margin-bottom: 1.4rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .qa-question {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+      line-height: 1.4;
+    }
+    .q-badge {
+      background: #0284c7;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .qa-intent {
+      background: #f8fafc;
+      border-left: 3px solid #64748b;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.82rem;
+      color: #475569;
+      margin-bottom: 0.8rem;
+      border-radius: 0 4px 4px 0;
+    }
+    .qa-intent strong { color: #334155; }
+    .qa-answer {
+      font-size: 0.9rem;
+      color: #334155;
+      text-align: justify;
+    }
+    .qa-answer p { margin-bottom: 0.6rem; }
+    .qa-answer ul, .qa-answer ol { padding-left: 1.3rem; margin-bottom: 0.6rem; }
+    .qa-answer li { margin-bottom: 0.3rem; }
+    .a-header {
+      font-weight: 700;
+      color: #047857;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    /* ─── Callouts ─── */
+    .callout {
+      border-radius: 8px;
+      padding: 0.9rem 1.2rem;
+      margin: 1rem 0;
+      font-size: 0.88rem;
+    }
+    .callout-success {
+      background: #f0fdf4;
+      border-left: 4px solid #10b981;
+      color: #064e3b;
+    }
+    .callout-warning {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      color: #78350f;
+    }
+    .callout-info {
+      background: #f0f9ff;
+      border-left: 4px solid #0284c7;
+      color: #0c4a6e;
+    }
+
+    /* ─── Code Snippets ─── */
+    code {
+      background: #f1f5f9;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.86em;
+      color: #047857;
+      font-weight: 600;
+    }
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 6px;
+      padding: 0.8rem 1rem;
+      overflow-x: auto;
+      margin: 0.6rem 0;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: #f8fafc;
+      font-weight: normal;
+    }
+
+    /* ─── Tables ─── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.8rem 0 1rem;
+      font-size: 0.85rem;
+    }
+    th {
+      background: #f0fdf4;
+      color: #065f46;
+      padding: 0.55rem 0.75rem;
+      border: 1px solid #d1fae5;
+      text-align: left;
+      font-weight: 700;
+    }
+    td {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #fbfcfe; }
+
+    /* ─── Step Flow ─── */
+    .steps-container {
+      margin: 1.2rem 0;
+    }
+    .step-item {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    .step-number {
+      background: #047857;
+      color: #fff;
+      font-weight: bold;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.9rem;
+    }
+    .step-body {
+      flex: 1;
+    }
+    .step-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.25rem;
+    }
+    .step-desc {
+      font-size: 0.88rem;
+      color: #475569;
+    }
+
+    /* ─── Formula Box ─── */
+    .formula-box {
+      background: #f8fafc;
+      border: 1.5px dashed #059669;
+      border-radius: 8px;
+      padding: 1rem 1.4rem;
+      margin: 1rem 0;
+      text-align: center;
+      font-size: 1.05rem;
+      color: #065f46;
+      font-weight: 700;
+    }
+
+    .badge-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-success { background: #dcfce7; color: #166534; }
+    .badge-warning { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+    .badge-neutral { background: #f1f5f9; color: #475569; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ─── Cover ─── -->
+    <div class="cover">
+      <span class="badge-role">Comprehensive Technical & Exam Guide</span>
+      <h1>คู่มือเจาะลึกระบบคำนวณเงินปันผลประจำปี<br>& แนวคำถาม-คำตอบการสอบโครงงาน</h1>
+      <p class="subtitle">Annual Dividend Distribution System — Clover Project</p>
+      <p class="desc">
+        คู่มืออธิบายฟังก์ชันการทำงาน ตรรกะทางธุรกิจ สถาปัตยกรรมระบบ โค้ดทั้งฝั่ง Frontend และ Backend 
+        พร้อมชุดคำถาม-แนวทางคำตอบครอบคลุมทุกมิติ เพื่อเตรียมความพร้อมสำหรับการสอบป้องกันโครงงานเทคโนโลยีสารสนเทศ
+      </p>
+      <p class="meta">
+        <strong>ระบบสารสนเทศ:</strong> Clover Rubber Cooperative System (Node.js + Express + Prisma ORM + PostgreSQL)<br>
+        <strong>หน้าที่รับผิดชอบ:</strong> หน้าการจัดการคำนวณเงินปันผล (<code>/dividends</code>)<br>
+        <strong>จัดทำเอกสารเมื่อ:</strong> ตุลาคม พ.ศ. 2569
+      </p>
+    </div>
+
+    <!-- ─── Table of Contents ─── -->
+    <div class="toc">
+      <h2>สารบัญเนื้อหา (Table of Contents)</h2>
+      <ul>
+        <li><a href="#part1-overview">1.1 ภาพรวมและวัตถุประสงค์ทางธุรกิจ</a></li>
+        <li><a href="#part1-rules">1.2 กฎธุรกิจและสูตรการคำนวณเงินปันผล</a></li>
+        <li><a href="#part1-workflow">1.3 สถาปัตยกรรมและโฟลว์การทำงาน 5 ขั้นตอน</a></li>
+        <li><a href="#part1-database">1.4 โครงสร้างข้อมูลและฐานข้อมูล (Database Schema)</a></li>
+        <li><a href="#part1-frontend">1.5 เจาะลึกโค้ดฝั่ง Frontend (HTML & JavaScript)</a></li>
+        <li><a href="#part1-backend">1.6 เจาะลึกโค้ดฝั่ง Backend (API & Data Layer)</a></li>
+        <li><a href="#part1-security">1.7 กลไกความปลอดภัยและ Concurrency Control</a></li>
+        <li><a href="#part2-qa-biz">2.1 คำถามหมวดตรรกะธุรกิจและที่มาของระบบ</a></li>
+        <li><a href="#part2-qa-sec">2.2 คำถามหมวดความปลอดภัยและ Database Transaction</a></li>
+        <li><a href="#part2-qa-arch">2.3 คำถามหมวดสถาปัตยกรรมระบบและการรับส่งข้อมูล</a></li>
+        <li><a href="#part2-qa-code">2.4 คำถามหมวดเจาะลึกโค้ดและเทคนิคัล</a></li>
+        <li><a href="#part2-qa-edge">2.5 คำถามหมวดกรณีศึกษาและ Edge Cases</a></li>
+      </ul>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- PART 1: SYSTEM EXPLANATION                                         -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <h2 class="part-header" id="part1">
+      ส่วนที่ 1: การอธิบายฟังก์ชันการทำงาน ตรรกะ (Logic) แนวคิด (Concept) และโค้ด
+    </h2>
+
+    <!-- 1.1 ภาพรวม -->
+    <h3 class="sub-header" id="part1-overview">1.1 ภาพรวมและวัตถุประสงค์ทางธุรกิจ (Business Background & Purpose)</h3>
+    <p>
+      สหกรณ์ชาวสวนยางพาราเป็นองค์กรที่ดำเนินการเพื่อผลประโยชน์ร่วมกันของสมาชิกชาวสวนยาง 
+      เมื่อสิ้นสุดรอบปีบัญชีและสหกรณ์มีผลกำไรจากการดำเนินงาน สหกรณ์จะนำผลกำไรส่วนหนึ่งมาจัดสรรเป็น 
+      <strong>"เงินปันผลตามส่วนธุรกิจ" (Patronage Dividend)</strong> คืนให้แก่สมาชิกเจ้าของสวนยาง
+    </p>
+    <div class="callout callout-info">
+      <strong>หลักการสำคัญของระบบปันผลใน Clover Project:</strong>
+      <ul>
+        <li><strong>ปันผลตามผลผลิตจริง:</strong> สมาชิกที่ส่งน้ำยางมาก ย่อมได้รับส่วนแบ่งเงินปันผลมากตามสัดส่วนการมีส่วนร่วมทางธุรกิจ</li>
+        <li><strong>คิดจากน้ำหนักยางแห้ง (Dry Rubber Content):</strong> ไม่คิดจากน้ำหนักน้ำยางสดหรือมูลค่าเงิน เพราะน้ำยางสดมีส่วนผสมของน้ำและความเข้มข้นไม่เท่ากัน น้ำหนักยางแห้งจึงเป็นตัวชี้วัดเนื้อยางที่แท้จริงและยุติธรรมที่สุด</li>
+        <li><strong>จ่ายตรงเข้ากระเป๋าเงินสะสม (Wallet):</strong> เงินปันผลจะถูกนำไปบวกเพิ่มใน <code>walletBalance</code> ของสมาชิกทันท่วงที ทำให้สมาชิกสามารถนำไปเบิกเป็นเงินสดในหน้าเบิกเงินได้ทันที</li>
+      </ul>
+    </div>
+
+    <!-- 1.2 กฎธุรกิจและสูตร -->
+    <h3 class="sub-header" id="part1-rules">1.2 กฎธุรกิจและสูตรการคำนวณ (Business Rules & Formulas)</h3>
+    <p>
+      ระบบคำนวณเงินปันผลยึดตามข้อกำหนดทางธุรกิจ (Business Constraints) ดังนี้:
+    </p>
+
+    <div class="formula-box">
+      เงินปันผลของสมาชิก (บาท) = น้ำหนักเนื้อยางแห้งรวมตลอดทั้งปี (กก.) × อัตราเงินปันผล (บาท/กก.)
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 25%;">ข้อกำหนดธุรกิจ</th>
+          <th style="width: 40%;">รายละเอียดและเงื่อนไข</th>
+          <th style="width: 35%;">การรองรับในระบบ (System Enforcement)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>รอบการคำนวณ</strong></td>
+          <td>
+            รอบบัญชีประจำปี: <strong>พฤษภาคม ถึง มีนาคม</strong><br>
+            <em>(เดือนเมษายนเป็นช่วงปิดกรีด ยางผลัดใบ ไม่มีการรับซื้อ)</em>
+          </td>
+          <td>
+            แสดงข้อความกำกับ <code>DIVIDEND_PERIOD_LABEL = "พฤษภาคม - มีนาคม"</code> และผูกกับปี พ.ศ.
+          </td>
+        </tr>
+        <tr>
+          <td><strong>ความถี่ในการจ่าย</strong></td>
+          <td>จ่ายได้ <strong>ปีละ 1 ครั้งเท่านั้น</strong> ห้ามจ่ายซ้ำในปีเดิมเด็ดขาด</td>
+          <td>
+            - UI ล็อกปุ่มและฟิลด์พร้อมขึ้นแบนเนอร์<br>
+            - Server ตรวจสอบ <code>prisma.dividendPayment.findFirst</code><br>
+            - DB บังคับ <code>@@unique([memberId, buddhistYear])</code>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>ผู้มีสิทธิ์ได้รับเงิน</strong></td>
+          <td>สมาชิกที่มีน้ำหนักยางแห้งสะสมในปีนั้นมากกว่า 0 กิโลกรัม</td>
+          <td>
+            ฟังก์ชัน <code>payDividend</code> กรองเฉพาะสมาชิกที่มี <code>dryWeightKg > 0</code> เท่านั้น
+          </td>
+        </tr>
+        <tr>
+          <td><strong>การบันทึกยอดเงิน</strong></td>
+          <td>
+            ยอดเงินปันผลจะถูกนำไปปรับปรุง 2 ยอด:<br>
+            1. <code>walletBalance</code> (ยอดเงินสะสมที่ถอนได้จริง)<br>
+            2. <code>dividendBalance</code> (ยอดปันผลสะสมตลอดชีพ)
+          </td>
+          <td>
+            ประมวลผลผ่าน <code>tx.member.update</code> ด้วยคำสั่ง atomic increment <code>{ increment: amount }</code>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>ห้ามจ่ายปันผลล่วงหน้า</strong></td>
+          <td>ไม่สามารถคำนวณหรือจ่ายเงินปันผลของปีในอนาคตได้</td>
+          <td>
+            ตรวจสอบทั้ง Client และ Server ห้ามปี พ.ศ. เกิน <code>getUTCFullYear() + 543</code>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- 1.3 สถาปัตยกรรม 5 ขั้นตอน -->
+    <h3 class="sub-header" id="part1-workflow">1.3 สถาปัตยกรรมและโฟลว์การทำงาน 5 ขั้นตอน (5-Step Operational Flow)</h3>
+    <div class="steps-container">
+      <div class="step-item">
+        <div class="step-number">1</div>
+        <div class="step-body">
+          <div class="step-title">โหลดข้อมูลเริ่มต้น (Initial Data Loading)</div>
+          <div class="step-desc">
+            เมื่อเปิดหน้าเว็บ ระบบจะเรียก API <code>GET /api/page-data/dividends</code> เพื่อดึงรายชื่อสมาชิกทั้งหมด, 
+            ข้อมูลน้ำหนักยางแห้งจากการรับซื้อทั้งหมดในอดีต (<code>purchases</code>), ประวัติการจ่ายปันผล (<code>payments</code>), 
+            และรายการปีที่เคยจ่ายไปแล้ว (<code>paidYears</code>) นำมาเก็บไว้ใน <code>state.data</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-number">2</div>
+        <div class="step-body">
+          <div class="step-title">เลือกปีและกำหนดอัตรา (Parameter Input)</div>
+          <div class="step-desc">
+            ผู้ใช้งานเลือกปี พ.ศ. จาก Dropdown (คัดกรองเฉพาะปีที่มีธุรกรรมจริงและไม่เกินปีปัจจุบัน) 
+            และกรอกอัตราเงินปันผล (บาท/กก.) เช่น <code>2.50</code> จากนั้นกดปุ่ม <strong>"ตกลง"</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-number">3</div>
+        <div class="step-body">
+          <div class="step-title">จำลองผลการคำนวณฝั่ง Client (Client-Side Simulation & Preview)</div>
+          <div class="step-desc">
+            ฟังก์ชัน <code>render()</code> ในเบราว์เซอร์จะคำนวณผลลัพธ์ทันที โดยรวมน้ำหนักยางแห้งแยกรายคนผ่าน <code>Map</code> 
+            และคูณด้วยอัตราปันผล แสดงผลบนการ์ดสรุป 4 ใบ และเรนเดอร์ตารางรายชื่อสมาชิกพร้อมแบ่งหน้า (Pagination 10 รายการ/หน้า) 
+            <strong>โดยยังไม่มีการเขียนข้อมูลลง Database ใดๆ ทั้งสิ้น</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-number">4</div>
+        <div class="step-body">
+          <div class="step-title">ยืนยันการทำรายการผ่าน Modal (Action Confirmation)</div>
+          <div class="step-desc">
+            เมื่อตรวจสอบตัวเลขแล้ว ผู้ใช้งานกดปุ่ม <strong>"จ่ายปันผล"</strong> 
+            ระบบจะแสดง Modal ป๊อปอัปเตือนอย่างชัดเจนว่า <em>"เมื่อยืนยันแล้วปันผลจะถูกบวกเพิ่มในยอดเงินสะสมของสมาชิกทันที และจะไม่สามารถแก้ไขหรือคำนวณปันผลปีนี้ซ้ำได้อีก"</em> 
+            เพื่อป้องกันอุบัติเหตุจากการกดผิดพลาด (Human Error)
+          </div>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-number">5</div>
+        <div class="step-body">
+          <div class="step-title">คำนวณซ้ำและบันทึกผ่าน Transaction ที่ Server (Atomic Execution & System Lock)</div>
+          <div class="step-desc">
+            ส่งคำขอ <code>POST /api/dividends</code> ไปยังเซิร์ฟเวอร์ เซิร์ฟเวอร์จะ <strong>ไม่เชื่อตัวเลขจาก Client</strong> 
+            แต่จะคำนวณใหม่จากฐานข้อมูลทั้งหมด ดำเนินการผ่าน <code>prisma.$transaction</code> 
+            สร้างรหัสปันผล <code>D-XXXX</code>, บันทึกประวัติรายคนพร้อม Snapshot ยอดเงินก่อน-หลัง, บวกเงินเข้า Member Wallet, 
+            และบันทึก Audit Log เมื่อสำเร็จ ระบบจะล็อกการจ่ายปันผลของปีนั้นทันที
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1.4 Database Schema -->
+    <h3 class="sub-header" id="part1-database">1.4 โครงสร้างข้อมูลและฐานข้อมูล (Database Schema)</h3>
+    <p>
+      ระบบคำนวณเงินปันผลทำงานเชื่อมโยงกับ 3 ตารางหลักใน PostgreSQL ผ่าน Prisma ORM:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ตาราง (Model)</th>
+          <th>ฟิลด์สำคัญที่เกี่ยวข้อง</th>
+          <th>บทบาทหน้าที่ในระบบปันผล</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Purchase</strong><br>(การรับซื้อน้ำยาง)</td>
+          <td>
+            <code>memberId</code> (FK)<br>
+            <code>dryWeightKg</code> (Decimal)<br>
+            <code>recordDate</code> (DateTime UTC)
+          </td>
+          <td>
+            เป็นแหล่งข้อมูลตั้งต้น (Source of Truth) ของน้ำหนักยางแห้ง 
+            ระบบจะกรอง <code>recordDate</code> ตามปี พ.ศ. แล้วรวมยอด <code>dryWeightKg</code> แยกตาม <code>memberId</code>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>DividendPayment</strong><br>(ประวัติการจ่ายปันผล)</td>
+          <td>
+            <code>dividendCode</code> (Unique, D-XXXX)<br>
+            <code>memberId</code> (FK)<br>
+            <code>buddhistYear</code> (Int)<br>
+            <code>rate</code> (Decimal 10,2)<br>
+            <code>dryWeightKg</code> (Decimal 10,2)<br>
+            <code>amount</code> (Decimal 12,2)<br>
+            <code>balanceBefore</code> (Decimal 12,2)<br>
+            <code>balanceAfter</code> (Decimal 12,2)<br>
+            <code>createdAt</code> (DateTime)
+          </td>
+          <td>
+            ตารางบันทึกประวัติการจ่ายเงินปันผลรายบุคคลแบบ <strong>Insert-Only</strong> (ห้ามแก้ไข/ห้ามลบ) 
+            มี Snapshot ยอดเงินในกระเป๋า <code>balanceBefore</code> และ <code>balanceAfter</code> 
+            เพื่อความโปร่งใส ตรวจสอบย้อนหลังได้ (Audit Trail)
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Member</strong><br>(สมาชิกชาวสวน)</td>
+          <td>
+            <code>id</code> (PK)<br>
+            <code>walletBalance</code> (Decimal 12,2)<br>
+            <code>dividendBalance</code> (Decimal 12,2)
+          </td>
+          <td>
+            เมื่อจ่ายปันผล ยอดเงินจะถูกนำไปบวกเพิ่มใน <code>walletBalance</code> (สมาชิกสามารถกดเบิกเงินสดได้) 
+            และบวกเข้า <code>dividendBalance</code> (เก็บบันทึกสถิติเงินปันผลสะสมที่สมาชิกได้รับตลอดชีพ)
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-warning">
+      <strong>Database Constraint สำคัญระดับตาราง:</strong>
+      <pre><code>// prisma/schema.prisma
+model DividendPayment {
+  ...
+  @@unique([memberId, buddhistYear]) // สมาชิก 1 คน รับปันผลได้สูงสุด 1 ครั้งต่อปี พ.ศ.
+  @@index([memberId])
+}</code></pre>
+      Constraint <code>@@unique([memberId, buddhistYear])</code> เป็นเกราะป้องกันชั้นเด็ดขาดที่สุดในระดับ Database Engine 
+      ต่อให้มี Request ส่งมาพร้อมกัน (Race Condition) Database จะปฏิเสธทันทีด้วย Error Code <code>P2002</code>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- 1.5 เจาะลึกโค้ด Frontend -->
+    <h3 class="sub-header" id="part1-frontend">1.5 เจาะลึกโค้ดฝั่ง Frontend (HTML & JavaScript)</h3>
+    
+    <h4>1) โครงสร้าง UI และองค์ประกอบสำคัญ (<code>pages/dividends.html</code>)</h4>
+    <p>หน้าเว็บแบ่งองค์ประกอบออกเป็น 4 ส่วนหลัก:</p>
+    <ul>
+      <li><strong>ฟอร์มกำหนดพารามิเตอร์ (<code>#dividend-form</code>):</strong> มี Dropdown ปี พ.ศ. (<code>#year-select</code>) และช่องกรอกอัตราปันผล (<code>#rate-input</code>)</li>
+      <li><strong>แบนเนอร์ล็อกระบบ (<code>#dividend-lock-banner</code>):</strong> กล่องสีเหลืองพร้อมไอคอนแม่กุญแจ แสดงข้อความแจ้งเตือนเมื่อปีที่เลือกได้รับการจ่ายปันผลไปแล้ว</li>
+      <li><strong>การ์ดสรุปสถิติ 4 ใบ (<code>.dividend-stats</code>):</strong> น้ำหนักยางแห้งรวม, มูลค่าเงินปันผลรวม, อัตราเงินปันผล, จำนวนสมาชิกทั้งหมด</li>
+      <li><strong>ตารางคำนวณและปุ่มจ่ายเงิน (<code>#dividend-result</code>):</strong> แสดงตารางรายคน, ตัวแบ่งหน้า, และปุ่ม <code>#pay-button</code></li>
+      <li><strong>ตารางประวัติการจ่ายปันผล (<code>.payout-history</code>):</strong> บันทึกรอบการจ่ายในอดีต พร้อมปุ่มเปิด Modal ดูรายละเอียด (<code>#payout-modal</code>)</li>
+    </ul>
+
+    <h4>2) การจัดการ State และตรรกะในเบราว์เซอร์ (<code>public/js/pages/dividends.js</code>)</h4>
+    <p>
+      ระบบใช้ State-driven UI Pattern โดยเก็บสถานะไว้ที่ออบเจกต์ <code>state</code> ดังนี้:
+    </p>
+    <pre><code>const state = {
+  data: null,              // ข้อมูลที่โหลดมาจากเซิร์ฟเวอร์ { members, purchases, paidYears, payments }
+  year: null,              // ปี พ.ศ. ที่กำลังเลือกดู
+  appliedPeriodLabel: "",  // ช่วงเวลาปันผล เช่น "พฤษภาคม - มีนาคม"
+  appliedRate: null,       // อัตราปันผลที่กด "ตกลง" แล้ว (null = ยังไม่คำนวณ)
+  error: null,             // ข้อผิดพลาดของการกรอกข้อมูล
+  page: 1,                 // หน้าปัจจุบันของตารางปันผล
+  paid: false,             // สถานะว่ากดจ่ายสำเร็จในรอบปัจจุบันแล้วหรือไม่
+  payError: null,          // ข้อผิดพลาดจากการส่ง API จ่ายเงิน
+  selectedPayout: null,    // ข้อมูลประวัติรอบที่กำลังเปิดดู Modal
+};</code></pre>
+
+    <h4>3) ฟังก์ชันการรวมน้ำหนักยางแห้งด้วย Map (Algorithm Analysis):</h4>
+    <pre><code>function dryWeightByMember() {
+  const map = new Map();
+  for (const purchase of state.data.purchases) {
+    if (purchase.buddhistYear !== state.year) continue;
+    map.set(purchase.memberId, (map.get(purchase.memberId) ?? 0) + purchase.dryWeightKg);
+  }
+  return map;
+}</code></pre>
+    <p>
+      <strong>ทำไมต้องใช้ Map?:</strong> การใช้ <code>Map</code> ทำให้การรวมยอดมีประสิทธิภาพเชิงเวลาเป็น <strong>$O(N)$</strong> 
+      (โดย $N$ คือจำนวนการรับซื้อทั้งหมด) และเมื่อต้องการค้นหายอดของสมาชิกในฟังก์ชัน <code>dividendRows</code> 
+      จะมีความเร็วเป็น <strong>$O(1)$</strong> ต่อคน แทนที่จะต้องใช้ <code>filter</code> ซ้อนวนลูปเป็น $O(M \times N)$
+    </p>
+
+    <h4>4) การเรนเดอร์และควบคุมโหมด Read-Only / Locked:</h4>
+    <pre><code>function render() {
+  const alreadyPaid = yearAlreadyPaid(); // state.data.paidYears.includes(state.year)
+  const paidInfo = alreadyPaid ? getPaidInfoForYear(state.year) : null;
+
+  if (alreadyPaid) {
+    lockBanner.hidden = false;
+    rateInput.value = formatNumber(state.appliedRate);
+    rateInput.disabled = true;   // ปิดช่องกรอก
+    calcSubmitBtn.disabled = true; // ปิดปุ่มตกลง
+    byId("pay-button").hidden = true; // ซ่อนปุ่มจ่ายเงิน
+    byId("pay-locked").hidden = false; // แสดงป้าย "จ่ายเงินปันผลประจำปีนี้เรียบร้อยแล้ว (ล็อกระบบ)"
+  } else {
+    lockBanner.hidden = true;
+    rateInput.disabled = false;
+    calcSubmitBtn.disabled = false;
+    byId("pay-button").hidden = false;
+  }
+  ...
+}</code></pre>
+
+    <!-- 1.6 เจาะลึกโค้ด Backend -->
+    <h3 class="sub-header" id="part1-backend">1.6 เจาะลึกโค้ดฝั่ง Backend (API & Data Layer)</h3>
+
+    <h4>1) REST API Routing (<code>server/routes/dividends.routes.js</code>)</h4>
+    <p>
+      กำหนดเอนด์พอยต์ <code>POST /api/dividends</code> โดยตรวจสอบความครบถ้วนของข้อมูลใน Request Body 
+      และเมื่อจ่ายเงินสำเร็จจะเรียก <code>logActivity</code> บันทึกลงตาราง <code>ActivityLog</code>:
+    </p>
+    <pre><code>await logActivity(req, {
+  action: "CREATE_DIVIDEND",
+  targetType: "DIVIDEND",
+  description: `จ่ายเงินปันผลประจำปี ${body.buddhistYear} (${body.periodLabel}) อัตรา ${body.rate} บาท/กก. ให้สมาชิก ${payments.length} ราย รวม ${totalAmount} บาท`,
+});</code></pre>
+
+    <div class="page-break"></div>
+
+    <h4>2) Data Access Layer และ Transaction (<code>server/lib/data/dividends.js</code>)</h4>
+    <p>
+      หัวใจสำคัญของการจ่ายเงินปันผลอยู่ที่ฟังก์ชัน <code>payDividend(input)</code> ซึ่งมีขั้นตอนและมาตรการด้านความปลอดภัยขั้นสูงสุด:
+    </p>
+
+    <pre><code>export async function payDividend(input) {
+  // 1. ตรวจสอบเงื่อนไขพื้นฐาน
+  if (!input.rate || input.rate <= 0) throw new DividendError("กรุณากรอกอัตราเงินปันผลเป็นตัวเลขมากกว่า 0");
+  const currentBuddhistYear = buddhistYearOf(new Date());
+  if (input.buddhistYear > currentBuddhistYear) {
+    throw new DividendError(`ยังไม่ถึงปี พ.ศ. ${input.buddhistYear} ในปัจจุบัน ไม่สามารถจ่ายเงินปันผลล่วงหน้าได้`);
+  }
+
+  // 2. ตรวจสอบว่าปีนี้เคยจ่ายหรือยัง
+  const alreadyPaid = await prisma.dividendPayment.findFirst({
+    where: { buddhistYear: input.buddhistYear },
+    select: { id: true },
+  });
+  if (alreadyPaid) throw new DividendError(`ปันผลประจำปี ${input.buddhistYear} ถูกคำนวณและจ่ายไปแล้ว`);
+
+  // 3. ดึงข้อมูลการรับซื้อและคำนวณใหม่ 100% ที่ Server (Zero-Trust Security)
+  const purchases = await prisma.purchase.findMany({
+    select: { memberId: true, dryWeightKg: true, recordDate: true },
+  });
+  const dryWeightByMember = new Map();
+  for (const purchase of purchases) {
+    if (buddhistYearOf(purchase.recordDate) !== input.buddhistYear) continue;
+    dryWeightByMember.set(purchase.memberId, (dryWeightByMember.get(purchase.memberId) ?? 0) + purchase.dryWeightKg.toNumber());
+  }
+
+  // 4. เริ่ม Atomic Database Transaction
+  const payments = await prisma.$transaction(async (tx) => {
+    const members = await tx.member.findMany({ where: { id: { in: memberIds } } });
+    const created = [];
+
+    for (let i = 0; i < members.length; i++) {
+      const member = members[i];
+      const dryWeightKg = dryWeightByMember.get(member.id) ?? 0;
+      const amount = dryWeightKg * input.rate;
+      const balanceBefore = member.walletBalance.toNumber();
+      const balanceAfter = balanceBefore + amount;
+
+      // 4.1 สร้างแถว DividendPayment ทีละคน
+      const payment = await tx.dividendPayment.create({
+        data: {
+          dividendCode: `D-${String(startNumber + i).padStart(4, "0")}`,
+          memberId: member.id,
+          memberCode: member.memberCode,
+          memberName: `${member.firstName} ${member.lastName}`,
+          buddhistYear: input.buddhistYear,
+          periodLabel: input.periodLabel.trim(),
+          rate: input.rate,
+          dryWeightKg,
+          amount,
+          balanceBefore,
+          balanceAfter,
+        },
+      });
+      created.push(payment);
+
+      // 4.2 ปรับปรุงยอดเงินใน Member (ทั้ง walletBalance และ dividendBalance)
+      await tx.member.update({
+        where: { id: member.id },
+        data: {
+          walletBalance: { increment: amount },
+          dividendBalance: { increment: amount },
+        },
+      });
+    }
+    return created;
+  }).catch((error) => {
+    // ดักจับข้อผิดพลาดกรณีจ่ายซ้ำพร้อมกัน (Concurrency / Race Condition)
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      throw new DividendError(`ปันผลประจำปี ${input.buddhistYear} ถูกจ่ายไปแล้ว หรือมีการจ่ายพร้อมกันจากผู้ใช้อื่น`);
+    }
+    throw error;
+  });
+
+  return payments.map(serializePayment);
+}</code></pre>
+
+    <!-- 1.7 กลไกความปลอดภัย -->
+    <h3 class="sub-header" id="part1-security">1.7 กลไกความปลอดภัยและความถูกต้องของข้อมูลทางการเงิน (Financial Data Integrity)</h3>
+    <div class="logic-card">
+      <div class="logic-card-header">
+        <span class="logic-card-title">สรุป 4 เสาหลักด้านความปลอดภัยทางการเงินของระบบปันผล</span>
+        <span class="badge-pill badge-success">Enterprise Grade</span>
+      </div>
+      <ol style="padding-left: 1.2rem; line-height: 1.8;">
+        <li>
+          <strong>หลักการ Zero-Trust (Server-side Recalculation):</strong> 
+          Client ส่งมาเพียง <code>{ buddhistYear, rate, periodLabel }</code> เท่านั้น ระบบไม่รับตัวเลขยอดเงินรวมหรือน้ำหนักยางแห้งจากเบราว์เซอร์ เพื่อป้องกันการแก้ไขข้อมูลผ่าน Developer Tools
+        </li>
+        <li>
+          <strong>ACID Database Transactions:</strong> 
+          การสร้างประวัติการจ่ายของสมาชิกทุกคน และการอัปเดตยอดเงินในกระเป๋าของสมาชิกทุกคน ต้องสำเร็จครบ 100% เท่านั้น หากสมาชิกลำดับสุดท้ายเกิดข้อผิดพลาด ฐานข้อมูลจะทำการ <code>ROLLBACK</code> ข้อมูลทั้งหมดกลับสู่สภาพเดิมทันที เงินจะไม่สูญหายหรือเบิกรั่วไหล
+        </li>
+        <li>
+          <strong>Idempotency & Race Condition Prevention:</strong> 
+          ป้องกันปัญหาการกดเบิ้ล หรือเปิดสองแท็บแล้วกดพร้อมกัน ด้วยการรวมพลัง 3 ชั้น: (1) UI Disabling (2) Application Logic Check (3) Database Unique Constraint (<code>P2002</code>)
+        </li>
+        <li>
+          <strong>Immutable Audit Trail & Historical Snapshot:</strong> 
+          ทุกแถวใน <code>DividendPayment</code> บันทึก <code>balanceBefore</code> และ <code>balanceAfter</code> ไว้ชัดเจน เป็นหลักฐานทางการเงินที่ตรวจสอบย้อนหลังได้โดยไม่ต้องพึ่งพาล็อกภายนอก
+        </li>
+      </ol>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- PART 2: DEFENSE QUESTIONS & ANSWERS                                -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <h2 class="part-header" id="part2">
+      ส่วนที่ 2: รวมแนวคำถาม-คำตอบ สำหรับการสอบป้องกันโครงงาน (Project Defense Q&A)
+    </h2>
+    <p style="margin-bottom: 1.5rem; color: #475569;">
+      รวบรวมคำถามที่คณะกรรมการและอาจารย์ผู้สอบนิยมถาม ทั้งเชิงทฤษฎี ตรรกะธุรกิจ สถาปัตยกรรมความปลอดภัย และโค้ดเทคนิค พร้อมแนวทางการตอบแบบมืออาชีพ
+    </p>
+
+    <!-- หมวดที่ 1: ตรรกะธุรกิจ -->
+    <h3 class="sub-header" id="part2-qa-biz">หมวดที่ 1: ตรรกะธุรกิจและที่มาของระบบ (Business Logic & Domain Questions)</h3>
+
+    <!-- Q1 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q1</span>
+        <span>ทำไมระบบถึงคิดเงินปันผลจาก "น้ำหนักยางแห้ง" (Dry Rubber Content) แทนที่จะคิดจากน้ำหนักน้ำยางสด หรือคิดจากยอดเงินรวมที่สมาชิกขายยางได้?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> ทดสอบความเข้าใจในบริบทธุรกิจจริง (Domain Knowledge) ของเกษตรกรชาวสวนยางและความยุติธรรมในระบบสหกรณ์
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          เนื่องจากน้ำยางสดที่สมาชิกแต่ละรายนำมาขาย มี <strong>เปอร์เซ็นต์เนื้อยางแห้ง (%DRC)</strong> ไม่เท่ากันขึ้นอยู่กับสภาพสวน สภาพอากาศ และการกรีด เช่น น้ำยางสด 100 กก. ที่มีเนื้อยาง 35% จะได้เนื้อยางจริง 35 กก. ในขณะที่น้ำยางสด 100 กก. ที่มีเนื้อยางเพียง 25% จะมีเนื้อยางจริงเพียง 25 กก.
+        </p>
+        <p>
+          หากเราคิดจากน้ำหนักน้ำยางสด จะทำให้เกิดความไม่เป็นธรรมต่อสมาชิกที่รักษาคุณภาพน้ำยางเข้มข้น และหากคิดจากยอดเงินขายยาง ราคากลางยางพาราในแต่ละวันมีความผันผวนสูงมาก การใช้ <strong>น้ำหนักยางแห้งสุทธิ (<code>dryWeightKg</code>)</strong> จึงสะท้อนถึง <strong>"ปริมาณผลผลิตเนื้อยางจริง"</strong> ที่สมาชิกส่งมอบให้แก่สหกรณ์ เป็นเกณฑ์สากลของสหกรณ์กองทุนสวนยางที่มีความเที่ยงตรงและยุติธรรมที่สุดครับ
+        </p>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q2</span>
+        <span>เหตุใดรอบการจ่ายเงินปันผลของระบบถึงกำหนดเป็นช่วง "พฤษภาคม - มีนาคม" ทำไมไม่ใช้ปีปฏิทินสากล (1 มกราคม - 31 ธันวาคม)?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> เช็กว่านักศึกษาลงพื้นที่ศึกษา Business Process จริง หรือแค่นึกขึ้นมาเอง
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          เป็นไปตาม <strong>"รอบฤดูกาลกรีดยางและวงจรบัญชีของสหกรณ์ชาวสวนยาง"</strong> ครับ ในทางปฏิบัติ ต้นยางพาราจะมีการผลัดใบในช่วงฤดูแล้ง คือเดือนมีนาคมถึงเมษายน เกษตรกรจะหยุดกรีดยาง (ปิดหน้ายาง) เพื่อให้ต้นยางพักฟื้น 
+        </p>
+        <p>
+          ดังนั้น ฤดูการกรีดยางจะเริ่มต้นเปิดกรีดในเดือนพฤษภาคม และสิ้นสุดฤดูกาลในเดือนมีนาคมของปีถัดไป สหกรณ์จึงใช้รอบเดือนพฤษภาคมถึงมีนาคมเป็นรอบสรุปผลประกอบการและคำนวณเงินปันผลประจำปี เพื่อให้สอดคล้องกับรายได้และผลผลิตในหนึ่งรอบฤดูกาลผลิตอย่างแท้จริงครับ
+        </p>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q3</span>
+        <span>ในระบบมีทั้ง <code>walletBalance</code> และ <code>dividendBalance</code> ในตาราง Member ทั้งสองตัวนี้ต่างกันอย่างไร และเงินปันผลไหลไปทางไหน?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบความเข้าใจเรื่อง Data Modeling และ Flow ของเงินในระบบ
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          ทั้งสองตัวแปรเก็บข้อมูลยอดเงินคนละวัตถุประสงค์กันครับ:
+        </p>
+        <ul>
+          <li><strong><code>walletBalance</code> (กระเป๋าเงินสะสมที่เบิกได้):</strong> เป็นยอดเงินจริงคงเหลือในบัญชีของสมาชิก ซึ่งรวมทั้งรายได้จากการขายยางและเงินปันผล ยอดนี้จะ <strong>เพิ่มขึ้น</strong> เมื่อขายยางหรือได้ปันผล และจะ <strong>ลดลง</strong> เมื่อสมาชิกทำรายการเบิกเงินสดที่หน้า <code>/withdrawals</code></li>
+          <li><strong><code>dividendBalance</code> (สถิติเงินปันผลสะสมตลอดชีพ):</strong> เป็นฟิลด์ที่ทำหน้าที่สะสมยอดเงินปันผลรวมทั้งหมดที่สมาชิกเคยได้รับตั้งแต่สมัครสมาชิก ยอดนี้จะ <strong>เพิ่มขึ้นทางเดียว (Monotonically Increasing)</strong> และไม่ลดลงแม้สมาชิกจะถอนเงินออกไป เพื่อใช้สำหรับแสดงสถิติและผลประโยชน์ตอบแทนสะสมในหน้า Member Portal ครับ</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q4</span>
+        <span>ถ้าลูกจ้างกรีดยาง (Employee) กรีดยางในสัญญาจับคู่ (MePair) ลูกจ้างคนนั้นจะได้รับเงินปันผลด้วยหรือไม่?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> ทดสอบความเข้าใจเรื่องความสัมพันธ์คู่สัญญา (MePair Contract) กับการจ่ายปันผล
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          <strong>ไม่ได้รับครับ เงินปันผลจ่ายให้เฉพาะสมาชิกเจ้าของสวน (Member) เท่านั้น</strong> 
+        </p>
+        <p>
+          เนื่องจากตามหลักการสหกรณ์ เงินปันผลเป็นสิทธิ์ของสมาชิกผู้ถือหุ้นและเจ้าของสวนยาง ส่วนลูกจ้างกรีดยางได้รับส่วนแบ่งรายได้ตามสัญญาจ้าง (เช่น 60% / 40%) ทันที ณ วันที่มีการรับซื้อน้ำยางแต่ละครั้งไปแล้วในบิลรับซื้อ (Purchase) ดังนั้น เงินปันผลประจำปีจึงถูกจัดสรรคืนให้แก่สมาชิกเจ้าของสวนยางผู้เป็นสมาชิกสหกรณ์เท่านั้นครับ
+        </p>
+      </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- หมวดที่ 2: ความปลอดภัยและ Transaction -->
+    <h3 class="sub-header" id="part2-qa-sec">หมวดที่ 2: ความปลอดภัยและ Database Transaction (Security & Transactions)</h3>
+
+    <!-- Q5 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q5</span>
+        <span>ทำไมตอนกด "จ่ายปันผล" ฝั่ง Frontend ถึงส่งไปแค่ปี พ.ศ. และอัตราปันผล ทำไมไม่ส่งตารางผลลัพธ์ที่คำนวณแล้วไปให้เซิร์ฟเวอร์บันทึกเลย?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> เช็กความรู้ด้าน Web Application Security และหลักการ Zero-Trust Architecture
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          เป็นการออกแบบตามหลักการ <strong>Zero-Trust Architecture</strong> และ <strong>Server-side Authority</strong> ครับ
+        </p>
+        <p>
+          หากเราให้ Frontend ส่งยอดเงินปันผลรายคนหรือยอดรวมไป ผู้ใช้งานหรือผู้ไม่ประสงค์ดีอาจใช้ Browser Developer Tools, Postman, หรือดักจับ HTTP Request (Man-in-the-Middle) เพื่อแอบแก้ไขตัวเลขยอดเงินก่อนส่งมาบันทึกได้ 
+        </p>
+        <p>
+          ดังนั้น ในระบบของเรา หน้า Frontend มีหน้าที่เพียง <strong>"จำลองการคำนวณ (Simulation Preview)"</strong> ให้ผู้ใช้ตรวจสอบเท่านั้น ส่วนขั้นตอนการจ่ายเงินจริง เซิร์ฟเวอร์จะรับเพียง <code>buddhistYear</code> และ <code>rate</code> แล้วดึงข้อมูลน้ำหนักยางแห้งจริงจากตาราง <code>Purchase</code> ในฐานข้อมูลมาคำนวณใหม่ 100% ทำให้มั่นใจได้ว่าข้อมูลถูกต้องแม่นยำและไม่สามารถถูกแทรกแซงได้ครับ
+        </p>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q6</span>
+        <span>ทำไมต้องใช้ <code>prisma.$transaction</code> ในฟังก์ชัน <code>payDividend</code>? ถ้าไม่ใช้แล้วเกิดไฟดับหรือ Server ดับกลางคัน จะเกิดผลกระทบอย่างไร?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> ทดสอบคุณสมบัติ ACID ของ Database (โดยเฉพาะ Atomicity)
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          การจ่ายเงินปันผลประจำปีมีสมาชิกที่เกี่ยวข้องหลายสิบหรือหลายร้อยคน ในการทำงาน 1 ครั้ง มีคำสั่ง Database ย่อยเป็นจำนวนมาก เช่น สมาชิก 50 คน จะต้องมีการสร้าง <code>DividendPayment</code> 50 แถว และ <code>update Member</code> อีก 50 แถว รวมเป็น 100 การดำเนินการ
+        </p>
+        <p>
+          หากเรา <strong>ไม่ใช้ Transaction</strong> แล้วเกิดระบบล่มหรือข้อผิดพลาดที่สมาชิกลำดับที่ 25:
+        </p>
+        <ul>
+          <li>สมาชิก 24 คนแรกจะได้รับเงินและมีประวัติบันทึกไปแล้ว</li>
+          <li>สมาชิกคนที่ 25 ถึง 50 จะไม่ได้รับเงิน</li>
+          <li>เมื่อเจ้าหน้าที่กลับมากดจ่ายใหม่ ระบบจะปฏิเสธเพราะตรวจพบว่าปีนี้มีการจ่ายไปแล้วบางส่วน ทำให้เกิดปัญหาข้อมูลไม่สอดคล้องกัน (Data Inconsistency) และเงินหายจากระบบ</li>
+        </ul>
+        <p>
+          การใช้ <strong><code>prisma.$transaction</code></strong> จะรับประกันคุณสมบัติ <strong>Atomicity (All-or-Nothing)</strong> คือ ต้องทำงานสำเร็จครบทุกรายการ 100% เท่านั้น หากเกิดข้อผิดพลาดแม้แต่จุดเดียว ระบบจะทำการ <code>ROLLBACK</code> ข้อมูลทั้งหมดกลับสู่จุดเริ่มต้นเสมือนไม่เคยมีอะไรเกิดขึ้น จึงปลอดภัยต่อข้อมูลทางการเงินสูงสุดครับ
+        </p>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q7</span>
+        <span>ถ้าเจ้าหน้าที่เปิดหน้าคำนวณปันผล 2 เครื่องพร้อมกัน แล้วกดยืนยันจ่ายปันผลปีเดียวกันในเสี้ยววินาทีเดียวกัน (Race Condition) ระบบป้องกันอย่างไร?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบการรับมือปัญหา Concurrency Control และ Race Condition ในระดับ Database
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          ระบบมีกลไกป้องกัน <strong>Concurrency 3 ระดับ (Multi-Layer Defense)</strong> ครับ:
+        </p>
+        <ol>
+          <li><strong>ระดับ Client UI:</strong> เมื่อกดปุ่มจ่ายปันผล ปุ่มจะเปลี่ยนสถานะเป็น Disabled ทันทีเพื่อกันการกดซ้ำจากหน้าจอเดียว</li>
+          <li><strong>ระดับ Application Logic:</strong> ฟังก์ชัน <code>payDividend</code> จะใช้ <code>prisma.dividendPayment.findFirst</code> ตรวจสอบก่อนว่าปีนี้เคยจ่ายหรือไม่</li>
+          <li><strong>ระดับ Database Constraint (เด็ดขาดที่สุด):</strong> ใน Prisma Schema เราใส่ <code>@@unique([memberId, buddhistYear])</code> ไว้ที่ตาราง <code>DividendPayment</code> หากมี 2 Request หลุดเข้ามาในเวลาเสี้ยววินาทีเดียวกัน Request แรกจะถูก Commit สำเร็จ ส่วน Request ที่สองจะชนกับ Unique Constraint ทันที ส่งผลให้เกิด Prisma Error <code>P2002</code> และโค้ดของเราดักจับข้อผิดพลาดนี้ไว้แล้ว เพื่อคืน Error ข้อความสุภาพว่า <em>"ปันผลประจำปีถูกจ่ายไปแล้ว หรือมีการจ่ายพร้อมกันจากผู้ใช้อื่น"</em> โดยไม่มีเงินซ้ำซ้อนแน่นอนครับ
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- หมวดที่ 3: สถาปัตยกรรมและการเชื่อมต่อ -->
+    <h3 class="sub-header" id="part2-qa-arch">หมวดที่ 3: สถาปัตยกรรมระบบและการรับส่งข้อมูล (Architecture & Flow)</h3>
+
+    <!-- Q8 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q8</span>
+        <span>ทำไมหน้าเว็บถึงโหลดข้อมูลผ่าน <code>loadPageData("dividends")</code> แทนที่จะยิงเรียก API หลายๆ เส้นแยกกัน เช่น <code>/api/members</code>, <code>/api/purchases</code>?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> เช็กแนวคิดเรื่อง Network Performance, Round-trip Time (RTT) และการออกแบบ Page-Data Route
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          เป็นรูปแบบการออกแบบสถาปัตยกรรมแบบ <strong>BFF (Backend-For-Frontend) หรือ Aggregated Page-Data Endpoint</strong> ครับ
+        </p>
+        <p>
+          หากเราแยกยิง 4 เส้น (Members, Purchases, Payments, PaidYears) เบราว์เซอร์จะต้องเสียเวลาทำ HTTP Handshake ถึง 4 รอบ (เกิด Network Waterfall & High Latency) และหน้าเว็บอาจเกิดอาการกระตุกจากการที่ข้อมูลแต่ละส่วนโหลดเสร็จไม่พร้อมกัน
+        </p>
+        <p>
+          ระบบจึงรวมศูนย์ไว้ที่ <code>server/routes/page-data.routes.js</code> และฝั่งเซิร์ฟเวอร์จะใช้ <code>Promise.all([ ... ])</code> ดึงข้อมูลจากฐานข้อมูลพร้อมกันแบบขนาน (Parallel Query) แล้วส่งกลับมาใน JSON Payload ก้อนเดียว ทำให้หน้าเว็บโหลดเร็วกว่ามาก และมั่นใจได้ว่า State เริ่มต้นมีความพร้อมสมบูรณ์ก่อนเรนเดอร์หน้าจอครับ
+        </p>
+      </div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q9</span>
+        <span>เมื่อเลือกปีที่จ่ายเงินปันผลไปแล้ว หน้าจอจะเปลี่ยนไปอย่างไร และระบบนำข้อมูลจากไหนมาแสดง?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> ทดสอบความเข้าใจเรื่อง State-driven UI และการแยกโหมดระหว่าง New Calculation กับ Historical View
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          เมื่อเลือกปีที่เคยจ่ายแล้ว (<code>state.data.paidYears.includes(state.year)</code>) ระบบจะสลับเข้าสู่ <strong>"โหมดล็อกและดูประวัติ (Locked / Read-Only Mode)"</strong>:
+        </p>
+        <ul>
+          <li><strong>แสดงแบนเนอร์ล็อกสีทอง (<code>#dividend-lock-banner</code>):</strong> แจ้งว่าการจ่ายเงินปันผลรอบปีนี้เสร็จสิ้นแล้ว และจะเปิดรอบใหม่เมื่อถึงปี พ.ศ. ถัดไป</li>
+          <li><strong>ล็อกฟิลด์อินพุต:</strong> ช่องกรอกอัตราปันผลและปุ่ม "ตกลง" จะถูก Disabled</li>
+          <li><strong>ดึงข้อมูลจริงจากประวัติ:</strong> ฟังก์ชัน <code>getPaidInfoForYear(state.year)</code> จะกรองข้อมูลจาก <code>state.data.payments</code> เพื่อนำอัตราและยอดเงินที่เคยจ่ายจริงในอดีตมาแสดงบนการ์ดสรุปและตาราง แทนการคำนวณใหม่</li>
+          <li><strong>ซ่อนปุ่มจ่ายเงิน:</strong> ปุ่ม <code>#pay-button</code> จะถูกซ่อน และแสดงป้ายสถานะ <code>#pay-locked</code> แทน</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- หมวดที่ 4: โค้ดและเทคนิคัล -->
+    <h3 class="sub-header" id="part2-qa-code">หมวดที่ 4: เจาะลึกโค้ดและเทคนิคัล (Code & Database Implementation)</h3>
+
+    <!-- Q10 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q10</span>
+        <span>ในฟังก์ชัน <code>buddhistYearOf(date)</code> ทำไมต้องใช้ <code>date.getUTCFullYear() + 543</code> ทำไมไม่ใช้ <code>date.getFullYear() + 543</code> ธรรมดา?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> เช็กความรู้เชิงลึกเรื่อง Date Timezone Issue ใน JavaScript/Node.js ซึ่งเป็นบั๊กคลาสสิกของโปรแกรมเมอร์
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          นี่เป็นจุดสำคัญเรื่อง <strong>Timezone Normalization</strong> ครับ!
+        </p>
+        <p>
+          ในระบบของเรา ฟิลด์ <code>recordDate</code> ในตาราง <code>Purchase</code> ถูกกำหนดให้เก็บเป็น <strong>"เที่ยงคืน UTC ของวันทำการ"</strong> (เช่น วันที่ 1 มกราคม 2026 จะเก็บเป็น <code>2026-01-01T00:00:00.000Z</code>) 
+        </p>
+        <p>
+          หากเราใช้ <code>date.getFullYear()</code> แบบ Local Time ถ้าเครื่องเซิร์ฟเวอร์รันอยู่ใน Timezone ที่อยู่ทางตะวันตกของ UTC (เช่น อเมริกา UTC-5) วันที่และเวลาจะถูกเลื่อนถอยหลังไป 5 ชั่วโมง กลายเป็นวันที่ <code>31 ธันวาคม 2025 เวลา 19:00 น.</code> ส่งผลให้ <code>getFullYear()</code> คืนค่าปี 2025 ทำให้คำนวณปี พ.ศ. ผิดพลาดทันที! การบังคับอ่านผ่าน <strong><code>getUTCFullYear()</code></strong> จึงรับประกันความถูกต้องแม่นยำ 100% ไม่ว่าเซิร์ฟเวอร์จะตั้งอยู่บน Cloud ภูมิภาคใดในโลกครับ
+        </p>
+      </div>
+    </div>
+
+    <!-- Q11 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q11</span>
+        <span>ในฟังก์ชัน <code>payDividend</code> ทำไมต้องอัปเดตยอดเงินด้วย <code>{ increment: amount }</code> แทนที่จะนำยอดเดิมมาบวกใน JavaScript แล้วเขียนทับลงไป?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบความเข้าใจเรื่อง Atomic Operations ในฐานข้อมูล
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          การใช้ <code>{ increment: amount }</code> ของ Prisma จะถูกแปลงเป็นคำสั่ง SQL ระดับฐานข้อมูลโดยตรง เช่น:
+        </p>
+        <pre><code>UPDATE "Member" SET "walletBalance" = "walletBalance" + 1500.00 WHERE "id" = '...';</code></pre>
+        <p>
+          ซึ่งเป็น <strong>Atomic Operation</strong> บนระดับ Database Engine หากเราคำนวณใน JavaScript (เช่น <code>walletBalance = member.walletBalance + amount</code>) จะเกิดปัญหา <strong>Lost Update</strong> ได้ง่าย หากในจังหวะนั้นสมาชิกกำลังทำรายการอื่น เช่น มีบิลรับซื้อเข้าหรือเบิกเงินสดพร้อมกัน การคำนวณในหน่วยความจำแล้วเขียนทับค่าเดิมจะไปทับยอดเงินธุรกรรมอื่นให้สูญหายได้ครับ
+        </p>
+      </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- Q12 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q12</span>
+        <span>ในภาษา JavaScript ตัวเลขแบบ Floating Point มีปัญหาเรื่องความคลาดเคลื่อน เช่น <code>0.1 + 0.2 !== 0.3</code> ระบบนี้จัดการกับปัญหาความคลาดเคลื่อนของทศนิยมทางการเงินอย่างไร?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> ทดสอบความรู้ด้าน Floating Point Arithmetic & Financial Precision
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          ระบบมีมาตรการจัดการ 2 ส่วนครับ:
+        </p>
+        <ul>
+          <li><strong>ในระดับ Database (Prisma / PostgreSQL):</strong> ฟิลด์ทางการเงินทั้งหมดถูกนิยามเป็นชนิดข้อมูล <code>Decimal(12, 2)</code> และ <code>Decimal(10, 2)</code> ซึ่งจัดเก็บตัวเลขแบบ Exact Numeric (Fixed Point) ไม่ใช้ <code>Float</code> หรือ <code>Double</code> จึงไม่มีการปัดเศษผิดพลาดในฐานข้อมูลอย่างแน่นอน</li>
+          <li><strong>ในระดับ JavaScript Client:</strong> ใช้ตัวช่วยจัดรูปแบบ <code>formatNumber()</code>, <code>formatCurrency()</code> จาก <code>shared/format.js</code> ซึ่งใช้ <code>Intl.NumberFormat</code> ควบคุมทศนิยม 2 ตำแหน่งอย่างแม่นยำ</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Q13 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q13</span>
+        <span>การสร้างรหัสเงินปันผล เช่น <code>D-0001</code>, <code>D-0002</code> ทำงานอย่างไร ทำไมไม่ใช้ Auto-increment ID ของฐานข้อมูล?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> เช็กตรรกะการสร้าง Business Document ID (Running Code)
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          ในระบบธุรกิจ เอกสารทางการเงินต้องการ <strong>รหัสเอกสารที่สื่อความหมายและจัดรูปแบบคงที่ (Standard Document Prefix)</strong> เช่น รหัสสมาชิกขึ้นต้นด้วย <code>M-</code>, รหัสรับซื้อ <code>P-</code>, รหัสเบิกเงิน <code>W-</code> และรหัสเงินปันผล <code>D-</code> เพื่อให้ง่ายต่อการพิมพ์ลงเอกสารใบเสร็จและง่ายต่อการสื่อสารของเจ้าหน้าที่
+        </p>
+        <p>
+          ฟังก์ชัน <code>nextDividendCode()</code> จะค้นหาแถวล่าสุดที่เรียงตาม <code>dividendCode DESC</code> ดึงตัวเลขออกมาแปลงด้วย <code>parseInt</code> บวก 1 แล้วจัดรูปแบบด้วย <code>String(n).padStart(4, "0")</code> ทำให้ได้รหัสเรียงลำดับอย่างเป็นระเบียบ เช่น <code>D-0001</code>, <code>D-0002</code> ... <code>D-9999</code> ครับ
+        </p>
+      </div>
+    </div>
+
+    <!-- หมวดที่ 5: กรณีศึกษาและ Edge Cases -->
+    <h3 class="sub-header" id="part2-qa-edge">หมวดที่ 5: กรณีศึกษาและ Edge Cases (Scenarios & Edge Cases)</h3>
+
+    <!-- Q14 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q14</span>
+        <span>หากในปีนั้น สมาชิกรายหนึ่งไม่มีการส่งน้ำยางสดเลย (น้ำหนักยางแห้งสะสม = 0 กก.) ระบบจะปฏิบัติต่อสมาชิกคนนี้อย่างไร?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบ Edge Case ของสมาชิกที่ไม่มีผลผลิต
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          ระบบจะจัดการดังนี้ครับ:
+        </p>
+        <ul>
+          <li><strong>ในหน้าจำลองคำนวณ (Frontend):</strong> รายชื่อสมาชิกรายนั้นจะยังปรากฏในตาราง เพื่อให้เจ้าหน้าที่ทราบข้อมูลครบถ้วน โดยจะแสดงน้ำหนักยางแห้งเป็น <code>0.00 กก.</code> และยอดเงินปันผลเป็น <code>฿0.00</code></li>
+          <li><strong>ในการบันทึกจ่ายเงินจริง (Backend):</strong> ฟังก์ชัน <code>payDividend</code> มีการกรองสมาชิกด้วยคำสั่ง:<br>
+          <code>const memberIds = [...dryWeightByMember.keys()].filter(id => dryWeightByMember.get(id) > 0);</code><br>
+          ดังนั้น สมาชิกที่มียอดเป็น 0 จะ <strong>ไม่ถูกสร้างแถวใน DividendPayment</strong> และไม่มีการบวกยอดเงิน 0 บาทเข้าไป เพื่อลดขยะในฐานข้อมูล (Zero Record Clutter) และประหยัดทรัพยากรการเขียน Disk ครับ</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Q15 -->
+    <div class="qa-card">
+      <div class="qa-question">
+        <span class="q-badge">Q15</span>
+        <span>ถ้าในอนาคตสหกรณ์มีสมาชิกเพิ่มขึ้นเป็น 10,000 คน ฟังก์ชัน <code>payDividend</code> ที่วนลูปบันทึกใน Transaction จะมีปัญหาเรื่อง Performance หรือไม่ และมีแนวทางขยายระบบ (Scalability) อย่างไร?</span>
+      </div>
+      <div class="qa-intent">
+        <strong>เจตนาของผู้สอบ:</strong> วัดวิสัยทัศน์ทางวิศวกรรมซอฟต์แวร์ (Software Engineering Vision & Scalability)
+      </div>
+      <div class="qa-answer">
+        <span class="a-header">แนวทางการตอบ:</span>
+        <p>
+          เป็นคำถามที่ยอดเยี่ยมมากครับ! ปัจจุบันระบบได้รับการออกแบบสำหรับสหกรณ์ขนาดกลาง (สมาชิกหลักร้อยถึงพันคน) ซึ่งการวนลูปภายใน Transaction ใช้เวลาเพียงไม่กี่ร้อยมิลลิวินาที 
+        </p>
+        <p>
+          แต่หากในอนาคตมีสมาชิก 10,000 คน การเปิด Transaction ค้างไว้นานอาจทำให้เกิด Database Lock Contention ได้ แนวทางการปรับปรุง (Optimization) ในอนาคตมีดังนี้ครับ:
+        </p>
+        <ol>
+          <li><strong>ใช้ Batch Insertion (<code>tx.dividendPayment.createMany</code>):</strong> ส่งคำสั่งสร้างข้อมูลเป็นก้อน ก้อนละ 1,000 แถว แทนการสร้างทีละแถว ซึ่งจะลด Round-trip ใน Database ลงได้มากกว่า 90%</li>
+          <li><strong>Background Job / Worker Queue:</strong> ใช้ระบบคิว เช่น BullMQ (Redis) เพื่อประมวลผลการจ่ายปันผลในเบื้องหลังแบบ Asynchronous พร้อมแสดง Progress Bar ให้เจ้าหน้าที่ทราบความคืบหน้าแบบ Real-time โดยไม่ทำให้ HTTP Request หมดเวลา (Timeout)</li>
+          <li><strong>Database Indexing:</strong> เสริม Index บน <code>recordDate</code> ในตาราง Purchase และ <code>buddhistYear</code> ใน DividendPayment เพื่อให้การค้นหาและสรุปยอดรวดเร็วในระดับมิลลิวินาทีครับ</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- ─── Footer ─── -->
+    <div style="margin-top: 3rem; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 1.5rem; color: #94a3b8; font-size: 0.8rem;">
+      <p>Clover Rubber Cooperative Information System — Senior Project Documentation</p>
+      <p>จัดทำขึ้นเพื่อการศึกษาและการสอบป้องกันโครงงานเทคโนโลยีสารสนเทศ</p>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แนวคำถาม-คำตอบ การสอบป้องกันโครงงาน — Clover Project</title>
+  <style>
+    /* ─── Reset & Base Settings ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 13px; }
+    body {
+      font-family: 'Segoe UI', 'Sarabun', 'Noto Sans Thai', Tahoma, sans-serif;
+      color: #1e293b;
+      line-height: 1.68;
+      background: #f8fafc;
+      padding: 2rem;
+    }
+
+    /* ─── Page & Print Setup (A4) ─── */
+    @page {
+      size: A4;
+      margin: 15mm 14mm 15mm 14mm;
+    }
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+        font-size: 11px;
+        line-height: 1.55;
+      }
+      .container {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+      .page-break { page-break-before: always; }
+      .no-print { display: none !important; }
+      h1, h2, h3, h4 { page-break-after: avoid; }
+      .qa-card, table, pre, .callout { page-break-inside: avoid; }
+    }
+
+    /* ─── Container ─── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 3rem 3.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+    }
+
+    /* ─── Cover Page ─── */
+    .cover {
+      text-align: center;
+      padding: 4rem 2rem 3.5rem;
+      border-bottom: 3px solid #047857;
+      margin-bottom: 2.5rem;
+    }
+    .cover .badge-role {
+      display: inline-block;
+      background: #d1fae5;
+      color: #065f46;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 1.2rem;
+    }
+    .cover h1 {
+      font-size: 2.2rem;
+      color: #0f172a;
+      margin-bottom: 0.6rem;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+    .cover .subtitle {
+      font-size: 1.15rem;
+      color: #059669;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .cover .desc {
+      font-size: 0.95rem;
+      color: #475569;
+      max-width: 680px;
+      margin: 0 auto 1.8rem;
+    }
+    .cover .meta {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+
+    /* ─── Table of Contents ─── */
+    .toc {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 1.4rem 1.8rem;
+      margin-bottom: 2.5rem;
+    }
+    .toc h2 {
+      font-size: 1.2rem;
+      color: #065f46;
+      border-bottom: 2px solid #86efac;
+      padding-bottom: 0.4rem;
+      margin: 0 0 0.8rem;
+    }
+    .toc ul {
+      list-style: none;
+      padding-left: 0;
+      columns: 2;
+      column-gap: 1.8rem;
+    }
+    .toc li {
+      margin-bottom: 0.45rem;
+      font-size: 0.9rem;
+    }
+    .toc a {
+      color: #047857;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ─── Section Headings ─── */
+    h2.section-header {
+      font-size: 1.35rem;
+      color: #065f46;
+      border-bottom: 2px solid #a7f3d0;
+      padding-bottom: 0.4rem;
+      margin: 2.2rem 0 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-num {
+      background: #047857;
+      color: #fff;
+      width: 28px; height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    /* ─── QA Card ─── */
+    .qa-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1.3rem 1.5rem;
+      margin-bottom: 1.4rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .qa-question {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+      line-height: 1.4;
+    }
+    .q-badge {
+      background: #dc2626;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .qa-intent {
+      background: #f8fafc;
+      border-left: 3px solid #64748b;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.82rem;
+      color: #475569;
+      margin-bottom: 0.8rem;
+      border-radius: 0 4px 4px 0;
+    }
+    .qa-intent strong { color: #334155; }
+    .qa-answer {
+      font-size: 0.9rem;
+      color: #334155;
+      text-align: justify;
+    }
+    .qa-answer p { margin-bottom: 0.6rem; }
+    .qa-answer ul, .qa-answer ol { padding-left: 1.3rem; margin-bottom: 0.6rem; }
+    .qa-answer li { margin-bottom: 0.3rem; }
+    .a-header {
+      font-weight: 700;
+      color: #047857;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    /* ─── Code Snippets ─── */
+    code {
+      background: #f1f5f9;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.86em;
+      color: #047857;
+      font-weight: 600;
+    }
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 6px;
+      padding: 0.8rem 1rem;
+      overflow-x: auto;
+      margin: 0.6rem 0;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      color: #f8fafc;
+      font-weight: normal;
+    }
+
+    /* ─── Tables ─── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.6rem 0 0.9rem;
+      font-size: 0.85rem;
+    }
+    th {
+      background: #f0fdf4;
+      color: #065f46;
+      padding: 0.5rem 0.7rem;
+      border: 1px solid #d1fae5;
+      text-align: left;
+    }
+    td {
+      padding: 0.45rem 0.7rem;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #f8fafc; }
+
+    /* ─── Callout ─── */
+    .callout {
+      border-left: 4px solid #10b981;
+      background: #f0fdf4;
+      padding: 0.7rem 1rem;
+      border-radius: 0 6px 6px 0;
+      margin: 0.6rem 0;
+      font-size: 0.85rem;
+    }
+    .callout.warn {
+      border-left-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    /* ─── Footer ─── */
+    .doc-footer {
+      margin-top: 3rem;
+      padding-top: 1.2rem;
+      border-top: 2px solid #d1fae5;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════ COVER PAGE ═══════════════════════════════════ -->
+  <div class="cover">
+    <div class="badge-role">คู่มือจำลองการสอบป้องกันโครงงาน (Master Examination Defense)</div>
+    <h1>รวมแนวคำถาม-คำตอบ สำหรับการสอบจบโปรเจกต์</h1>
+    <div class="subtitle">ระบบบริหารจัดการการรับซื้อน้ำยางพารา (Clover Project — Field Latex System)</div>
+    <div class="desc">
+      รวบรวมคำถามเจาะลึกระดับคณะกรรมการสอบ ทั้งด้านสถาปัตยกรรมซอฟต์แวร์, ตรรกะทางธุรกิจ, ฟังก์ชันในโค้ด,
+      ความปลอดภัย, ฐานข้อมูล และการจัดการข้อยกเว้น พร้อมแนวทางคำตอบฉบับสมบูรณ์อย่างละเอียดทุกประเด็น
+    </div>
+    <div class="meta">
+      <strong>ระดับการประเมิน:</strong> โครงงานเทคโนโลยีสารสนเทศ / วิทยาการคอมพิวเตอร์ / วิศวกรรมซอฟต์แวร์<br/>
+      <strong>เทคโนโลยี:</strong> Node.js • Express • PostgreSQL • Prisma ORM • Vanilla HTML/CSS/JS (ES Modules)<br/>
+      <strong>จัดทำเมื่อ:</strong> ตุลาคม 2569
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ TOC ═══════════════════════════════════ -->
+  <div class="toc">
+    <h2>สารบัญหมวดหมู่คำถาม</h2>
+    <ul>
+      <li><a href="#cat1">1. สถาปัตยกรรมระบบและการตัดสินใจเชิงเทคนิค</a></li>
+      <li><a href="#cat2">2. การออกแบบฐานข้อมูลและความสมบูรณ์ของข้อมูล</a></li>
+      <li><a href="#cat3">3. โลจิกทางธุรกิจ การคิดเงิน และการเงินสหกรณ์</a></li>
+      <li><a href="#cat4">4. ความปลอดภัยและการยืนยันตัวตน (Security & Auth)</a></li>
+      <li><a href="#cat5">5. เจาะลึกโค้ดและกลไกหน้าบ้าน (DOM Engine)</a></li>
+      <li><a href="#cat6">6. การรองรับข้อผิดพลาด ปัญหา Edge Cases & การขยายระบบ</a></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════ CATEGORY 1 ═══════════════════════════════════ -->
+  <h2 class="section-header" id="cat1">
+    <span class="section-num">1</span>
+    สถาปัตยกรรมระบบและการตัดสินใจเชิงเทคนิค (System Architecture)
+  </h2>
+
+  <!-- Q1 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q1</span>
+      <span>ทำไมระบบนี้ถึงเลือกไม่ใช้ React, Vue หรือ Next.js ในหน้าหลัก แต่แปลงมาเป็น Vanilla HTML, CSS และ JavaScript ร่วมกับ Express? มีข้อดีข้อเสียอย่างไรในเชิงวิศวกรรม?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความเข้าใจในการเลือกใช้เทคโนโลยีที่เหมาะสมกับบริบทผู้ใช้งาน (Trade-offs) ไม่ใช่แค่เลือกตามกระแสนิยม
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "ทางทีมงานได้ทำการประเมินบริบทของผู้ใช้งานจริง ซึ่งเป็นเจ้าหน้าที่หน้าลานรับซื้อน้ำยางและสมาชิกชาวสวนยางในพื้นที่ต่างจังหวัด จึงมีเหตุผลเชิงวิศวกรรม 4 ประการครับ:
+      </p>
+      <ol>
+        <li><strong>ประสิทธิภาพและความเร็วในการโหลด (Zero-Bundle Overhead):</strong> หน้าเว็บที่เป็น Vanilla JS ไม่มีไฟล์ JavaScript Framework Bundle ขนาดใหญ่ (เช่น React + Next runtime หนัก 200-500KB) ทำให้หน้าเว็บเปิดได้ทันที แม้ในจุดรับซื้อที่สัญญาณ 3G/4G อ่อน</li>
+        <li><strong>ลดการใช้หน่วยความจำเซิร์ฟเวอร์ (Low Memory Footprint):</strong> Express ทำหน้าที่เป็น REST API + HTML Server แบบตรงไปตรงมา กินแรมเพียง 50-80MB ขณะที่ Next.js Node server ต้องใช้ทรัพยากรมากกว่า 200-400MB ในการทำ SSR</li>
+        <li><strong>ความง่ายในการตรวจสอบและบำรุงรักษา (Maintainability & Debuggability):</strong> แต่ละหน้ามีคู่ไฟล์ชัดเจน (HTML 1 ไฟล์ คู่กับ JS 1 ไฟล์) สามารถเปิดดู Console หรือ Network ใน DevTools ไล่ดูการทำงานได้ทันทีโดยไม่ต้องผ่าน Source Maps ที่ซับซ้อน</li>
+        <li><strong>การใช้ React เฉพาะส่วนที่จำเป็น (Targeted Micro-bundle):</strong> เราเลือกใช้ React 19 + Recharts เฉพาะส่วนการวาดกราฟสถิติในหน้า <code>purchase-summary</code> และ <code>member-finance</code> โดยบันเดิลเป็นไฟล์เล็ก ๆ ด้วย <code>esbuild</code> ซึ่งทำให้ได้ข้อดีของทั้งสองโลก คือความเบาของ Vanilla และพลังการวาดกราฟของ Recharts ครับ"</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q2</span>
+      <span>เมื่อไม่มี Redux, Pinia หรือ React Context ระบบจัดการ State ในแต่ละหน้าอย่างไร และป้องกันปัญหา State ไม่ตรงกับหน้าจอ (State Inconsistency) อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> เข้าใจรูปแบบการออกแบบ State Management ใน Pure JavaScript (Architecture Pattern)
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "เราใช้สถาปัตยกรรม <strong>Predictable Single-Source-of-Truth State Management</strong> ครับ โดยในโค้ด JavaScript ของแต่ละหน้า (เช่น <code>purchases.js</code>, <code>contracts.js</code>, <code>dividends.js</code>) จะมีโครงสร้างดังนี้:
+      </p>
+      <ul>
+        <li><strong>State Object:</strong> มีตัวแปร <code>state = { ... }</code> ประกาศไว้ที่ระดับ Module Scope เป็นแหล่งความจริงจุดเดียว เช่น เก็บข้อมูลรายการ, ตัวกรอง, ค่าค้นหา, และสถานะการโหลด</li>
+        <li><strong>Unidirectional Data Flow (การไหลทิศทางเดียว):</strong> เมื่อเกิด Event จากผู้ใช้ (เช่น พิมพ์ค้นหา, เลือก Combobox) ฟังก์ชัน Event Listener จะไม่ไปไล่แก้ไข DOM กระจัดกระจาย แต่จะไปอัปเดตค่าใน <code>state</code> ก่อนเสมอ</li>
+        <li><strong>Centralized Render Function:</strong> เมื่อ <code>state</code> เปลี่ยนแปลง จะเรียกฟังก์ชัน <code>render()</code> ส่วนกลาง ซึ่งจะอ่านค่าจาก <code>state</code> แล้ววาด DOM ใหม่ผ่าน Template Engine ใน <code>core/dom.js</code> ทำให้หน้าจอกับข้อมูลในตัวแปรตรงกัน 100% เสมอ ปราศจากปัญหา Desync ครับ"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q3</span>
+      <span>กลไกการรวม HTML ด้วย <code>&lt;!-- @include partials/... --&gt;</code> ทำงานอย่างไร ทำไมไม่ใช้ Template Engine สำเร็จรูปอย่าง EJS หรือ Pug?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความเข้าใจใน Express Middleware, Regex Parsing และการประมวลผล String ในฝั่ง Server
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "กลไกนี้ถูกเขียนขึ้นใน <code>server/routes/pages.routes.js</code> ครับ โดยมีหลักการทำงานดังนี้:
+      </p>
+      <ol>
+        <li>เมื่อมีคำขอเปิดหน้าเว็บ เซิร์ฟเวอร์จะอ่านไฟล์ HTML จากโฟลเดอร์ <code>pages/</code> ด้วย <code>fs.readFile()</code></li>
+        <li>ใช้ Regular Expression ตรวจจับแพทเทิร์น <code>/&lt;!--\s*@include\s+([a-zA-Z0-9_\-\/.]+)\s*--&gt;/g</code> แล้วแทนที่ตำแหน่งนั้นด้วยเนื้อหาของไฟล์ partial นั้นจริง เช่น นำ <code>partials/sidebar.html</code> มาเสียบ</li>
+        <li>ในโหมด Production ระบบจะทำการ <strong>Cache HTML</strong> ที่ผ่านการประกอบแล้วเก็บไว้ใน Memory ทันที ทำให้คำขอถัดไปส่งไฟล์ออกไปได้เร็วระดับเสี้ยววินาทีโดยไม่ต้องอ่านไฟล์จากดิสก์ซ้ำ</li>
+        <li><strong>เหตุผลที่ไม่ใช้ EJS/Pug:</strong> เพราะเราต้องการให้หน้า HTML เป็น Pure HTML มาตรฐาน 100% ที่นักพัฒนาสามารถเปิดพรีวิวในเบราว์เซอร์ได้ทันทีโดยไม่ต้องผ่านตัวคอมไพเลอร์ และไม่เสี่ยงต่อช่องโหว่ Code Injection ที่อาจเกิดขึ้นจาก Template Engine ที่รันคำสั่ง JS ได้ครับ"</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ CATEGORY 2 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 class="section-header" id="cat2">
+    <span class="section-num">2</span>
+    การออกแบบฐานข้อมูลและความสมบูรณ์ของข้อมูล (Database & Integrity)
+  </h2>
+
+  <!-- Q4 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q4</span>
+      <span>ทำไมจึงต้องแยกตาราง <code>MePair</code> ออกมาต่างหาก ทำไมไม่เก็บรหัสลูกจ้างไว้ในตาราง Member หรือเก็บรหัสสมาชิกไว้ในตาราง Employee โดยตรง? สอดคล้องกับหลัก Normalization อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความรู้เรื่อง Database Normalization, ความสัมพันธ์ Many-to-Many และ Business Requirement
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "เนื่องจากในโลกแห่งความเป็นจริง ความสัมพันธ์ระหว่าง 'สมาชิกเจ้าของสวน' กับ 'ลูกจ้างกรีดยาง' เป็นความสัมพันธ์แบบ <strong>Many-to-Many (N:M)</strong> ครับ:
+      </p>
+      <ul>
+        <li>สมาชิก 1 คน อาจมีสวนหลายแปลง และจ้างลูกจ้างหลายคนมากรีด</li>
+        <li>ลูกจ้าง 1 คน ก็สามารถรับจ้างกรีดยางให้เจ้าของสวนหลายรายในเวลาเดียวกันได้ (เช่น สวน A กรีดวันคี่, สวน B กรีดวันคู่)</li>
+        <li>นอกจากนี้ แต่ละคู่สัญญายังมี <strong>สัดส่วนแบ่งรายได้ (memberShare, employeeShare)</strong> และวันหมดอายุของสัญญาที่ไม่เหมือนกัน</li>
+      </ul>
+      <p>
+        หากนำไปเก็บในตาราง Member หรือ Employee จะเกิดปัญหาข้อมูลซ้ำซ้อน (Redundancy) และขัดต่อหลัก <strong>Third Normal Form (3NF)</strong> ทันที การสร้างตาราง <code>MePair</code> ขึ้นมาทำหน้าที่เป็น Junction Table ที่เชื่อมโยงด้วย Foreign Key 2 เส้น จึงเป็นการออกแบบที่ถูกต้องตามหลักวิศวกรรมฐานข้อมูลและรองรับการเก็บประวัติการเปลี่ยนสัดส่วนย้อนหลังได้ด้วยครับ"
+      </p>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q5</span>
+      <span>อธิบายการทำงานของ Database Transaction ในระบบ โดยเฉพาะในขั้นตอนการรับซื้อน้ำยาง (Purchase) และการเบิกเงิน (Withdrawal) ว่าควบคุมคุณสมบัติ ACID อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความเข้าใจเรื่อง Data Consistency, Concurrency, ACID Properties และ Prisma API
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "ในระบบการเงิน ข้อผิดพลาดที่ยอมรับไม่ได้คือ 'ยอดเงินในกระเป๋าเปลี่ยน แต่ไม่มีบันทึกบิล' หรือ 'มีบิลบันทึก แต่ยอดเงินไม่ขยับ' เราจึงใช้ <code>prisma.$transaction()</code> ในการควบคุมความเป็น <strong>Atomic (ทำทั้งหมด หรือไม่ทำเลย)</strong> ครับ:
+      </p>
+      <ol>
+        <li><strong>ในขั้นตอนการรับซื้อ (<code>createPurchase</code>):</strong>
+          <pre><code>await prisma.$transaction([
+  prisma.purchase.create({ data: purchaseData }),
+  prisma.member.update({
+    where: { id: memberId },
+    data: { walletBalance: { increment: ownerPayout } }
+  })
+]);</code></pre>
+          คำสั่งสร้างรายการรับซื้อและการบวกเงินเข้ากระเป๋าของเจ้าของสวนยางจะถูกผูกเข้าด้วยกัน หากเกิดไฟดับหรือ Database Error คำสั่งทั้งคู่จะถูก <strong>Rollback</strong> คืนค่าเดิมทันที
+        </li>
+        <li><strong>ในขั้นตอนการเบิกเงิน (<code>createWithdrawal</code>):</strong>
+          ระบบจะเช็คยอดเงินคงเหลือก่อน และสั่งสร้างเรคอร์ดการเบิกเงิน <code>W-XXXX</code> พร้อมสั่ง <code>decrement</code> ยอดเงินในกระเป๋าพร้อมกันใน Transaction เดียว ยอดเงินสะสมจึงไม่มีทางติดลบและมีความถูกต้องตามหลักบัญชี 100% ครับ"
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q6</span>
+      <span>ทำไมในตาราง <code>Purchase</code> และ <code>Withdrawal</code> จึงต้องเก็บฟิลด์ <code>ownerPayout</code>, <code>employeePayout</code>, <code>balanceBefore</code>, <code>balanceAfter</code> ไว้ด้วย ทั้งๆ ที่คำนวณสดจากราคากลางและส่วนแบ่งได้? ขัดกับหลักการลดความซ้ำซ้อนหรือไม่?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความเข้าใจเรื่อง Audit Trail, Historical Snapshot และข้อแตกต่างระหว่าง OLTP กับ Pure Normalization
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "นี่คือการออกแบบโดยเจตนาตามรูปแบบ <strong>Financial Audit Snapshot (การเก็บภาพนิ่งทางการเงิน)</strong> ครับ เพราะในระบบธุรกิจจริง:
+      </p>
+      <ul>
+        <li><strong>ราคากลางและสัดส่วนสัญญาอาจเปลี่ยนไปตามกาลเวลา:</strong> หากเราคำนวณสดตลอดเวลา วันหนึ่งเมื่อสมาชิกแก้สัญญาจาก 60:40 เป็น 50:50 ยอดเงินของบิลย้อนหลังเมื่อ 6 เดือนก่อนจะเพี้ยนตามไปด้วยทันที</li>
+        <li><strong>ความถูกต้องทางกฎหมายและใบเสร็จ (Immutable Receipt):</strong> ใบเสร็จที่พิมพ์ให้ชาวสวนไปแล้ว ระบุว่าได้รับเงิน 2,500 บาท ข้อมูลในฐานข้อมูลจะต้องบันทึกตัวเลข 2,500 บาทคงที่ไว้ตลอดไปเพื่อใช้เป็นหลักฐานทางบัญชี</li>
+        <li><strong>Audit Trail ของการเบิกเงิน:</strong> การบันทึก <code>balanceBefore</code> และ <code>balanceAfter</code> ทำให้เราสามารถสอบย้อน (Trace) การเคลื่อนไหวของกระเป๋าเงินทีละรายการได้ทันทีว่าเงินลดลงถูกต้องหรือไม่ โดยไม่ต้องคำนวณใหม่ตั้งแต่บิลแรกของชีวิตสมาชิกครับ"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ CATEGORY 3 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 class="section-header" id="cat3">
+    <span class="section-num">3</span>
+    โลจิกทางธุรกิจ การคิดเงิน และการเงินสหกรณ์ (Business Logic)
+  </h2>
+
+  <!-- Q7 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q7</span>
+      <span>ช่วยอธิบายโลจิกในฟังก์ชัน <code>lookupSeller()</code> ในหน้ารับซื้อน้ำยางสด ว่าระบบตรวจสอบอย่างไรว่าใครเป็นผู้ส่งยาง และตัดเงินให้ใครบ้าง?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความเข้าใจใน Workflow การรับซื้อน้ำยาง และความสามารถในการไล่โค้ดที่ซับซ้อนใน <code>server/lib/data/purchases.js</code>
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "ฟังก์ชัน <code>lookupSeller(code, preferredMemberId)</code> มีกระบวนการทำงาน 4 ขั้นตอนครับ:
+      </p>
+      <ol>
+        <li><strong>ตรวจจับคำนำหน้า (Prefix Detection):</strong> ระบบรองรับทั้งการพิมพ์ <code>M-0001</code>, <code>E-0001</code> หรือแม้กระทั่งพิมพ์ตัวเลขเดี่ยว ๆ เช่น <code>1</code> ระบบจะมี Regex ช่วยแปลงเป็นรหัสมาตรฐาน</li>
+        <li><strong>กรณีเป็นสมาชิก (Member):</strong>
+          - ตรวจสอบว่าสมาชิกมีสถานะเป็น <code>Active</code> หรือไม่ (ถ้าถูกระงับจะ Reject ทันที)<br/>
+          - กำหนดว่าเจ้าของสวนมาขายเอง ส่วนแบ่งเจ้าของสวน = 100%, ส่วนของลูกจ้าง = 0%
+        </li>
+        <li><strong>กรณีเป็นลูกจ้าง (Employee):</strong>
+          - ตรวจสอบว่าลูกจ้างมีสถานะ <code>Active</code> หรือไม่<br/>
+          - ค้นหาสัญญาในตาราง <code>MePair</code> ที่มีสถานะ Active และยังไม่หมดอายุ (<code>contractEndDate == null</code> หรือยังไม่ถึงกำหนด)<br/>
+          - <strong>จุดสำคัญ (Multiple Contracts):</strong> หากลูกจ้างรับจ้างให้เจ้าของสวน 3 คน ระบบจะส่งรายชื่อทั้ง 3 สวนกลับมาเป็น Dropdown ให้เจ้าหน้าที่เลือก หรือใช้ <code>preferredMemberId</code> ที่เจ้าหน้าที่เลือก เพื่อดึงสัดส่วน <code>memberShare</code> และ <code>employeeShare</code> ของสวนนั้นมาคำนวณอย่างถูกต้องครับ"</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q8</span>
+      <span>ระบบจัดการเรื่องเงินปันผลประจำปี (Dividend) อย่างไร มีสูตรคิดอย่างไร และระบบ 'ล็อกหน้าจอข้ามปี พ.ศ.' ทำงานอย่างไรในโค้ด?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ตรรกะรอบบัญชีปฏิทินไทย (พ.ศ.), การป้องกันข้อผิดพลาดในการจ่ายเงินปันผล และโค้ดล่าสุดที่เพิ่งอัปเดต
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "ระบบเงินปันผลของสหกรณ์คิดตามรอบปีบัญชีปฏิทินไทย (พ.ค. - มี.ค.) โดยมีโลจิกสำคัญดังนี้ครับ:
+      </p>
+      <ul>
+        <li><strong>สูตรการคำนวณ:</strong> คิดจาก <code>∑(dryWeightKg) × rate (บาท/กก.)</code> โดยระบบจะไปรวบรวมน้ำหนักเนื้อยางแห้งจากทุกบิลรับซื้อของสมาชิกคนนั้นในปี พ.ศ. ดังกล่าวมาคูณกับอัตราปันผลที่กำหนด</li>
+        <li><strong>การตัดเงินเข้ากระเป๋า:</strong> เมื่อกดปุ่ม 'จ่ายเงินปันผล' ระบบจะบวกเงินเข้า <code>Member.walletBalance</code> เพื่อให้เบิกเป็นเงินสดได้ และบวกเข้า <code>Member.dividendBalance</code> เพื่อเก็บเป็นสถิติสะสม</li>
+        <li><strong>ระบบล็อกหน้าจอข้ามปี พ.ศ. (Dividend Lock System):</strong>
+          <pre><code>// server/lib/data/dividends.js
+const currentBuddhistYear = new Date().getUTCFullYear() + 543;
+if (buddhistYear > currentBuddhistYear) {
+  throw new DividendError("ไม่สามารถคำนวณหรือจ่ายเงินปันผลล่วงหน้าได้");
+}</code></pre>
+          ในฝั่ง Client (<code>dividends.js</code>) และ Server มีการตรวจสอบว่าหากปี พ.ศ. ปัจจุบันถูกจ่ายไปแล้ว ระบบจะแสดงแถบแบนเนอร์ล็อกสีเทา ปิดปุ่มจ่ายเงิน และซ่อนฟอร์มคำนวณ จนกว่าวันเวลาจริงของเครื่องเซิร์ฟเวอร์จะก้าวข้ามเข้าสู่วันที่ 1 มกราคมของปี พ.ศ. ถัดไปจริง ๆ ระบบจึงจะปลดล็อกและเลือกปีใหม่ให้อัตโนมัติ ป้องกันการกดจ่ายเงินปันผลซ้ำซ้อนอย่างสมบูรณ์ครับ"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ CATEGORY 4 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 class="section-header" id="cat4">
+    <span class="section-num">4</span>
+    ความปลอดภัยและการยืนยันตัวตน (Security & Authentication)
+  </h2>
+
+  <!-- Q9 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q9</span>
+      <span>อธิบายระบบ Dual-Session ว่าทำไมระบบจึงต้องแยก Cookie และ Algorithm ระหว่างเจ้าหน้าที่กับสมาชิก? มีการป้องกันการปลอมแปลง Token อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความรู้เชิงลึกเรื่อง Session Security, Cryptographic Signatures, และ Identity Isolation
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "เราออกแบบระบบแยกขาดเป็น 2 คุกกี้เซสชัน เพื่อป้องกันการยกระดับสิทธิ์ (Privilege Escalation) ครับ:
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>มิติการเปรียบเทียบ</th>
+            <th>Cookie <code>session</code> (ฝั่งเจ้าหน้าที่)</th>
+            <th>Cookie <code>member_session</code> (ฝั่งสมาชิก)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>เป้าหมาย</strong></td>
+            <td>เข้าถึงระบบจัดการหลังบ้าน, บัญชี, สัญญา</td>
+            <td>ดูเฉพาะข้อมูลสวนและกระเป๋าเงินของตนเอง</td>
+          </tr>
+          <tr>
+            <td><strong>กุญแจเซ็น Token</strong></td>
+            <td><code>SESSION_SECRET</code></td>
+            <td><code>HMAC(SESSION_SECRET, "member-session-v1")</code></td>
+          </tr>
+          <tr>
+            <td><strong>โครงสร้าง Token</strong></td>
+            <td colspan="2"><code>base64url(JSON Payload) . base64url(HMAC-SHA256 Signature)</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        <strong>กลไกป้องกันการปลอมแปลง (Tamper-proofing):</strong> ทุกครั้งที่มี Request เข้ามา ฟังก์ชัน <code>decodeSession()</code> จะนำ Payload มาคำนวณลายเซ็นใหม่ด้วยกุญแจลับ แล้วเปรียบเทียบกับลายเซ็นที่แนบมาด้วยฟังก์ชัน <code>crypto.timingSafeEqual()</code> หากใครพยายามแอบแก้ไข ID หรือ Role ใน Cookie ลายเซ็นจะไม่ตรงกัน และระบบจะตัดสิทธิ์เป็น Unauthorized ทันทีครับ"
+      </p>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q10</span>
+      <span>ทำไมรหัสผ่านจึงใช้ <code>scrypt</code> แทนที่จะเป็น MD5 หรือ SHA-256? และ <code>crypto.timingSafeEqual</code> มีไว้เพื่อป้องกันอะไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความรู้เรื่อง Cryptography และการป้องกันการโจมตีทางเวลา (Timing Attacks)
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "ในทางความปลอดภัยสารสนเทศ:
+      </p>
+      <ul>
+        <li><strong>ทำไมไม่ใช้ MD5/SHA-256:</strong> เพราะเป็น Fast Hash Function ที่ออกแบบมาเพื่อตรวจสอบความสมบูรณ์ของไฟล์ ทำให้แฮกเกอร์สามารถใช้การ์ดจอ (GPU) ยิง Brute-force สุ่มรหัสผ่านได้หลายพันล้านครั้งต่อวินาที รวมถึงมีปัญหา Rainbow Table</li>
+        <li><strong>ทำไมต้องเป็น <code>scrypt</code>:</strong> เพราะเป็น <strong>Memory-Hard Function</strong> ที่บังคับให้ต้องใช้ทั้งเวลาและหน่วยความจำ RAM ในการคำนวณ ทำให้การโจมตีด้วย GPU หรือชิป ASIC ทำได้ยากมาก อีกทั้งเรายังสุ่ม Salt ขนาด 16 ไบต์เฉพาะของแต่ละคน ทำให้รหัสผ่านเหมือนกันแต่ได้ Hash ต่างกัน ป้องกันการเทียบตารางสำเร็จรูปได้ 100%</li>
+        <li><strong>การป้องกัน Timing Attack ด้วย <code>timingSafeEqual</code>:</strong> การเปรียบเทียบ String ธรรมดาด้วยเครื่องหมาย <code>===</code> ใน JavaScript จะหยุดทำงานทันทีที่เจอตัวอักษรตัวแรกที่ไม่ตรงกัน ทำให้เวลาที่ใช้ในการประมวลผลสั้นยาวไม่เท่ากัน แฮกเกอร์สามารถจับเวลาในระดับไมโครวินาทีเพื่อเดาอักขระทีละตัวได้ แต่ <code>timingSafeEqual</code> จะตรวจสอบความยาวและค่าทั้งหมดด้วยระยะเวลาคงที่เสมอ ทำให้ตัดช่องโหว่นี้ได้เด็ดขาดครับ"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q11</span>
+      <span>ระบบมีมาตรการป้องกันช่องโหว่ OWASP Top 10 เช่น XSS, SQL Injection และ Open Redirect อย่างไรบ้าง ระบุตำแหน่งในโค้ด?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความเข้าใจด้าน Web Security Practice ในเชิงลึก
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <ol>
+        <li><strong>SQL Injection:</strong> ป้องกันได้ 100% เนื่องจากทั้งระบบเข้าถึงฐานข้อมูลผ่าน Prisma ORM ซึ่งสร้าง Parameterized Queries เสมอ ไม่มีการต่อสตริงคำสั่ง SQL โดยตรง</li>
+        <li><strong>Stored / Reflected XSS:</strong> ในฝั่งหน้าบ้าน เรามีกฎเหล็กว่าจะไม่ใช้ <code>element.innerHTML = data</code> แต่เราใช้ฟังก์ชัน <code>setSlot(root, name, text)</code> ใน <code>public/js/core/dom.js</code> ซึ่งกำหนดค่าผ่าน <code>element.textContent = text</code> เสมอ ตัวอักษรอย่าง <code>&lt;script&gt;</code> จึงถูกเรนเดอร์เป็นตัวอักษรธรรมดา ไม่สามารถรันเป็นสคริปต์ได้</li>
+        <li><strong>Open Redirect:</strong> ในหน้า Login หากมีพารามิเตอร์ <code>?next=...</code> ระบบจะส่งผ่านฟังก์ชัน <code>sanitizeNext()</code> ใน <code>public/js/core/safe-redirect.js</code> ซึ่งจะตรวจสอบว่า URL ปลายทางต้องเป็น Local Path ในโดเมนเดียวกันเท่านั้น ป้องกันการถูกหลอกให้ Redirect ไปเว็บหลอกลวง (Phishing)</li>
+        <li><strong>Cookie Hijacking:</strong> คุกกี้ทั้งหมดตั้งค่าแฟล็ก <code>HttpOnly</code> ป้องกันไม่ให้สคริปต์หน้าเว็บเข้าถึงได้ และตั้ง <code>SameSite: "lax"</code> เพื่อป้องกันการโจมตีแบบ CSRF ครับ"</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ CATEGORY 5 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 class="section-header" id="cat5">
+    <span class="section-num">5</span>
+    เจาะลึกโค้ดและกลไกหน้าบ้าน (Frontend DOM Engine)
+  </h2>
+
+  <!-- Q12 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q12</span>
+      <span>อธิบายกลไกของฟังก์ชัน <code>cloneTemplate()</code>, <code>setSlot()</code> และ <code>action()</code> ใน <code>public/js/core/dom.js</code> ว่าช่วยให้การเขียนโค้ดหน้าบ้านเป็นระบบได้อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความเข้าใจใน DOM API และการออกแบบ Abstraction Layer สำหรับจัดการ UI
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "ไฟล์ <code>dom.js</code> ทำหน้าที่เป็นแกนกลางเสมือน Mini-framework ของโปรเจกต์ครับ:
+      </p>
+      <ul>
+        <li><code>cloneTemplate(id)</code>: ใช้ดึงเนื้อหาจากแท็ก <code>&lt;template id="..."&gt;</code> ใน HTML ออกมาทำสำเนาด้วย <code>content.firstElementChild.cloneNode(true)</code> ซึ่งมีข้อดีคือเบราว์เซอร์จะไม่เรนเดอร์แท็ก Template จนกว่าเราจะสั่ง Clone ทำให้ประหยัดหน่วยความจำ</li>
+        <li><code>setSlot(root, name, text)</code>: ค้นหา Element ภายในแม่แบบที่มีแอตทริบิวต์ <code>data-slot="name"</code> แล้วยัดข้อความผ่าน <code>.textContent</code> นอกจากจะปลอดภัยจาก XSS แล้ว ยังทำหน้าที่แยกโครงสร้างการจัดวาง (HTML) ออกจากตรรกะการป้อนข้อมูล (JS) อย่างชัดเจน</li>
+        <li><code>action(root, name)</code>: ค้นหาปุ่มที่มี <code>data-action="name"</code> (เช่น view, edit, delete) เพื่อนำมาผูก <code>addEventListener</code> ทำให้เราไม่ต้องตั้ง ID ซ้ำซ้อนในตารางที่มีแถวข้อมูลเป็นร้อย ๆ แถวครับ"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q13</span>
+      <span>ในคอมโพเนนต์ <code>debounced-lookup.js</code> และ <code>combobox.js</code> มีปัญหา Race Condition หรือไม่ และโค้ดจัดการอย่างไรหากคำขอค้นหาอันแรกตอบกลับมาช้ากว่าคำขออันหลัง?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความเข้าใจเรื่อง Asynchronous Programming, Network Latency, และ Token-based Request Invalidation
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "นี่คือจุดที่เราให้ความสำคัญอย่างมากครับ เพราะหากผู้ใช้พิมพ์ค้นหารหัส <code>M-0001</code> แล้วเปลี่ยนใจแก้เป็น <code>M-0002</code> อย่างรวดเร็ว หากคำขอของ <code>M-0001</code> ตอบกลับมาช้ากว่า อาจทำให้ข้อมูลของ <code>M-0001</code> มาทับผลลัพธ์ของ <code>M-0002</code> ได้ เราจึงแก้ด้วย <strong>Token Invalidation Pattern</strong> ใน <code>debounced-lookup.js</code>:
+      </p>
+      <pre><code>let requestToken = 0;
+async function fetchLookup(code) {
+  const currentToken = ++requestToken;
+  const res = await fetch(buildUrl(code));
+  const data = await res.json();
+  
+  // ตรวจสอบว่าคำขอนี้ยังเป็นคำขอล่าสุดอยู่หรือไม่
+  if (currentToken !== requestToken) {
+    return; // ถ้ามีคำขอใหม่กว่าส่งออกไปแล้ว ให้ทิ้งผลลัพธ์นี้ทันที
+  }
+  applyData(data);
+}</code></pre>
+      <p>
+        ทุกครั้งที่มีการพิมพ์ใหม่ ค่า <code>requestToken</code> จะถูกบวก 1 เสมอ เมื่อคำขอนั้นตอบกลับมา หากพบว่าตัวเลข Token ในมือไม่ตรงกับค่าล่าสุดในตัวแปรระบบ ผลลัพธ์นั้นจะถูกทิ้งทันที จึงรับประกันว่าหน้าจอจะแสดงข้อมูลของผู้ขายคนล่าสุดที่พิมพ์เสมอครับ"
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ CATEGORY 6 ═══════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 class="section-header" id="cat6">
+    <span class="section-num">6</span>
+    การรองรับข้อผิดพลาด ปัญหา Edge Cases & การขยายระบบ (Scalability)
+  </h2>
+
+  <!-- Q14 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q14</span>
+      <span>หากในอนาคตมีสหกรณ์ขยายสาขา และมีปริมาณการทำรายการรับซื้อยางพร้อมกันมากกว่า 500-1,000 รายการต่อนาที (High Concurrency) ระบบนี้จะเกิดคอขวด (Bottleneck) ที่จุดใด และจะปรับปรุงอย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> วิสัยทัศน์ด้าน System Scaling, Database Connection Pooling และ Architectural Evolution
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "หากระบบมีปริมาณการใช้งานสูงขึ้นในระดับพันรายการต่อนาที คอขวดหลักจะอยู่ที่ 2 จุดครับ:
+      </p>
+      <ol>
+        <li><strong>Database Lock Contention ในการอัปเดตกระเป๋าเงิน (<code>walletBalance</code>):</strong>
+          ในตาราง <code>Member</code> หากสมาชิกคนเดียวกันมีลูกจ้างหลายคนมาส่งยางพร้อมกัน หรือมีการคำนวณเงินสะสม การใช้คำสั่ง <code>update { increment }</code> พร้อมกันในหลาย Transaction อาจทำให้เกิด Lock Wait หรือ Deadlock ได้<br/>
+          <em>แนวทางแก้ไข:</em> ปรับเปลี่ยนระบบบัญชีเป็น <strong>Event-Sourcing / Ledger Model</strong> โดยไม่แก้ยอดคงเหลือในตาราง Member แบบทันที แต่ใช้วิธี Append แถวในตาราง Ledger แล้วให้ Background Worker หรือ Database Trigger มาคำนวณยอดสรุป (Materialized View)
+        </li>
+        <li><strong>Database Connection Limits:</strong>
+          Prisma Client มีขนาด Connection Pool จำกัด<br/>
+          <em>แนวทางแก้ไข:</em> ติดตั้ง <strong>PgBouncer</strong> เป็น Connection Pooler ด้านหน้า PostgreSQL เพื่อทำ Transaction Pooling และแยก Read Replica สำหรับคำขออ่านรายงานสถิติ (Purchase Summary) ออกจากเซิร์ฟเวอร์หลักที่ใช้บันทึกธุรกรรมครับ"
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q15</span>
+      <span>หากอินเทอร์เน็ตที่จุดรับซื้อน้ำยางหน้างานดับกะทันหัน โครงสร้างปัจจุบันรองรับได้หรือไม่? และมีแนวทางในการพัฒนาต่อยอดเป็น Offline-First อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>สิ่งที่กรรมการต้องการวัด:</strong> ความเข้าใจข้อจำกัดปัจจุบัน (Honest Technical Assessment) และแนวทางพัฒนาในอนาคต
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        "ในเวอร์ชันปัจจุบัน ระบบเป็นแบบ Online Web Application ซึ่งต้องพึ่งพาการเชื่อมต่อ HTTP API ไปยัง Express Server ดังนั้นหากอินเทอร์เน็ตหลุดจะไม่สามารถบันทึกบิลหรือเบิกเงินได้ครับ<br/>
+        อย่างไรก็ตาม โครงสร้างของโปรเจกต์ที่เป็น Vanilla HTML/JS ได้รับการออกแบบให้พร้อมสำหรับการพัฒนาต่อยอดเป็น <strong>PWA (Progressive Web App) แบบ Offline-First</strong> ได้อย่างง่ายดายในอนาคต โดยมีขั้นตอนดังนี้:
+      </p>
+      <ul>
+        <li><strong>Service Worker:</strong> เพิ่มไฟล์ Service Worker เพื่อแคชไฟล์สถิต (HTML, CSS, JS, Fonts) ไว้ในเครื่อง ทำให้เปิดหน้าจอรับซื้อน้ำยางได้แม้ไม่มีเน็ต</li>
+        <li><strong>IndexedDB Storage:</strong> เมื่อบันทึกการรับซื้อยางขณะออฟไลน์ ข้อมูลบิลจะถูกบันทึกไว้ในเบราว์เซอร์ (IndexedDB) ก่อน พร้อมออกใบเสร็จชั่วคราว</li>
+        <li><strong>Background Sync:</strong> เมื่อสัญญาณอินเทอร์เน็ตกลับมา Service Worker จะทำการส่งข้อมูลที่ค้างอยู่ใน IndexedDB ขึ้นไป Sync กับ Express Server และตัดยอดในฐานข้อมูล PostgreSQL อัตโนมัติครับ"</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ FOOTER ═══════════════════════════════════ -->
+  <div class="doc-footer">
+    คู่มือเอกสารแนวคำถาม-คำตอบ การสอบป้องกันโครงงาน Clover Project (Field Latex System)<br/>
+    จัดทำขึ้นเพื่อเตรียมความพร้อมในการนำเสนอโครงงานอย่างมั่นใจและสมบูรณ์แบบ
+  </div>
+
+</div>
+
+</body>
+</html>

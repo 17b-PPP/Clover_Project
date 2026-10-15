@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>คู่มือสถาปัตยกรรมระบบหลังบ้านและแนวข้อสอบป้องกันโครงงาน — Clover Project</title>
+  <style>
+    /* ─── Reset & Base Settings ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 13px; }
+    body {
+      font-family: 'Segoe UI', 'Sarabun', 'Noto Sans Thai', Tahoma, sans-serif;
+      color: #1e293b;
+      line-height: 1.68;
+      background: #f8fafc;
+      padding: 2rem;
+    }
+
+    /* ─── Page & Print Setup (A4) ─── */
+    @page {
+      size: A4;
+      margin: 15mm 14mm 15mm 14mm;
+    }
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+        font-size: 11px;
+        line-height: 1.55;
+      }
+      .container {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+      .page-break { page-break-before: always; }
+      .no-print { display: none !important; }
+      h1, h2, h3, h4 { page-break-after: avoid; }
+      .qa-card, .logic-card, table, pre, .callout, .arch-diagram { page-break-inside: avoid; }
+    }
+
+    /* ─── Container ─── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 3rem 3.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+    }
+
+    /* ─── Cover Page ─── */
+    .cover {
+      text-align: center;
+      padding: 3.5rem 2rem 3rem;
+      border-bottom: 3px solid #0f766e;
+      margin-bottom: 2.5rem;
+    }
+    .cover .badge-role {
+      display: inline-block;
+      background: #ccfbf1;
+      color: #0f766e;
+      font-weight: 700;
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 1.2rem;
+    }
+    .cover h1 {
+      font-size: 2.2rem;
+      color: #0f172a;
+      margin-bottom: 0.6rem;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+    .cover .subtitle {
+      font-size: 1.15rem;
+      color: #0d9488;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .cover .desc {
+      font-size: 0.95rem;
+      color: #475569;
+      max-width: 720px;
+      margin: 0 auto 1.8rem;
+    }
+    .cover .meta {
+      font-size: 0.85rem;
+      color: #64748b;
+      line-height: 1.8;
+      display: inline-block;
+      text-align: left;
+      background: #f1f5f9;
+      padding: 0.8rem 1.6rem;
+      border-radius: 8px;
+    }
+
+    /* ─── Table of Contents ─── */
+    .toc {
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      border-radius: 10px;
+      padding: 1.4rem 1.8rem;
+      margin-bottom: 2.5rem;
+    }
+    .toc h2 {
+      font-size: 1.25rem;
+      color: #0f766e;
+      border-bottom: 2px solid #5eead4;
+      padding-bottom: 0.4rem;
+      margin: 0 0 0.8rem;
+    }
+    .toc ul {
+      list-style: none;
+      padding-left: 0;
+      columns: 2;
+      column-gap: 2rem;
+    }
+    .toc li {
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .toc a {
+      color: #0f766e;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .toc a:hover { text-decoration: underline; }
+
+    /* ─── Section Headings ─── */
+    h2.part-header {
+      font-size: 1.5rem;
+      color: #ffffff;
+      background: linear-gradient(135deg, #115e59 0%, #0d9488 100%);
+      padding: 0.85rem 1.3rem;
+      border-radius: 8px;
+      margin: 3rem 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    h3.sub-header {
+      font-size: 1.22rem;
+      color: #0f766e;
+      border-bottom: 2px solid #99f6e4;
+      padding-bottom: 0.4rem;
+      margin: 2rem 0 1rem;
+    }
+    h4 {
+      font-size: 1.05rem;
+      color: #1e293b;
+      margin: 1.2rem 0 0.5rem;
+    }
+
+    /* ─── Cards & Boxes ─── */
+    .logic-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1.3rem 1.5rem;
+      margin-bottom: 1.4rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .logic-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .logic-card-title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .qa-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1.3rem 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .qa-question {
+      font-size: 1.03rem;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+      line-height: 1.45;
+    }
+    .q-badge {
+      background: #0284c7;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .qa-intent {
+      background: #f8fafc;
+      border-left: 3px solid #64748b;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.84rem;
+      color: #475569;
+      margin-bottom: 0.85rem;
+      border-radius: 0 4px 4px 0;
+    }
+    .qa-intent strong { color: #334155; }
+    .qa-answer {
+      font-size: 0.91rem;
+      color: #334155;
+      text-align: justify;
+    }
+    .qa-answer p { margin-bottom: 0.6rem; }
+    .qa-answer ul, .qa-answer ol { padding-left: 1.3rem; margin-bottom: 0.6rem; }
+    .qa-answer li { margin-bottom: 0.35rem; }
+    .a-header {
+      font-weight: 700;
+      color: #0f766e;
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    /* ─── Callouts ─── */
+    .callout {
+      border-radius: 8px;
+      padding: 0.9rem 1.2rem;
+      margin: 1.1rem 0;
+      font-size: 0.89rem;
+    }
+    .callout-info {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      color: #1e3a8a;
+    }
+    .callout-success {
+      background: #f0fdf4;
+      border-left: 4px solid #10b981;
+      color: #064e3b;
+    }
+    .callout-warning {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      color: #78350f;
+    }
+    .callout-danger {
+      background: #fef2f2;
+      border-left: 4px solid #ef4444;
+      color: #7f1d1d;
+    }
+
+    /* ─── Tables ─── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.1rem 0;
+      font-size: 0.88rem;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 0.55rem 0.75rem;
+      text-align: left;
+    }
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: #334155;
+    }
+    tr:nth-child(even) td { background: #fdfdfd; }
+
+    /* ─── Code Snippets ─── */
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 0.95rem 1.2rem;
+      border-radius: 8px;
+      font-family: 'Consolas', 'Fira Code', monospace;
+      font-size: 0.82rem;
+      overflow-x: auto;
+      margin: 0.85rem 0;
+      line-height: 1.45;
+    }
+    code {
+      font-family: 'Consolas', 'Fira Code', monospace;
+      background: #f1f5f9;
+      color: #0f766e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    /* ─── Diagram & Flow ─── */
+    .arch-diagram {
+      background: #0f172a;
+      color: #38bdf8;
+      border-radius: 8px;
+      padding: 1.2rem;
+      font-family: 'Consolas', monospace;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 1.2rem 0;
+      border: 1px solid #1e293b;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-primary { background: #e0f2fe; color: #0369a1; }
+    .badge-success { background: #dcfce7; color: #15803d; }
+    .badge-warning { background: #fef3c7; color: #b45309; }
+    .badge-danger { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- COVER PAGE                                                              -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <div class="cover">
+    <div class="badge-role">BACKEND ARCHITECTURE & DEFENSE MASTER GUIDE</div>
+    <h1>คู่มือสถาปัตยกรรมระบบหลังบ้านและแนวข้อสอบป้องกันโปรเจกต์</h1>
+    <div class="subtitle">ระบบบริหารจัดการสหกรณ์รับซื้อน้ำยางพารา (Clover Project)</div>
+    <div class="desc">
+      เอกสารฉบับสมบูรณ์ครอบคลุมทุกมิติทางวิศวกรรมซอฟต์แวร์ของระบบหลังบ้าน (Backend Engine):
+      การออกแบบสถาปัตยกรรมระดับองค์กร, ไปป์ไลน์การประมวลผลคำขอ, ระบบความปลอดภัยแบบแยกโดเมน (Domain-Separated HMAC),
+      การบูรณาการ PostgreSQL และ Prisma ORM, ธุรกรรมการเงินแบบ ACID และแนวข้อสอบป้องกันโปรเจกต์เชิงลึก 25 ข้อพร้อมเฉลย
+    </div>
+    <div class="meta">
+      <div><strong>สถาปัตยกรรม:</strong> Layered Architecture (Routes &rarr; DAL &rarr; Prisma ORM &rarr; PostgreSQL)</div>
+      <div><strong>สแต็กเทคโนโลยี:</strong> Node.js (ES Modules), Express 5.2.1, PostgreSQL, Prisma ORM 6.19.3, ExcelJS</div>
+      <div><strong>การรักษาความปลอดภัย:</strong> Cryptographic HMAC-SHA256 Signed Cookies, Scrypt Hashing, RBAC, Zero-Trust</div>
+      <div><strong>จัดทำโดย:</strong> คณะผู้พัฒนาโครงการ Clover Project &bull; พฤศจิกายน 2569</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- TABLE OF CONTENTS                                                       -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <div class="toc">
+    <h2>สารบัญเนื้อหา (Table of Contents)</h2>
+    <ul>
+      <li><a href="#p1-overview">ส่วนที่ 1.1 ภาพรวมสถาปัตยกรรมและเทคโนโลยีสแตก</a></li>
+      <li><a href="#p1-env-server">ส่วนที่ 1.2 สภาพแวดล้อมและการเริ่มต้นระบบ (server.js, env.js)</a></li>
+      <li><a href="#p1-db-prisma">ส่วนที่ 1.3 เลเยอร์ฐานข้อมูลและ Prisma ORM</a></li>
+      <li><a href="#p1-security-session">ส่วนที่ 1.4 ระบบความปลอดภัยและ Dual-Session HMAC</a></li>
+      <li><a href="#p1-rbac-guard">ส่วนที่ 1.5 การควบคุมสิทธิ์ (RBAC) และ Access Guard</a></li>
+      <li><a href="#p1-http-error">ส่วนที่ 1.6 การจัดการคำขอ ตัวช่วย HTTP และ Audit Log</a></li>
+      <li><a href="#p1-dal">ส่วนที่ 1.7 Data Access Layer และตรรกะทางธุรกิจ</a></li>
+      <li><a href="#p1-api-bff">ส่วนที่ 1.8 สถาปัตยกรรม REST API และ BFF Pattern</a></li>
+      <li><a href="#p1-ssr-helpers">ส่วนที่ 1.9 การเรนเดอร์หน้าเว็บ (SSR) และโมดูลช่วยเสริม</a></li>
+      <li><a href="#p2-sec1">ส่วนที่ 2.1 ข้อสอบหมวดสถาปัตยกรรมและหลักการออกแบบ [Q1-Q5]</a></li>
+      <li><a href="#p2-sec2">ส่วนที่ 2.2 ข้อสอบหมวดความปลอดภัยและการยืนยันตัวตน [Q6-Q10]</a></li>
+      <li><a href="#p2-sec3">ส่วนที่ 2.3 ข้อสอบหมวดธุรกรรมการเงินและ Concurrency [Q11-Q15]</a></li>
+      <li><a href="#p2-sec4">ส่วนที่ 2.4 ข้อสอบหมวดฐานข้อมูลและ Prisma Optimization [Q16-Q20]</a></li>
+      <li><a href="#p2-sec5">ส่วนที่ 2.5 ข้อสอบหมวดประสิทธิภาพและความเสถียร [Q21-Q25]</a></li>
+    </ul>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- PART 1: COMPLETE BACKEND EXPLANATION                                    -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <h2 class="part-header" id="part-1">
+    <span>ส่วนที่ 1: เอกสารอธิบายการทำงานของ Backend ทั้งหมดอย่างละเอียด</span>
+  </h2>
+
+  <!-- 1.1 ภาพรวมสถาปัตยกรรมและเทคโนโลยีสแตก -->
+  <h3 class="sub-header" id="p1-overview">1.1 ภาพรวมสถาปัตยกรรมและเทคโนโลยีสแตก (Architecture Overview)</h3>
+  <p>
+    ระบบหลังบ้านของ <strong>Clover Project</strong> ถูกสร้างขึ้นด้วยแนวคิด <em>Layered Architecture (สถาปัตยกรรมแบบแบ่งชั้น)</em> 
+    โดยใช้เทคโนโลยีระดับมาตรฐานองค์กร มุ่งเน้นความน่าเชื่อถือของข้อมูลการเงิน (Financial Data Integrity), 
+    ความปลอดภัยระดับสูง (Zero-Trust Security), และความเร็วในการตอบสนองคำขอ โดยมีองค์ประกอบหลักดังนี้:
+  </p>
+
+  <div class="arch-diagram">
++---------------------------------------------------------------------------------------------------+
+|                                       CLIENT LAYER (Web Browser)                                  |
+|  - Staff / Admin Portal (Desktop/Tablet)              - Member Self-Service Portal (Mobile-First) |
++---------------------------------------------------------------------------------------------------+
+                                                  |  (HTTP/HTTPS Requests, Signed Cookies)
+                                                  v
++---------------------------------------------------------------------------------------------------+
+|                                      EXPRESS 5.2.1 RUNTIME PIPELINE                               |
+|  1. Express Static Asset Server (/public, /shared) -> Zero overhead static asset bypass           |
+|  2. Raw Text Body Parser (/api, 50MB Limit)        -> Safe memory limit, handles Base64 photos     |
+|  3. Access Guard Middleware (RBAC)                -> Role resolution, dual-token cryptographic ver.|
++---------------------------------------------------------------------------------------------------+
+                  |                                                                 |
+                  v                                                                 v
++------------------------------------+            +-------------------------------------------------+
+|      PAGES ROUTER (SSR ENGINE)     |            |             API ROUTERS (/api/v1)               |
+|  - Component Include Engine        |            |  - /auth, /member-auth (Session creation)       |
+|  - HTML Partial Stitching          |            |  - /members, /employees, /contracts             |
+|  - Layout Context Injection        |            |  - /purchases, /withdrawals, /dividends         |
+|  - 404 Fallback Delivery           |            |  - /page-data (BFF Aggregator), /member-portal  |
++------------------------------------+            +-------------------------------------------------+
+                  |                                                                 |
+                  +--------------------------------+--------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+|                                   DATA ACCESS LAYER (DAL) (/server/lib/data/*)                    |
+|  - members.js, employees.js, contracts.js, purchases.js, withdrawals.js, dividends.js, users.js    |
+|  - Business Rules Validation, Zero-Trust Financial Recalculations, Remainder Cent Preservation    |
++---------------------------------------------------------------------------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+|                                  PRISMA ORM 6.19.3 (Data Mapping Layer)                           |
+|  - Singleton Client (globalThis.prisma) -> Connection pool reuse, no socket leakage               |
+|  - Atomic Transactions (prisma.$transaction) -> ACID compliant financial state updates           |
++---------------------------------------------------------------------------------------------------+
+                                                   |
+                                                   v
++---------------------------------------------------------------------------------------------------+
+|                                   POSTGRESQL RELATIONAL DATABASE                                  |
+|  - Exact-precision Decimals (Decimal(12,2))   - Unique Constraints & Indexes                      |
+|  - Append-only Financial & Audit Ledgers      - Referential Integrity via Foreign Keys            |
++---------------------------------------------------------------------------------------------------+
+  </div>
+
+  <table style="margin-top: 1.2rem;">
+    <thead>
+      <tr>
+        <th style="width: 25%;">เทคโนโลยี / โมดูล</th>
+        <th style="width: 20%;">เวอร์ชัน</th>
+        <th>หน้าที่และความสำคัญในเชิงวิศวกรรม</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Node.js (ES Modules)</strong></td>
+        <td>v20+ LTS</td>
+        <td>รันไทม์ฝั่งเซิร์ฟเวอร์แบบ Non-blocking I/O ใช้ ES Modules แท้ (<code>type: "module"</code>) ทำให้โค้ดสะอาด เป็นโมดูลาร์ และทันสมัย</td>
+      </tr>
+      <tr>
+        <td><strong>Express Framework</strong></td>
+        <td>5.2.1</td>
+        <td>เว็บเซิร์ฟเวอร์ตัวหลัก จัดการ Routing, Middleware Pipeline และ HTTP Lifecycle ได้อย่างแม่นยำและมีประสิทธิภาพสูง</td>
+      </tr>
+      <tr>
+        <td><strong>PostgreSQL</strong></td>
+        <td>Relational DB</td>
+        <td>ฐานข้อมูลเชิงสัมพันธ์ระดับองค์กร รองรับ ACID Transactions และการคำนวณทศนิยมที่แม่นยำสูง (Numeric/Decimal) ปราศจาก Floating Point Inaccuracy</td>
+      </tr>
+      <tr>
+        <td><strong>Prisma ORM</strong></td>
+        <td>6.19.3</td>
+        <td>ตัวจัดการการเชื่อมต่อและจับคู่ข้อมูล (Object-Relational Mapping) ที่มี Type-Safety ป้องกัน SQL Injection โดยสมบูรณ์</td>
+      </tr>
+      <tr>
+        <td><strong>ExcelJS</strong></td>
+        <td>4.4.0</td>
+        <td>โมดูลสร้างและจัดรูปแบบไฟล์สเปรดชีต Excel (.xlsx) คุณภาพสูง สำหรับระบบรายงานสรุปยอดการรับซื้อน้ำยางพารา</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 1.2 สภาพแวดล้อมและการเริ่มต้นระบบ -->
+  <div class="page-break"></div>
+  <h3 class="sub-header" id="p1-env-server">1.2 สภาพแวดล้อมและการเริ่มต้นระบบ (Environment Configuration & Server Pipeline)</h3>
+  <p>
+    เซิร์ฟเวอร์เริ่มต้นการทำงานที่ไฟล์ <code>server/server.js</code> โดยมีลำดับการประมวลผล (Execution Pipeline) ที่ถูกออกแบบมาเพื่อความปลอดภัยและประสิทธิภาพสูงสุด:
+  </p>
+
+  <div class="logic-card">
+    <div class="logic-card-title">ลำดับการทำงานของ Middleware Pipeline ใน server.js</div>
+    <ol style="padding-left: 1.4rem; margin-top: 0.6rem; font-size: 0.9rem;">
+      <li>
+        <strong>การโหลดตัวแปรสภาพแวดล้อม (<code>import "./env.js"</code>):</strong> 
+        ถูกเรียกเป็นบรรทัดแรกสุด เพื่อให้แน่ใจว่าค่า <code>NODE_ENV</code>, <code>DATABASE_URL</code>, <code>SESSION_SECRET</code> ถูกอ่านเข้าสู่ <code>process.env</code> ก่อนที่โมดูลอื่นใดจะเริ่มทำงาน
+      </li>
+      <li>
+        <strong>การพรางข้อมูลเซิร์ฟเวอร์ (<code>app.disable("x-powered-by")</code>):</strong> 
+        ปิดการส่ง HTTP Header <code>X-Powered-By: Express</code> ป้องกันการถูกผู้ไม่หวังดีสแกนหาช่องโหว่ประจำเวอร์ชันของเซิร์ฟเวอร์ (Information Disclosure Mitigation)
+      </li>
+      <li>
+        <strong>การส่งไฟล์สแตติกคงที่ (Static Assets Bypass):</strong> 
+        เส้นทาง <code>/public</code> และ <code>/shared</code> ให้บริการผ่าน <code>express.static</code> โดยตั้งค่า <code>index: false</code> เพื่อป้องกัน Directory Browsing และไม่มีการตรวจสอบสิทธิ์ ทำให้เบราว์เซอร์ดาวน์โหลดไฟล์ CSS/JS/รูปภาพ ได้รวดเร็วที่สุด
+      </li>
+      <li>
+        <strong>การรับข้อมูลเนื้อหา API (Raw Text Body Parser):</strong> 
+        ใช้ <code>express.text({ type: () => true, limit: "50mb" })</code> สำหรับเส้นทาง <code>/api</code> รองรับการส่งภาพถ่ายรูปโปรไฟล์สมาชิกในรูปแบบ Base64 ขนาดใหญ่ โดยยังไม่ Parse เป็น JSON ทันทีเพื่อประหยัด CPU จะ Parse เฉพาะเมื่อ Endpoint นั้นต้องการ
+      </li>
+      <li>
+        <strong>ตัวควบคุมการเข้าถึงส่วนกลาง (<code>app.use(accessGuard)</code>):</strong> 
+        ด่านตรวจสิทธิ์คัดกรองทุกคำขอ แยกเส้นทางสาธารณะ, สมาชิก, พนักงาน และผู้ดูแลระบบ ก่อนส่งต่อไปยัง Router ปลายทาง
+      </li>
+      <li>
+        <strong>เราเตอร์ API และหน้าเว็บ:</strong> 
+        แมป <code>/api</code> ไปยัง <code>apiRouter</code> และหน้าเว็บทั่วไปไปยัง <code>pagesRouter</code>
+      </li>
+      <li>
+        <strong>ตัวจัดการ 404 และ Error Handler รวมศูนย์:</strong> 
+        ดักจับกรณีไม่พบหน้าด้วย <code>sendNotFound</code> และกรณีเกิดข้อผิดพลาดรุนแรงด้วย Global Error Middleware ตอบกลับเป็น JSON ในเส้นทาง API หรือข้อความมาตรฐานในหน้าเว็บ
+      </li>
+    </ol>
+  </div>
+
+  <pre><code>// โค้ดสำคัญใน server/server.js
+import "./env.js";
+import express from "express";
+import { accessGuard } from "./middleware/access-guard.js";
+import { apiRouter } from "./routes/api.routes.js";
+import { pagesRouter, sendNotFound } from "./routes/pages.routes.js";
+
+const app = express();
+app.disable("x-powered-by");
+
+// 1. Static Assets (Public & Shared)
+app.use(express.static(path.join(projectRoot, "public"), { index: false }));
+app.use("/shared", express.static(path.join(projectRoot, "shared"), { index: false }));
+
+// 2. High-Capacity Text Parser สำหรับ Base64 Photo Uploads
+app.use("/api", express.text({ type: () => true, limit: "50mb" }));
+
+// 3. Access Guard RBAC
+app.use(accessGuard);
+
+// 4. Mount API & Page Routers
+app.use("/api", apiRouter);
+app.use(pagesRouter);
+
+// 5. Fallback 404 & Centralized Error Handler
+app.use((req, res, next) => { sendNotFound(res).catch(next); });
+app.use((error, req, res, next) => {
+  console.error(error);
+  if (res.headersSent) return next(error);
+  const status = error.status || error.statusCode || 500;
+  if (req.path.startsWith("/api")) {
+    return res.status(status).json({ error: error.message || "Internal server error" });
+  }
+  return res.status(status).type("text").send("Internal Server Error");
+});</code></pre>
+
+  <!-- 1.3 เลเยอร์ฐานข้อมูลและ Prisma ORM -->
+  <h3 class="sub-header" id="p1-db-prisma">1.3 เลเยอร์ฐานข้อมูลและ Prisma ORM (Database Schema & Prisma Layer)</h3>
+  <p>
+    ฐานข้อมูลถูกออกแบบตามหลัก 3rd Normal Form (3NF) เพื่อขจัดความซ้ำซ้อนของข้อมูล และใช้ชนิดข้อมูล <code>Decimal</code> สำหรับตัวเลขทางการเงินทั้งหมด เพื่อป้องกันปัญหาเศษสตางค์คลาดเคลื่อนจากมาตรฐาน IEEE 754 Floating Point ใน JavaScript
+  </p>
+
+  <div class="logic-card">
+    <div class="logic-card-title">ความสัมพันธ์และโครงสร้างของเอนทิตีหลักใน prisma/schema.prisma</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 20%;">โมเดล (Model)</th>
+          <th style="width: 25%;">คีย์หลักและฟิลด์เด่น</th>
+          <th>หน้าที่และความสัมพันธ์ (Relationships)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>Member</code></td>
+          <td><code>id (cuid)</code>, <code>memberCode</code>, <code>walletBalance</code>, <code>dividendBalance</code></td>
+          <td>สมาชิกเจ้าของสวนยาง มีกระเป๋าเงินสะสม 2 ส่วน: ยอดเงินขายยาง (walletBalance) และเงินปันผล (dividendBalance) มีความสัมพันธ์ One-to-Many กับ Purchase, Withdrawal, DividendPayment, MePair</td>
+        </tr>
+        <tr>
+          <td><code>Employee</code></td>
+          <td><code>id (cuid)</code>, <code>employeeCode</code>, <code>status</code></td>
+          <td>คนกรีดยาง / ลูกจ้างรับจ้างกรีดน้ำยาง มีความสัมพันธ์กับสัญญาคู่กรีด <code>MePair</code></td>
+        </tr>
+        <tr>
+          <td><code>MePair</code></td>
+          <td><code>pairCode</code>, <code>memberShare</code>, <code>employeeShare</code></td>
+          <td>สัญญาจับคู่ระหว่าง Member กับ Employee เพื่อกำหนดสัดส่วนแบ่งรายได้ (เช่น 60/40, 50/50) มี Foreign Keys ชี้ไปยัง Member และ Employee</td>
+        </tr>
+        <tr>
+          <td><code>Purchase</code></td>
+          <td><code>purchaseCode</code>, <code>rawWeightKg</code>, <code>dryPercentage</code>, <code>dryWeightKg</code>, <code>totalAmount</code></td>
+          <td>ตารางบันทึกการรับซื้อน้ำยางพารา เก็บข้อมูลน้ำหนักสด เปอร์เซ็นต์ DRC น้ำหนักยางแห้ง ราคากลาง และการคำนวณเงินส่วนลูกจ้าง (employeePayout) และเจ้าของสวน (ownerPayout)</td>
+        </tr>
+        <tr>
+          <td><code>Withdrawal</code></td>
+          <td><code>withdrawalCode</code>, <code>amount</code>, <code>balanceBefore</code>, <code>balanceAfter</code></td>
+          <td>ประวัติการเบิกเงินสดของสมาชิก เป็นตารางแบบ Append-only บันทึกภาพถ่ายยอดเงินก่อนและหลังเบิก (Balance Snapshot) เพื่อการตรวจสอบย้อนหลังที่แม่นยำ</td>
+        </tr>
+        <tr>
+          <td><code>DividendPayment</code></td>
+          <td><code>dividendCode</code>, <code>buddhistYear</code>, <code>rate</code>, <code>amount</code>, <code>balanceBefore</code></td>
+          <td>ประวัติการจ่ายเงินปันผลประจำปี มีเงื่อนไข <code>@@unique([memberId, buddhistYear])</code> ป้องกันการจ่ายเงินปันผลซ้ำซ้อนให้สมาชิกในปีเดียวกันระดับฐานข้อมูล</td>
+        </tr>
+        <tr>
+          <td><code>Staff</code></td>
+          <td><code>staffCode</code>, <code>username</code>, <code>password</code>, <code>role (ADMIN/STAFF)</code></td>
+          <td>บัญชีผู้ใช้งานระบบสำหรับเจ้าหน้าที่และผู้ดูแลระบบ</td>
+        </tr>
+        <tr>
+          <td><code>ActivityLog</code></td>
+          <td><code>logId</code>, <code>action</code>, <code>targetType</code>, <code>targetId</code>, <code>status</code></td>
+          <td>ตาราง Audit Trail บันทึกทุกความเคลื่อนไหวในระบบ (Login, Create, Update, Delete)</td>
+        </tr>
+        <tr>
+          <td><code>ReferencePrice</code> / <code>History</code></td>
+          <td><code>date</code>, <code>price</code></td>
+          <td>ราคากลางอ้างอิงยางพาราประจำวัน พร้อมตาราง History บันทึกประวัติการเปลี่ยนแปลงราคา</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-info">
+    <strong>Prisma Singleton Pattern (server/lib/prisma.js):</strong>
+    ในสภาวะการพัฒนา (Development Mode) โค้ดจะถูก Reload บ่อยครั้ง หากสร้าง <code>new PrismaClient()</code> ทุกครั้งจะทำให้ Connection Pool ของ PostgreSQL เต็ม (Connection Exhaustion) ระบบจึงแก้ปัญหานี้ด้วยการเก็บ Client ไว้ใน <code>globalThis.prisma</code> เพื่อนำ Connection เดิมกลับมาใช้ซ้ำเสมอ
+  </div>
+
+  <!-- 1.4 ระบบความปลอดภัยและการจัดการเซสชันแบบแยกโดเมน -->
+  <div class="page-break"></div>
+  <h3 class="sub-header" id="p1-security-session">1.4 ระบบความปลอดภัยและการจัดการเซสชันแบบแยกโดเมน (Security & Dual-Session Management)</h3>
+  <p>
+    ระบบเลือกใช้สถาปัตยกรรมความปลอดภัยแบบ <strong>Cryptographic Signed Cookies (HMAC-SHA256)</strong> 
+    โดยไม่พึ่งพา Session Table ในฐานข้อมูล (Stateless Tokenized Cookie) ช่วยลดภาระการ Query ฐานข้อมูลในทุกๆ Request:
+  </p>
+
+  <div class="logic-card">
+    <div class="logic-card-title">หลักการทำงานของ Cryptographic Domain Separation</div>
+    <p style="font-size: 0.9rem; margin-bottom: 0.6rem;">
+      ระบบแยกเซสชันของ <strong>เจ้าหน้าที่ (Staff)</strong> และ <strong>สมาชิก (Member)</strong> ออกจากกันโดยเด็ดขาด 
+      แม้ทั้งสองฝั่งจะอยู่บนเซิร์ฟเวอร์เดียวกัน โดยใช้เทคนิคการกระจายคีย์ทางคณิตศาสตร์ (Key Derivation):
+    </p>
+    <ul>
+      <li>
+        <strong>Staff Session Cookie (<code>session</code>):</strong> 
+        เซ็นด้วยรหัสลับหลัก <code>process.env.SESSION_SECRET</code> เก็บข้อมูล <code>{ staffId, username, role, exp }</code>
+      </li>
+      <li>
+        <strong>Member Session Cookie (<code>member_session</code>):</strong> 
+        สร้างกุญแจย่อยเฉพาะทางขึ้นมาใหม่ด้วยคำสั่ง:
+        <pre style="margin: 0.4rem 0;"><code>crypto.createHmac("sha256", secret).update("member-session-v1").digest();</code></pre>
+        เก็บข้อมูล <code>{ type: "member", memberId, memberCode, exp }</code>
+      </li>
+    </ul>
+    <div class="callout callout-success" style="margin-top: 0.6rem;">
+      <strong>ผลลัพธ์ทางความปลอดภัย:</strong> แม้ผู้ไม่หวังดีจะคัดลอก Cookie ของสมาชิกแล้วเปลี่ยนชื่อเป็น Cookie ของเจ้าหน้าที่ ลายเซ็น HMAC ก็จะไม่มีทางตรงกัน เพราะกุญแจที่ใช้ตรวจสอบเป็นคนละตัวกันทางคณิตศาสตร์ จึงป้องกันการเลื่อนระดับสิทธิ์ (Privilege Escalation) ได้ 100%
+    </div>
+  </div>
+
+  <div class="logic-card">
+    <div class="logic-card-title">ความปลอดภัยของรหัสผ่าน (server/lib/auth.js)</div>
+    <p style="font-size: 0.9rem;">
+      รหัสผ่านของระบบไม่ได้ใช้ MD5 หรือ SHA-256 ธรรมดา แต่ใช้ฟังก์ชัน <strong><code>crypto.scrypt</code></strong> 
+      ซึ่งเป็นอัลกอริทึมที่ออกแบบมาให้ใช้หน่วยความจำสูง (Memory-Hard Function) เพื่อต้านทานการถอดรหัสด้วยฮาร์ดแวร์ขุดเหมือง GPU/ASIC:
+    </p>
+    <ul style="padding-left: 1.3rem; margin-top: 0.5rem; font-size: 0.88rem;">
+      <li>สร้าง Salt แบบสุ่มขนาด 16 ไบต์ใหม่ทุกครั้ง (<code>crypto.randomBytes(16)</code>) ป้องกัน Rainbow Table Attack</li>
+      <li>คำนวณคีย์ความยาว 64 ไบต์ และเก็บในรูปแบบ <code>&lt;salt&gt;:&lt;hash&gt;</code></li>
+      <li>
+        ตรวจสอบรหัสผ่านด้วย <strong><code>crypto.timingSafeEqual</code></strong>: 
+        เปรียบเทียบระดับบิตโดยใช้เวลาคงที่เสมอ ป้องกันการโจมตีประเภท <em>Timing Attack</em> (การจับเวลาการทำงานของ CPU เพื่อเดาตัวอักษรของรหัสผ่าน)
+      </li>
+    </ul>
+  </div>
+
+  <!-- 1.5 การควบคุมสิทธิ์ (RBAC) และ Access Guard -->
+  <h3 class="sub-header" id="p1-rbac-guard">1.5 การควบคุมสิทธิ์ (Role-Based Access Control) และ Access Guard</h3>
+  <p>
+    <code>server/middleware/access-guard.js</code> ทำหน้าที่เป็นเกราะป้องกันหน้าเว็บและ API ทั้งหมด โดยกำหนดสิทธิ์ตามบทบาท (RBAC):
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">กลุ่มผู้ใช้ / เส้นทาง</th>
+        <th style="width: 30%;">สิทธิ์ที่ต้องใช้</th>
+        <th>พฤติกรรมเมื่อไม่ได้รับอนุญาต</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>หน้าและ API สาธารณะ</strong><br><code>/api/auth/*</code>, <code>/api/member-auth/*</code></td>
+        <td>ไม่ต้องยืนยันตัวตน (Public)</td>
+        <td>อนุญาตให้ผ่านได้ทันที</td>
+      </tr>
+      <tr>
+        <td><strong>ระบบจัดการผู้ใช้งานและ Audit Log</strong><br><code>/users</code>, <code>/audit-log</code>, <code>/api/users/*</code></td>
+        <td>ต้องเป็น Staff ที่มี Role = <code>ADMIN</code> เท่านั้น</td>
+        <td>
+          - หากยังไม่ล็อกอิน: Redirect ไป <code>/login?next=...</code><br>
+          - หากเป็น STAFF ทั่วไป: API ตอบ 403 Forbidden, หน้าเว็บ Redirect ไปหน้าแรก
+        </td>
+      </tr>
+      <tr>
+        <td><strong>งานปฏิบัติการประจำวัน</strong><br><code>/purchases</code>, <code>/withdrawals</code>, <code>/dividends</code></td>
+        <td>Staff Role = <code>STAFF</code> หรือ <code>ADMIN</code></td>
+        <td>API ตอบ 401 Unauthorized, หน้าเว็บ Redirect ไป <code>/login</code></td>
+      </tr>
+      <tr>
+        <td><strong>พอร์ทัลสมาชิก</strong><br><code>/member/*</code>, <code>/api/member-portal/*</code></td>
+        <td>ต้องมี <code>member_session</code> ที่ถูกต้อง</td>
+        <td>API ตอบ 401 Unauthorized พร้อม URL ไป <code>/member/login</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 1.6 การจัดการคำขอ ตัวช่วย HTTP และ Audit Log -->
+  <div class="page-break"></div>
+  <h3 class="sub-header" id="p1-http-error">1.6 การจัดการคำขอ ตัวช่วย HTTP และระบบบันทึกประวัติ (Audit Trail)</h3>
+  <p>
+    การจัดการการส่งข้อมูลและการตอบสนองถูกสร้างเป็นเลเยอร์ส่วนกลางใน <code>server/lib/</code>:
+  </p>
+  <ul>
+    <li>
+      <strong>การแยกวิเคราะห์ JSON อย่างปลอดภัย (<code>server/lib/request-body.js</code>):</strong> 
+      ฟังก์ชัน <code>readJsonBody(req)</code> ป้องกันข้อผิดพลาด JSON Syntax Error ไม่ให้ทำให้โปรเซสเซิร์ฟเวอร์ล่ม (Crash) โดยจะส่ง <code>ApiError.badRequest("รูปแบบข้อมูล JSON ไม่ถูกต้อง")</code> กลับไปอย่างสุภาพ
+    </li>
+    <li>
+      <strong>การจัดโครงสร้างความผิดพลาด (<code>server/lib/api-error.js</code>):</strong> 
+      คลาส <code>ApiError</code> สืบทอดจาก <code>Error</code> โดยกำหนด HTTP Status Code อย่างเป็นระบบ (400, 401, 403, 404, 409, 500)
+    </li>
+    <li>
+      <strong>การตรวจสอบข้อมูลนำเข้า (<code>server/lib/validate.js</code>):</strong> 
+      ตรวจสอบความยาวของเลขประจำตัวประชาชน 13 หลัก, หมายเลขโทรศัพท์ 10 หลัก และรูปแบบรหัสสมาชิก
+    </li>
+    <li>
+      <strong>ระบบบันทึกประวัติการใช้งาน (<code>server/lib/activity-log.js</code>):</strong> 
+      บันทึกการกระทำสำคัญ เช่น การล็อกอินสำเร็จ/ล้มเหลว, การบันทึกรับซื้อ, การเบิกเงิน, การจ่ายปันผล และการสร้าง/แก้ไขสัญญาจ้าง ลงในตาราง <code>ActivityLog</code> โดยอัตโนมัติ เพื่อรองรับการตรวจสอบทุจริตย้อนหลัง
+    </li>
+  </ul>
+
+  <!-- 1.7 Data Access Layer และตรรกะทางธุรกิจ -->
+  <h3 class="sub-header" id="p1-dal">1.7 Data Access Layer และตรรกะทางธุรกิจ (Business Logic & Transactions)</h3>
+  <p>
+    เลเยอร์การเข้าถึงข้อมูลใน <code>server/lib/data/*</code> แยกการคำนวณและกฎธุรกิจออกจาก Route Handlers อย่างเด็ดขาด:
+  </p>
+
+  <div class="logic-card">
+    <div class="logic-card-title">1. ตรรกะการรับซื้อน้ำยางพารา (server/lib/data/purchases.js)</div>
+    <p style="font-size: 0.9rem;">
+      ใช้หลักการ <strong>Zero-Trust Calculation</strong> โดยเซิร์ฟเวอร์จะนำ <code>rawWeightKg</code>, <code>dryPercentage</code> และราคากลางมาคำนวณใหม่ทั้งหมด:
+    </p>
+    <pre><code>// สูตรการคำนวณใน createPurchase
+const dryWeightKg = (input.rawWeightKg * input.dryPercentage) / 100;
+const totalAmount = dryWeightKg * input.marketPrice;
+
+// ปัดเศษส่วนของคนกรีดยาง แล้วนำยอดรวมลบออก เพื่อรักษาเศษสตางค์ไม่ให้สูญหาย
+const employeePayout = Math.round(totalAmount * (seller.employeeShare / 100) * 100) / 100;
+const ownerPayout = Math.round((totalAmount - employeePayout) * 100) / 100;
+
+// บันทึกด้วย ACID Transaction
+const [purchase] = await prisma.$transaction([
+  prisma.purchase.create({ data: { ... } }),
+  prisma.member.update({
+    where: { id: seller.memberId },
+    data: { walletBalance: { increment: ownerPayout } }, // อัปเดตยอดสะสมอัตโนมัติ
+  }),
+]);</code></pre>
+  </div>
+
+  <div class="logic-card">
+    <div class="logic-card-title">2. ตรรกะการเบิกเงินสะสม (server/lib/data/withdrawals.js)</div>
+    <p style="font-size: 0.9rem;">
+      ตรวจสอบว่ายอดเงินที่จะเบิกต้องมากกว่า 0 และไม่เกินยอดสะสมคงเหลือ (<code>walletBalance</code>) 
+      จากนั้นทำการบันทึกประวัติการเบิกและหักยอดเงินคงเหลือในคราวเดียวกันด้วย <code>prisma.$transaction</code> 
+      พร้อมเก็บ <code>balanceBefore</code> และ <code>balanceAfter</code> เป็นประวัติ snapshot แบบถาวร
+    </p>
+  </div>
+
+  <div class="logic-card">
+    <div class="logic-card-title">3. ตรรกะการคำนวณและจ่ายเงินปันผลประจำปี (server/lib/data/dividends.js)</div>
+    <p style="font-size: 0.9rem;">
+      เซิร์ฟเวอร์จะรวมน้ำหนักเนื้อยางแห้งจริงของสมาชิกแต่ละคนจากรายการรับซื้อ (<code>Purchase</code>) ตลอดทั้งปี พ.ศ. 
+      จากนั้นคูณด้วยอัตราเงินปันผล (บาท/กก.) และทำการจ่ายใน Transaction เดียว:
+    </p>
+    <ul>
+      <li>บันทึกแถวประวัติใน <code>DividendPayment</code></li>
+      <li>บวกเงินเข้า <code>walletBalance</code> (ให้สมาชิกเบิกเป็นเงินสดได้)</li>
+      <li>บวกเงินเข้า <code>dividendBalance</code> (เก็บบันทึกยอดปันผลสะสมตลอดชีพของสมาชิก)</li>
+      <li>มี Database Unique Constraint <code>@@unique([memberId, buddhistYear])</code> ล็อกไม่ให้เกิดการจ่ายซ้ำปีเดิมอย่างเด็ดขาด</li>
+    </ul>
+  </div>
+
+  <!-- 1.8 สถาปัตยกรรม REST API และ BFF Pattern -->
+  <div class="page-break"></div>
+  <h3 class="sub-header" id="p1-api-bff">1.8 สถาปัตยกรรม REST API และ BFF Pattern (Backend-For-Frontend)</h3>
+  <p>
+    โครงสร้าง Routing ใน <code>server/routes/api.routes.js</code> รวม Resource ต่างๆ เป็นระเบียบ พร้อมการประยุกต์ใช้แนวคิด 
+    <strong>Backend-For-Frontend (BFF Pattern)</strong> ใน <code>page-data.routes.js</code>:
+  </p>
+
+  <div class="logic-card">
+    <div class="logic-card-title">ข้อได้เปรียบของการใช้ BFF Pattern (page-data.routes.js)</div>
+    <p style="font-size: 0.9rem; margin-bottom: 0.6rem;">
+      ในเว็บแอปพลิเคชันทั่วไป เมื่อเปิดหน้าจอ 1 หน้า (เช่น หน้ารับซื้อ หรือหน้าคำนวณปันผล) 
+      เบราว์เซอร์จะต้องยิง Request ไปยังเซิร์ฟเวอร์หลายครั้ง (Waterfall Network Requests) เช่น ขอข้อมูลสมาชิก, ขอราคากลาง, ขอยอดขายย้อนหลัง 
+      ทำให้หน้าเว็บโหลดช้าและกินแบนด์วิธสูง
+    </p>
+    <p style="font-size: 0.9rem;">
+      <strong>วิธีแก้ของ Clover Project:</strong> ออกแบบ Endpoint <code>/api/page-data/:pageName</code> 
+      ซึ่งทำหน้าที่รวบรวม (Aggregate) ข้อมูลทั้งหมดที่จำเป็นสำหรับการเรนเดอร์หน้านั้นๆ มาจากหลายโมเดลในฐานข้อมูล 
+      แล้วส่งกลับไปยังเบราว์เซอร์ใน <strong>HTTP Request เดียว (Single Roundtrip)</strong> ทำให้หน้าจอแสดงผลได้รวดเร็วทันที
+    </p>
+  </div>
+
+  <!-- 1.9 การเรนเดอร์หน้าเว็บ (SSR) และโมดูลช่วยเสริม -->
+  <h3 class="sub-header" id="p1-ssr-helpers">1.9 การเรนเดอร์หน้าเว็บ (Server-Side Include) และโมดูลช่วยเสริม</h3>
+  <ul>
+    <li>
+      <strong>ระบบรวมหน้าเว็บด้วย <code>@include</code> (<code>server/routes/pages.routes.js</code>):</strong> 
+      เซิร์ฟเวอร์นำไฟล์ HTML มาประกบกับส่วนประกอบย่อย (Partials) เช่น แถบเมนูด้านข้าง (Sidebar), แถบหัวเรื่อง (Header) 
+      และแทรกบริบทผู้ใช้ (User Context) ลงใน HTML ก่อนส่งให้เบราว์เซอร์ ทำให้ไม่ต้องใช้ Template Engine หนักๆ อย่าง EJS หรือ Pug
+    </li>
+    <li>
+      <strong>การสร้างไฟล์รายงาน Excel ด้วย ExcelJS (<code>server/lib/export/purchase-summary-workbook.js</code>):</strong> 
+      สร้างไฟล์รายงานการรับซื้อน้ำยางพาราประจำเดือนและประจำปี โดยมีการจัดความกว้างคอลัมน์, การใส่สูตรคำนวณอัตโนมัติ, การจัดสีหัวตาราง และการฟอร์แมตตัวเลขทศนิยมสองตำแหน่งในระดับ Binary Buffer พร้อมส่งให้ผู้ใช้ดาวน์โหลดได้ทันที
+    </li>
+    <li>
+      <strong>ฐานข้อมูลที่อยู่ไทยแบบฝังตัว (<code>server/lib/thai-address.js</code>):</strong> 
+      เก็บข้อมูลตำบล อำเภอ จังหวัด และรหัสไปรษณีย์ทั่วประเทศไทยไว้ในหน่วยความจำ (In-Memory Lookup) 
+      ทำให้การค้นหารหัสไปรษณีย์และเติมชื่อตำบล/อำเภออัตโนมัติเกิดขึ้นในระดับ Sub-millisecond (&lt; 1ms)
+    </li>
+    <li>
+      <strong>โมดูลฟอร์แมตข้อมูลแบบใช้ร่วมกัน (<code>shared/format.js</code>):</strong> 
+      ฟังก์ชันแปลงวันที่เป็น พ.ศ. ภาษาไทย, การจัดรูปแบบสกุลเงินบาท (<code>formatCurrency</code>) 
+      ที่เขียนแบบ Isomorphic JavaScript สามารถรันได้ทั้งบน Node.js Backend และบนเบราว์เซอร์ Client โดยไม่มีความคลาดเคลื่อน
+    </li>
+  </ul>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- PART 2: EXAMINATION / DEFENSE QUESTIONS & ANSWERS                       -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <div class="page-break"></div>
+  <h2 class="part-header" id="part-2">
+    <span>ส่วนที่ 2: รวมแนวข้อสอบป้องกันโปรเจกต์เชิงลึก (Backend Defense Q&amp;A)</span>
+  </h2>
+  <p style="margin-bottom: 1.5rem; color: #475569; font-size: 0.95rem;">
+    รวบรวม 25 คำถามเชิงลึกครอบคลุมทุกมิติทางเทคนิคที่คณะกรรมการสอบโครงงานนิยมถาม พร้อมเจตนาของคำถามและแนวทางการตอบอย่างมืออาชีพ:
+  </p>
+
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <!-- หมวดที่ 1: สถาปัตยกรรมและหลักการออกแบบระบบ (Q1 - Q5)                       -->
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <h3 class="sub-header" id="p2-sec1">หมวดที่ 1: สถาปัตยกรรมและหลักการออกแบบระบบ (System Design &amp; Architecture)</h3>
+
+  <!-- Q1 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q1</span>
+      <span>ทำไมจึงเลือกใช้สถาปัตยกรรมแบบ Layered Architecture (Routes &rarr; DAL &rarr; Prisma &rarr; DB) แทนที่จะเขียนคำสั่งคิวรีฐานข้อมูลลงใน Route Controller โดยตรง?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> วัดความเข้าใจในหลักการออกแบบซอฟต์แวร์ (Separation of Concerns, Maintainability, Testability) และการป้องกันปัญหาโค้ดพันกัน (Spaghetti Code)
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        เหตุผลหลักคือการปฏิบัติตามหลักการ <strong>Separation of Concerns (การแยกหน้าที่ความรับผิดชอบ)</strong> 
+        เพื่อความยืดหยุ่นและการบำรุงรักษาในระยะยาว:
+      </p>
+      <ul>
+        <li><strong>Routes Layer (<code>server/routes/</code>):</strong> มีหน้าที่รับผิดชอบเฉพาะเรื่อง HTTP Protocol เท่านั้น เช่น การอ่าน Parameter, การตรวจสอบ Headers, การส่ง HTTP Status Code (200, 400, 404, 500) และการจัดการ Cookies</li>
+        <li><strong>Data Access Layer - DAL (<code>server/lib/data/</code>):</strong> เป็นหัวใจในการกักเก็บ <em>Business Logic</em> และกฎเกณฑ์ทางธุรกิจ เช่น สูตรการคำนวณน้ำหนักยางแห้ง DRC, การจัดสรรรายได้ระหว่างสมาชิกกับคนกรีดยาง, การตรวจสอบยอดเงินคงเหลือ และการเปิด ACID Transaction</li>
+        <li><strong>Prisma ORM &amp; DB Layer:</strong> ดูแลเรื่องการเชื่อมต่อฐานข้อมูลและการทำ Object-Relational Mapping</li>
+      </ul>
+      <p>
+        หากในอนาคตต้องการเปลี่ยนระบบรับคำขอ เช่น มีการเพิ่มคิวงานเบื้องหลัง (Background Worker / Message Queue) หรือเพิ่มช่องทาง GraphQL หรือ CLI Tool 
+        เราจะสามารถเรียกใช้งานฟังก์ชันใน DAL ได้ทันทีโดยไม่ต้องเขียนตรรกะการคำนวณหรือคิวรีฐานข้อมูลซ้ำซ้อน และยังทำให้การเขียน Unit Test ทำได้ง่ายขึ้นเพราะสามารถทดสอบตรรกะทางธุรกิจได้โดยไม่ต้องจำลอง HTTP Request
+      </p>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q2</span>
+      <span>เหตุใดระบบจึงออกแบบสถาปัตยกรรมแบบไฮบริด คือมีทั้ง Server-Side Rendering (SSR) ร่วมกับ BFF Aggregated Page Data API?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ทดสอบความรู้เรื่องประสิทธิภาพเครือข่าย (Network Latency), Initial Page Load Time และความแตกต่างระหว่าง SSR กับ Client-Side Hydration
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        การออกแบบนี้เป็นการผสมผสานข้อดีของ <strong>Multi-Page Application (MPA)</strong> และ <strong>Single-Page Dynamic Experience</strong>:
+      </p>
+      <ul>
+        <li>
+          <strong>การเรนเดอร์โครงสร้างหน้าเว็บด้วย SSR (<code>pages.routes.js</code>):</strong> 
+          ช่วยให้เบราว์เซอร์ได้รับโครงสร้างหลักของหน้าเว็บ (HTML Layout, Navigation, Header, Stylesheet) มาพร้อมใช้งานทันทีตั้งแต่ First Paint โดยไม่ต้องรอให้ JavaScript ทำงานเสร็จก่อน ส่งผลให้ First Contentful Paint (FCP) รวดเร็วมาก
+        </li>
+        <li>
+          <strong>การดึงข้อมูลด้วย BFF Pattern (<code>page-data.routes.js</code>):</strong> 
+          แก้ปัญหาคลาสสิกของ SPA ดั้งเดิมที่มักจะเกิด <em>Waterfall Requests</em> (เบราว์เซอร์ต้องยิง API ขอสมาชิก &rarr; รอผล &rarr; ยิงขอราคากลาง &rarr; รอผล &rarr; ยิงขอยอดขาย) 
+          ระบบ Clover ใช้ BFF รวบรวมข้อมูลทั้งหมดของหน้านั้นที่เซิร์ฟเวอร์ แล้วส่งกลับมาใน <strong>HTTP Roundtrip เดียว</strong> 
+          ลดภาระของเครือข่ายลงได้อย่างมหาศาล และทำให้ฝั่งหน้าบ้านเขียนโค้ดผูกข้อมูลกับ DOM ได้ง่ายดาย ไม่ซับซ้อน
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q3</span>
+      <span>ใน server.js มีการใช้ express.text({ type: () =&gt; true, limit: "50mb" }) แทน express.json() ทั่วไป เพราะเหตุใด และมีความเสี่ยงหรือผลกระทบอย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบว่าผู้พัฒนาเข้าใจพฤติกรรมของ Middleware ใน Express อย่างแท้จริงหรือไม่ และคำนึงถึงเรื่อง Denial of Service (DoS) หรือไม่
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        <strong>สาเหตุที่ต้องใช้:</strong> ในระบบสหกรณ์ มีฟังก์ชันการลงทะเบียนสมาชิกและคนกรีดยาง ซึ่งจำเป็นต้องมีการแนบภาพถ่ายใบหน้าจริงและภาพถ่ายบัตรประชาชนเพื่อยืนยันตัวตน 
+        โดยส่งขึ้นมาในรูปแบบข้อความ Data URL Base64 
+        หากใช้ <code>express.json({ limit: '1mb' })</code> แบบมาตรฐาน จะเกิดข้อผิดพลาด <code>PayloadTooLargeError: request entity too large</code> 
+        การใช้ <code>express.text()</code> พร้อมกำหนด Limit 50MB ช่วยให้เซิร์ฟเวอร์สามารถรับข้อมูลภาพถ่ายความละเอียดสูงได้โดยไม่เกิดข้อผิดพลาด
+      </p>
+      <p>
+        <strong>การบริหารจัดการความเสี่ยงและทรัพยากร:</strong>
+      </p>
+      <ol>
+        <li><strong>การประหยัด CPU:</strong> การรับเป็น Raw Text จะยังไม่มีการแปลงสตริงเป็น JavaScript Object ในระดับ Global Middleware ทำให้ประหยัด Memory และ CPU รอบแรก โดยจะ Parse ด้วย <code>readJsonBody(req)</code> เฉพาะใน Route ที่จำเป็นต้องใช้ข้อมูลเท่านั้น</li>
+        <li><strong>การป้องกัน Memory Exhaustion (DoS):</strong> มีการกำหนดเพดานขนาดสูงสุดไว้ชัดเจนที่ 50MB หากมีคำขอที่ขนาดเกิน ระบบจะตัดการทำงานทันที และมีการจำกัดการเข้าถึง API ส่วนใหญ่ผ่าน <code>accessGuard</code> เพื่อป้องกันไม่ให้บุคคลภายนอกที่ไม่ได้รับอนุญาตยิงข้อมูลขนาดใหญ่เข้ามาก่อกวนเซิร์ฟเวอร์</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q4</span>
+      <span>ระบบใช้ Singleton Pattern ใน server/lib/prisma.js เพื่อจุดประสงค์ใด หากไม่ทำเช่นนี้จะเกิดปัญหาอะไรกับ Node.js Event Loop และ Database Connections?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> วัดความเข้าใจเชิงลึกเรื่อง Connection Pooling, Resource Leakage และพฤติกรรมของโมดูลใน Node.js
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ในการทำงานของ <strong>PrismaClient</strong> ตัวอินสแตนซ์จะสร้าง <em>Connection Pool</em> เพื่อเปิดช่องทางการสื่อสารผ่าน TCP Socket ไปยัง PostgreSQL 
+        (โดยทั่วไปประมาณ 10-20 connections ต่อ 1 client)
+      </p>
+      <p>
+        ในระหว่างการพัฒนาซอฟต์แวร์ เราใช้โหมด Development ซึ่งมีการแก้ไขไฟล์และรีโหลดโมดูลซ้ำๆ หากทุกครั้งที่มีการรีโหลด เซิร์ฟเวอร์ทำการสร้าง <code>new PrismaClient()</code> ใหม่ 
+        การเชื่อมต่อเดิมที่เปิดค้างอยู่จะไม่ถูกปิดในทันที จะเกิดสภาวะที่เรียกว่า <strong>Connection Leak (การรั่วไหลของการเชื่อมต่อ)</strong> 
+        จนในที่สุดจะเกินขีดจำกัด <code>max_connections</code> ของ PostgreSQL ทำให้ฐานข้อมูลปฏิเสธการเชื่อมต่อใหม่และเซิร์ฟเวอร์เกิด Crash ด้วยข้อผิดพลาด <em>"Can't reach database server"</em> หรือ <em>"Too many connections"</em>
+      </p>
+      <p>
+        การนำ <code>globalThis.prisma</code> มาใช้ เป็นการการันตีว่าทั้งกระบวนการรันไทม์จะมีอินสแตนซ์ของ Prisma Client เพียงตัวเดียวเสมอ (Singleton) ไม่ว่าจะมีการรีโหลดโค้ดกี่ครั้งก็ตาม ทำให้จำนวน Database Connection คงที่และปลอดภัยสูงสุด
+      </p>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q5</span>
+      <span>การจัดการ State ของแอปพลิเคชันมีการเก็บข้อมูลไว้ในหน่วยความจำของเซิร์ฟเวอร์หรือไม่ และสถาปัตยกรรมนี้รองรับการขยายระบบแนวนอน (Horizontal Scaling) ได้อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ประเมินความเข้าใจเรื่อง Stateless Architecture, Sticky Sessions และการออกแบบระบบให้พร้อม Scale ด้วย Cluster หรือ Load Balancer
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ระบบหลังบ้านของ Clover Project ถูกออกแบบให้เป็น <strong>Stateless Server (เซิร์ฟเวอร์ไร้สถานะ)</strong> โดยสมบูรณ์ในแง่ของเซสชันผู้ใช้:
+      </p>
+      <ul>
+        <li>
+          <strong>เซสชันผู้ใช้ (Session State):</strong> 
+          ไม่มีการเก็บตัวแปร Session ไว้ใน RAM ของโหนดเซิร์ฟเวอร์ (In-Memory Session Store) แต่ใช้เทคนิค <em>Self-contained Signed Cookie (HMAC-SHA256)</em> 
+          ข้อมูลสถานะการยืนยันตัวตนถูกเข้ารหัสและลงนามดิจิทัลส่งกลับไปเก็บที่เบราว์เซอร์ของผู้ใช้
+        </li>
+        <li>
+          <strong>ข้อมูลธุรกิจ (Business State):</strong> 
+          สถานะทางการเงิน กระเป๋าเงิน และประวัติทั้งหมด จัดเก็บไว้ที่ศูนย์กลางคือ PostgreSQL
+        </li>
+      </ul>
+      <p>
+        <strong>ความสามารถในการขยายระบบแนวนอน (Horizontal Scaling):</strong> 
+        เมื่อต้องการขยายระบบเพื่อรองรับผู้ใช้เพิ่มขึ้น เราสามารถวางเซิร์ฟเวอร์ Node.js เพิ่มเป็น 5 หรือ 10 โหนดด้านหลัง Reverse Proxy / Load Balancer (เช่น Nginx หรือ AWS ALB) ได้ทันที 
+        โดยไม่ต้องใช้ Sticky Session (Session Affinity) เพราะทุกโหนดที่แชร์ <code>SESSION_SECRET</code> เดียวกัน จะสามารถอ่านและตรวจสอบความถูกต้องของ Cookie ได้เหมือนกันทุกประการ
+      </p>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <!-- หมวดที่ 2: ความปลอดภัย การยืนยันตัวตน และการควบคุมสิทธิ์ (Q6 - Q10)       -->
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <div class="page-break"></div>
+  <h3 class="sub-header" id="p2-sec2">หมวดที่ 2: ความปลอดภัย การยืนยันตัวตน และการควบคุมสิทธิ์ (Security, Authentication &amp; RBAC)</h3>
+
+  <!-- Q6 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q6</span>
+      <span>ทำไมระบบจึงเลือกใช้ Signed Cookie (HMAC-SHA256) แทนการเก็บ JWT ใน LocalStorage หรือการเก็บ Session Table ในฐานข้อมูล?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> วัดความเข้าใจเรื่อง Web Security (XSS vs CSRF), Storage Mechanisms และ Performance Overhead ของ Database Lookups
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        การเปรียบเทียบในเชิงวิศวกรรมความปลอดภัยและประสิทธิภาพ:
+      </p>
+      <ul>
+        <li>
+          <strong>ทำไมไม่เก็บ Token ใน LocalStorage:</strong> 
+          LocalStorage ของเบราว์เซอร์สามารถถูกเข้าถึงได้โดยตรงผ่านคำสั่ง JavaScript ใดๆ ก็ตามบนหน้าเว็บ หากระบบถูกโจมตีด้วยช่องโหว่ Cross-Site Scripting (XSS) เช่น ผ่านสคริปต์ภายนอก ผู้โจมตีจะสามารถขโมย Token ออกไปได้อย่างง่ายดาย 
+          ระบบจึงเลือกใช้ <strong>Cookie ที่มีแฟล็ก <code>HttpOnly</code></strong> ซึ่งเบราว์เซอร์จะไม่อนุญาตให้ JavaScript ใดๆ อ่านค่าคุกกี้นี้ได้โดยเด็ดขาด
+        </li>
+        <li>
+          <strong>ทำไมไม่ใช้ Session Table ในฐานข้อมูล:</strong> 
+          หากเก็บ Session ในฐานข้อมูล ทุกๆ คำขอที่วิ่งเข้ามา ไม่ว่าจะขอหน้าเว็บหรือเรียก API เซิร์ฟเวอร์จะต้องยิงคิวรี <code>SELECT * FROM sessions WHERE id = ...</code> ไปยังฐานข้อมูลก่อนเสมอ 
+          ทำให้ฐานข้อมูลรับภาระหนักมากโดยไม่จำเป็น การใช้ Signed Cookie ช่วยให้ตรวจสอบความถูกต้องได้ในระดับ CPU ทันทีโดยไม่ต้องแตะฐานข้อมูล
+        </li>
+        <li>
+          <strong>การป้องกันการปลอมแปลง (Tamper Protection):</strong> 
+          ตัวโทเค็นถูกผนึกด้วย HMAC-SHA256 หากผู้ใช้พยายามแอบเปลี่ยน <code>role: "STAFF"</code> เป็น <code>role: "ADMIN"</code> ใน Payload ลายเซ็นดิจิทัลจะไม่ตรงกับค่า Hash ใหม่ เซิร์ฟเวอร์จะปฏิเสธคำขอนั้นทันที
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q7</span>
+      <span>อธิบายหลักการทำงานของฟังก์ชัน Hash รหัสผ่านด้วย crypto.scrypt และทำไมจึงต้องใช้ crypto.timingSafeEqual ในการตรวจสอบรหัสผ่าน?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ประเมินความรู้ด้านวิทยาการเข้ารหัสลับ (Applied Cryptography) และความเข้าใจในเรื่อง Side-Channel Attacks / Timing Attacks
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        <strong>1. การทำงานของ <code>crypto.scrypt</code> (server/lib/auth.js):</strong><br>
+        อัลกอริทึมทั่วไปอย่าง MD5 หรือ SHA-256 ถูกออกแบบมาให้ประมวลผลเร็ว จึงง่ายต่อการถูกแฮกเกอร์ใช้เครื่องคอมพิวเตอร์กราฟิก (GPU) ยิงคำนวณรหัสผ่านแบบ Brute-Force ได้หลายพันล้านครั้งต่อวินาที 
+        แต่ <strong>Scrypt</strong> เป็น <em>Memory-Hard Key Derivation Function</em> ที่ถูกออกแบบมาให้ต้องใช้ทรัพยากรหน่วยความจำ (RAM) จำนวนมากในทุกครั้งที่คำนวณ ทำให้การสร้างชิปพิเศษ (ASIC) หรือใช้ GPU ถอดรหัสทำได้ยากและมีต้นทุนมหาศาล 
+        ระบบยังสุ่ม <strong>Salt ขนาด 16 ไบต์</strong> ใหม่ทุกครั้ง ทำให้รหัสผ่านที่เหมือนกันสองบัญชี มีค่าแฮชที่บันทึกต่างกันโดยสิ้นเชิง ป้องกันการโจมตีด้วย Rainbow Tables
+      </p>
+      <p>
+        <strong>2. ความสำคัญของ <code>crypto.timingSafeEqual</code>:</strong><br>
+        หากเปรียบเทียบสตริงรหัสผ่านด้วยตัวดำเนินการปกติ <code>if (candidate === hash)</code> 
+        คอมไพเลอร์จะตรวจสอบทีละตัวอักษรจากซ้ายไปขวา และ <strong>จะหยุดทำงานทันทีที่พบตัวอักษรที่ไม่ตรงกัน (Early Exit)</strong> 
+        ผู้โจมตีสามารถวัดเวลาการตอบสนองของเซิร์ฟเวอร์ในระดับนาโนวินาที (Nanoseconds) เพื่อคาดเดาว่าตัวอักษรตัวแรก ตัวที่สอง ถูกต้องแล้วหรือไม่ (Timing Attack) 
+        การใช้ <code>timingSafeEqual</code> จะบังคับให้ CPU ใช้เวลาในการเปรียบเทียบข้อมูลทุกไบต์เท่ากันเสมอ ไม่ว่าจะตรงหรือไม่ตรง จึงปิดช่องโหว่การแอบจับเวลานี้ได้อย่างสมบูรณ์
+      </p>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q8</span>
+      <span>ระบบมีมาตรการป้องกันปัญหาการข้ามสิทธิ์ดูข้อมูลของสมาชิกคนอื่น (Insecure Direct Object References - IDOR) ใน Member Portal อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบว่าระบบมีมาตรการ Zero-Trust ในระดับ API หรือเชื่อถือ Parameter ที่ Client ส่งมา (เช่น ?memberId=...) หรือไม่
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ในช่องทาง <strong>Member Portal</strong> (พอร์ทัลสมาชิก) ระบบใช้มาตรการ <strong>Server-Derived Identity (ตัวตนที่เซิร์ฟเวอร์ระบุเอง)</strong>:
+      </p>
+      <ul>
+        <li>
+          <strong>ไม่ยอมรับ ID จาก Client:</strong> 
+          ใน Endpoint <code>/api/member-portal/*</code> (เช่น การดูยอดเงินคงเหลือ, การดูประวัติขายยาง, หรือการดูเงินปันผล) 
+          API จะไม่รับ <code>memberId</code> ผ่าน URL Query หรือ Request Body จากหน้าเว็บโดยเด็ดขาด
+        </li>
+        <li>
+          <strong>ดึง ID จากเซสชันที่ผ่านการยืนยันตัวตนแล้วเท่านั้น:</strong> 
+          เซิร์ฟเวอร์จะถอดรหัส <code>clover_member_session</code> คุกกี้ที่ลงนาม HMAC ไว้ แล้วดึง <code>memberId</code> จาก Payload ภายในเซสชันที่ตรวจสอบความถูกต้องแล้วเท่านั้น 
+          แล้วนำค่านั้นไปเป็นเงื่อนไข <code>where: { memberId: session.memberId }</code> ในการคิวรีฐานข้อมูล
+        </li>
+      </ul>
+      <p>
+        ด้วยหลักการนี้ ต่อให้สมาชิกมีความรู้ทางเทคนิคและพยายามแก้ไขค่า HTTP Request หรือดัดแปลงสคริปต์หน้าเว็บ ก็จะไม่สามารถเข้าถึงข้อมูลของสมาชิกรายอื่นได้ เพราะเซิร์ฟเวอร์จะตอบกลับเฉพาะข้อมูลของเจ้าของเซสชันนั้นเสมอ
+      </p>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q9</span>
+      <span>กลไก usingDefaultPassword ทำงานอย่างไร และเหตุใดจึงถือเป็นข้อกำหนดความปลอดภัยที่สำคัญสำหรับระบบสารสนเทศของสหกรณ์?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> วัดความเข้าใจเรื่อง Security Governance, Password Lifecycle Management และความรับผิดชอบต่อข้อมูลส่วนบุคคล (PDPA)
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        <strong>1. หลักการทำงาน:</strong><br>
+        เมื่อผู้ดูแลระบบ (Admin) ทำการสร้างบัญชีเจ้าหน้าที่ใหม่ในตาราง <code>Staff</code> ระบบจะสร้างรหัสผ่านเริ่มต้น (Default Password) ให้พร้อมกำหนดฟิลด์แฟล็ก 
+        <code>usingDefaultPassword: true</code> ในฐานข้อมูล 
+        เมื่อเจ้าหน้าที่คนดังกล่าวเข้าสู่ระบบสำเร็จ Middleware <code>accessGuard</code> จะตรวจพบแฟล็กนี้ และจะ <strong>บล็อกการเข้าถึงหน้าเว็บและ API ทั้งหมดของระบบ</strong> 
+        โดยอนุญาตเฉพาะหน้าจอเปลี่ยนรหัสผ่านและ Endpoint อัปเดตรหัสผ่านใหม่เท่านั้น 
+        เมื่อเจ้าหน้าที่ตั้งรหัสผ่านใหม่ส่วนตัวสำเร็จ ระบบจะอัปเดตแฟล็กเป็น <code>false</code> จึงจะสามารถใช้งานระบบงานทั่วไปได้
+      </p>
+      <p>
+        <strong>2. ความสำคัญสำหรับระบบสหกรณ์:</strong><br>
+        ระบบสหกรณ์ถือครองข้อมูลทางการเงิน ข้อมูลที่ดินสวนยาง และข้อมูลส่วนบุคคลของสมาชิกจำนวนมาก 
+        รหัสผ่านเริ่มต้นมักถูกส่งผ่านช่องทางที่ไม่ปลอดภัย (เช่น จดบนกระดาษ หรือส่งผ่านแชต) หากไม่มีกลไกบังคับเปลี่ยนรหัสผ่าน 
+        เจ้าหน้าที่อาจละเลยไม่ยอมเปลี่ยน ทำให้บุคคลอื่นสามารถสวมรอยเข้ามาทำธุรกรรมทุจริต (เช่น เบิกเงิน หรือแก้ไขสัดส่วนรายได้) 
+        กลไกนี้จึงเป็นข้อบังคับตามหลัก <em>Non-Repudiation (การไม่สามารถปฏิเสธความรับผิดชอบได้)</em> เพื่อให้มั่นใจว่าทุกการกระทำใน Audit Log เกิดจากเจ้าของบัญชีตัวจริง
+      </p>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q10</span>
+      <span>ระบบมีมาตรการป้องกันการโจมตีทางเว็บที่พบบ่อย (Common Web Attacks) เช่น SQL Injection, CSRF, XSS และ Directory Traversal อย่างไรบ้าง?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบว่าระบบมีภูมิคุ้มกันความปลอดภัยรอบด้านตามมาตรฐาน OWASP Top 10 หรือไม่
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>ระบบมีมาตรการป้องกันแบบเชิงลึก (Defense in Depth) ครอบคลุมทุกช่องโหว่สำคัญ:</p>
+      <ul>
+        <li>
+          <strong>SQL Injection:</strong> ป้องกันได้ 100% ผ่านการใช้ <strong>Prisma ORM</strong> ซึ่งประมวลผลคำสั่งฐานข้อมูลทั้งหมดด้วย <em>Parameterized Queries</em> และ Prepared Statements ข้อมูลนำเข้าจากภายนอกจะถูกส่งเป็น Parameter แยกต่างหากจากไวยากรณ์ SQL จึงไม่สามารถถูกฉีดโค้ดอันตรายเข้ามาได้
+        </li>
+        <li>
+          <strong>Cross-Site Scripting (XSS):</strong> คุกกี้เซสชันทั้งหมดถูกกำกับด้วยแฟล็ก <code>HttpOnly</code> ทำให้ JavaScript ฝั่ง Client ไม่สามารถขโมยโทเค็นได้ และการเรนเดอร์ข้อมูลบนหน้าเว็บมีการ Escape อักขระพิเศษของ HTML เสมอ
+        </li>
+        <li>
+          <strong>Cross-Site Request Forgery (CSRF):</strong> คุกกี้เซสชันถูกกำหนดด้วยแฟล็ก <code>SameSite=Lax</code> ซึ่งป้องกันไม่ให้เบราว์เซอร์ส่งคุกกี้ไปด้วยเมื่อมีคำขอแบบ Cross-Site ข้ามโดเมนที่ไม่ได้เกิดจากการคลิกลิงก์ปกติของผู้ใช้
+        </li>
+        <li>
+          <strong>Directory Traversal:</strong> ใน <code>express.static</code> และการรวมหน้าด้วย <code>@include</code> มีการใช้ <code>path.resolve</code> และ <code>path.join</code> ผนวกกับการตั้งค่าไม่อนุญาตให้อ่านไฟล์ออกนอกไดเรกทอรีโครงการ
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <!-- หมวดที่ 3: ความถูกต้องทางข้อมูล ธุรกรรมการเงิน และความพร้อมกัน (Q11 - Q15)   -->
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <div class="page-break"></div>
+  <h3 class="sub-header" id="p2-sec3">หมวดที่ 3: ความถูกต้องทางข้อมูล ธุรกรรมการเงิน และความพร้อมกัน (Data Integrity, ACID &amp; Concurrency)</h3>
+
+  <!-- Q11 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q11</span>
+      <span>ในการบันทึกการรับซื้อน้ำยาง (Purchase) และการเบิกเงิน (Withdrawal) ระบบรับประกันคุณสมบัติ ACID และป้องกันข้อมูลคลาดเคลื่อนได้อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบความเข้าใจเรื่อง Transaction Management และคุณสมบัติของฐานข้อมูลระดับองค์กร (Atomicity, Consistency, Isolation, Durability)
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ระบบใช้ <strong>Interactive Transactions / Batch Transactions ของ Prisma (<code>prisma.$transaction</code>)</strong> 
+        ในการควบคุมธุรกรรมการเงินทุกประเภท:
+      </p>
+      <ul>
+        <li>
+          <strong>Atomicity (ความเป็นหนึ่งเดียว):</strong> ในฟังก์ชัน <code>createPurchase</code> การสร้างรายการรับซื้อในตาราง <code>Purchase</code> และการบวกเงินเพิ่มใน <code>Member.walletBalance</code> ถูกผูกไว้ใน Transaction เดียวกัน หากขั้นตอนใดขั้นตอนหนึ่งล้มเหลว (เช่น เซิร์ฟเวอร์ดับ, เน็ตเวิร์กหลุด หรือติด Database Constraint) การทำงานทั้งหมดจะถูก <strong>Rollback (ย้อนกลับ)</strong> ทันที จะไม่มีกรณีที่สร้างรายการซื้อสำเร็จแต่เงินไม่เข้าบัญชีสมาชิก
+        </li>
+        <li>
+          <strong>Consistency (ความถูกต้องสอดคล้อง):</strong> ข้อมูลตัวเลขเงินและเปอร์เซ็นต์ถูกกำหนดด้วยชนิดข้อมูล <code>Decimal(12,2)</code> ใน PostgreSQL ไม่มีการปัดเศษทศนิยมผิดพลาดแบบ Float
+        </li>
+        <li>
+          <strong>Isolation (ความแยกขาดจากกัน):</strong> PostgreSQL ใช้กลไก Multi-Version Concurrency Control (MVCC) ทำให้คำขอที่ทำงานพร้อมกันไม่มองเห็นข้อมูลครึ่งๆ กลางๆ ของธุรกรรมอื่นที่ยัง Commit ไม่เสร็จ
+        </li>
+        <li>
+          <strong>Durability (ความคงทนถาวร):</strong> เมื่อ Transaction สำเร็จ (Commit) ข้อมูลจะถูกเขียนลง Write-Ahead Logging (WAL) ของ PostgreSQL ทำให้ข้อมูลไม่สูญหายแม้ไฟดับ
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q12</span>
+      <span>สมมติว่ามีเจ้าหน้าที่ 2 คนกดอนุมัติการเบิกเงินของสมาชิกคนเดียวกันในเวลาเดียวกัน (Race Condition / Double Spending) ระบบป้องกันปัญหานี้อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> วัดความเข้าใจเรื่อง Concurrency Issues, Database Row-level Locking, หรือ Atomic Decrement ในระบบการเงิน
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ปัญหา <strong>Race Condition (การแย่งกันใช้ทรัพยากร)</strong> หรือ <strong>Double Spending</strong> เป็นปัญหาคลาสสิกของระบบการเงิน:
+      </p>
+      <ul>
+        <li>
+          <strong>Atomic Decrement ในระดับฐานข้อมูล:</strong><br>
+          ในไฟล์ <code>server/lib/data/withdrawals.js</code> คำสั่งอัปเดตยอดเงินไม่ได้ใช้วิธีคำนวณในหน่วยความจำแล้วเขียนทับแบบ <code>walletBalance = newBalance</code> 
+          แต่ใช้คำสั่งของ Prisma คือ:
+          <pre style="margin: 0.4rem 0;"><code>prisma.member.update({ where: { id }, data: { walletBalance: { decrement: input.amount } } })</code></pre>
+          ซึ่งถูกแปลงเป็นคำสั่ง SQL ระดับล่าง:
+          <pre style="margin: 0.4rem 0;"><code>UPDATE "Member" SET "walletBalance" = "walletBalance" - $1 WHERE "id" = $2;</code></pre>
+          ใน PostgreSQL คำสั่ง <code>UPDATE</code> จะทำการเข้าคิวและล็อกแถวข้อมูลนั้นโดยอัตโนมัติ (Implicit Row-Level Lock) คำขอที่สองจะต้องรอให้คำขอแรกทำงานเสร็จสิ้นก่อนเสมอ
+        </li>
+        <li>
+          <strong>การป้องกันยอดเงินติดลบ (Negative Balance Protection):</strong><br>
+          ก่อนทำการเบิก มีการตรวจสอบ <code>input.amount &gt; member.walletBalance</code> 
+          และสามารถเสริมความปลอดภัยขั้นสูงสุดระดับฐานข้อมูลได้ด้วยการตั้งค่า Check Constraint ใน PostgreSQL เช่น <code>CONSTRAINT chk_wallet_non_negative CHECK (walletBalance &gt;= 0)</code> 
+          ซึ่งหากคำขอที่สองมาถึงแล้วยอดเงินเหลือไม่พอ ฐานข้อมูลจะ Reject คำขอที่สองทันทีด้วยรหัสข้อผิดพลาด และ Rollback รายการเบิกนั้นออกไป
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q13</span>
+      <span>ตรรกะการคำนวณเงินและน้ำหนักในระบบรับซื้อน้ำยางและเงินปันผล ยึดหลัก Zero-Trust อย่างไร ทำไมเซิร์ฟเวอร์จึงไม่เชื่อตัวเลขที่ Client ส่งมา?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ประเมินความเข้าใจในหลักการออกแบบ API ที่ปลอดภัย (Never Trust Client Input)
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        หลักการพื้นฐานที่สุดของการพัฒนาเว็บระบบการเงินคือ <strong>"Never Trust the Client" (ห้ามเชื่อข้อมูลการคำนวณจากฝั่งเบราว์เซอร์)</strong> 
+        เพราะเบราว์เซอร์คือสภาพแวดล้อมที่ผู้ใช้สามารถเข้าถึงและดัดแปลงได้อิสระผ่าน Developer Tools หรือเครื่องมือยิงคำขออย่าง Postman:
+      </p>
+      <ul>
+        <li>
+          <strong>ในระบบรับซื้อ (Purchases):</strong> หน้าเว็บอาจส่งฟิลด์ <code>totalAmount</code> หรือ <code>dryWeightKg</code> มาด้วย แต่ใน <code>createPurchase</code> (DAL) 
+          เซิร์ฟเวอร์จะ <strong>เพิกเฉยต่อตัวเลขเหล่านั้น</strong> และนำเฉพาะข้อมูลดิบคือ <code>rawWeightKg</code> และ <code>dryPercentage</code> 
+          มาดึงราคากลางอ้างอิงล่าสุดจากตาราง <code>ReferencePrice</code> แล้วคำนวณใหม่บนเซิร์ฟเวอร์ทั้งหมด 
+          ทำให้ผู้ใช้ไม่สามารถแอบแก้ไขราคากลางหรือยอดเงินรวมใน Payload เพื่อโกงเงินสหกรณ์ได้
+        </li>
+        <li>
+          <strong>ในระบบเงินปันผล (Dividends):</strong> เมื่อผู้ใช้กดจ่ายปันผล หน้าเว็บจะส่งมาเพียง <code>buddhistYear</code> และ <code>rate</code> 
+          เซิร์ฟเวอร์จะทำการคิวรีตาราง <code>Purchase</code> ทั้งหมดในปีนั้นขึ้นมารวมน้ำหนักยางแห้งจริงของสมาชิกแต่ละรายด้วยตนเอง 
+          จึงมั่นใจได้ว่าเงินปันผลที่จ่ายออกไปตรงกับยอดส่งยางพาราจริง 100%
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q14</span>
+      <span>ทำไมในตาราง Withdrawal และ DividendPayment ถึงต้องมีการบันทึกฟิลด์ Snapshot เช่น balanceBefore และ balanceAfter ทั้งๆ ที่สามารถคำนวณย้อนหลังได้?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> วัดความเข้าใจเรื่อง Financial Auditing, Event Sourcing Concept, Performance of Historical Reports และ Immutable Ledgers
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        การจัดเก็บ <strong>Balance Snapshot (ภาพถ่ายยอดเงิน ณ ขณะเวลาทำรายการ)</strong> มีประโยชน์อย่างยิ่งยวดในระบบบัญชีและการเงิน:
+      </p>
+      <ol>
+        <li>
+          <strong>ความสามารถในการตรวจสอบทุจริตย้อนหลัง (Non-repudiation &amp; Audit Trail):</strong> 
+          หากเกิดข้อพิพาทว่า "ยอดเงินในบัญชีหายไปได้อย่างไร" หรือมีข้อสงสัยว่ามีใครแอบแก้ไขยอดเงินในฐานข้อมูลโดยตรง เจ้าหน้าที่สามารถตรวจสอบเส้นทางการเงินได้ทันทีว่าก่อนเบิกมีเท่าไร เบิกไปเท่าไร และหลังเบิกเหลือเท่าไร โดยตรวจสอบความสอดคล้องของสมการ <code>balanceAfter = balanceBefore - amount</code> ได้ในระดับแถวข้อมูลนั้นๆ
+        </li>
+        <li>
+          <strong>ประสิทธิภาพในการดึงประวัติ (Query Performance):</strong> 
+          หากไม่เก็บ Snapshot ไว้ เมื่อต้องการพิมพ์ใบเสร็จหรือแสดง Statement ย้อนหลัง เซิร์ฟเวอร์จะต้องยิงคำนวณผลรวมสะสม (Running Total Aggregation) 
+          ของทุกการซื้อและการเบิกตั้งแต่เปิดสหกรณ์ ซึ่งมีต้นทุนการประมวลผลสูงมาก (High CPU &amp; I/O) และจะช้าลงเรื่อยๆ ตามจำนวนปีที่เพิ่มขึ้น 
+          การเก็บ Snapshot ช่วยให้อ่านข้อมูลขึ้นมาแสดงผลได้ในทันทีแบบ $O(1)$
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q15</span>
+      <span>การคำนวณและการบันทึกประวัติการจ่ายเงินปันผลประจำปี (DividendPayment) มีการป้องกันการจ่ายซ้ำในปีเดิมซ้ำซ้อนระดับ Database Constraint อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบว่าผู้ออกแบบระบบพึ่งพาเพียงเงื่อนไขใน Application Layer (if/else) หรือมีการใช้ Database Constraint เพื่อความปลอดภัยที่แท้จริง
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ระบบมีการป้องกันแบบ 2 ชั้น (Two-Tier Defense):
+      </p>
+      <ul>
+        <li>
+          <strong>ชั้นที่ 1: Application-Level Check (<code>server/lib/data/dividends.js</code>):</strong> 
+          ก่อนจะเริ่มคำนวณ ฟังก์ชัน <code>payDividend</code> จะคิวรีตรวจสอบว่ามีประวัติการจ่ายเงินของปี พ.ศ. ดังกล่าวอยู่แล้วหรือไม่ หากมีจะโยน <code>DividendError("ปี พ.ศ. นี้ได้ทำการจ่ายเงินปันผลไปแล้ว")</code> ทันที
+        </li>
+        <li>
+          <strong>ชั้นที่ 2: Database-Level Constraint (<code>prisma/schema.prisma</code>):</strong> 
+          ในโมเดล <code>DividendPayment</code> มีการกำหนดเงื่อนไขสำคัญไว้คือ:
+          <pre style="margin: 0.4rem 0;"><code>@@unique([memberId, buddhistYear])</code></pre>
+          เงื่อนไขนี้บังคับให้ในตาราง PostgreSQL สมาชิก 1 คนจะมีเรคคอร์ดการจ่ายปันผลในปี พ.ศ. เดียวกันได้ไม่เกิน 1 แถวอย่างเด็ดขาด 
+          หากเกิดเหตุการณ์ที่มีผู้ดูแลระบบ 2 คนกดปุ่ม "จ่ายปันผล" พร้อมกันในมิลลิวินาทีเดียวกัน จนผ่านการตรวจสอบในชั้นที่ 1 มาได้ทั้งคู่ 
+          ฐานข้อมูลจะปฏิเสธคำขอที่สองทันทีด้วยข้อผิดพลาด <strong>Unique Constraint Violation (Prisma Error P2002)</strong> 
+          ทำให้ไม่มีทางที่เงินปันผลจะถูกบวกเบิ้ลเข้ากระเป๋าเงินสมาชิกสองรอบได้โดยเด็ดขาด
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <!-- หมวดที่ 4: การทำงานกับฐานข้อมูลและ Prisma ORM (Q16 - Q20)                  -->
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <div class="page-break"></div>
+  <h3 class="sub-header" id="p2-sec4">หมวดที่ 4: การทำงานกับฐานข้อมูลและ Prisma ORM (Database Design &amp; ORM Optimization)</h3>
+
+  <!-- Q16 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q16</span>
+      <span>อธิบายความสัมพันธ์ระหว่าง Member, Employee และ MePair ใน Prisma Schema ทำไมจึงต้องมีโมเดล MePair คั่นกลาง?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ทดสอบความรู้เรื่องการออกแบบฐานข้อมูลเชิงสัมพันธ์ การจัดการ Many-to-Many Relationship และการจัดเก็บ Relationship Attributes
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ในความเป็นจริงของธุรกิจสวนยางพารา ความสัมพันธ์ระหว่าง <strong>สมาชิกเจ้าของสวน (Member)</strong> และ <strong>คนกรีดยาง (Employee)</strong> 
+        เป็นความสัมพันธ์แบบ <strong>Many-to-Many (กลุ่มต่อกลุ่ม)</strong>:
+      </p>
+      <ul>
+        <li>สมาชิก 1 คน อาจมีสวนยางหลายแปลง และจ้างคนกรีดยางได้หลายคน</li>
+        <li>คนกรีดยาง 1 คน อาจรับจ้างกรีดยางให้กับสมาชิกเจ้าของสวนได้มากกว่า 1 คนในรอบสัปดาห์หรือช่วงเวลาที่ต่างกัน</li>
+      </ul>
+      <p>
+        โมเดล <strong><code>MePair</code></strong> ทำหน้าที่เป็น <strong>Junction Table (ตารางเชื่อมโยง)</strong> ที่ยกระดับขึ้นเป็น Entity ที่เก็บ <em>Relationship Attributes (คุณลักษณะของความสัมพันธ์)</em> ที่สำคัญ ได้แก่:
+      </p>
+      <ol>
+        <li><strong>สัดส่วนแบ่งรายได้ (<code>memberShare</code>, <code>employeeShare</code>):</strong> เช่น สมาชิก 60% / คนกรีด 40% ซึ่งแต่ละคู่สัญญาอาจตกลงสัดส่วนไม่เท่ากัน จึงไม่สามารถเก็บไว้ในตาราง Member หรือ Employee โดยตรงได้</li>
+        <li><strong>ช่วงเวลาของสัญญา (<code>contractStartDate</code>, <code>contractEndDate</code>):</strong> เพื่อบันทึกประวัติการเริ่มและสิ้นสุดสัญญา</li>
+        <li><strong>ไฟล์เอกสารแนบสัญญา (<code>contractFileUrl</code>):</strong> บันทึกหลักฐานเอกสารสัญญาจ้างจริง</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Q17 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q17</span>
+      <span>ในการคิวรีข้อมูลที่มีความสัมพันธ์หลายชั้นใน Prisma ORM มีการป้องกันปัญหา N+1 Query Problem อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ประเมินทักษะการเพิ่มประสิทธิภาพการคิวรีฐานข้อมูล (Query Optimization) และการเข้าใจกลไกของ ORM
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        <strong>ปัญหา N+1 Query Problem:</strong> เกิดขึ้นเมื่อเราคิวรีข้อมูลแม่ 1 ครั้ง (ได้ผลลัพธ์ N แถว) แล้วเขียนลูปวนคิวรีข้อมูลลูกทีละแถว ทำให้เกิดคำสั่งคิวรีไปยังฐานข้อมูลรวม $1 + N$ ครั้ง ซึ่งทำให้ฐานข้อมูลทำงานหนักและช้าลงอย่างมาก
+      </p>
+      <p>
+        <strong>แนวทางแก้ไขใน Clover Project:</strong>
+      </p>
+      <ul>
+        <li>
+          <strong>การใช้ <code>include</code> หรือ <code>select</code> ของ Prisma:</strong> 
+          ในไฟล์อย่าง <code>server/lib/data/contracts.js</code> เราใช้:
+          <pre style="margin: 0.4rem 0;"><code>const pairs = await prisma.mePair.findMany({ include: { member: true, employee: true } });</code></pre>
+          Prisma จะแปลงคำสั่งนี้เป็นการคิวรีที่เหมาะสม โดยคิวรีข้อมูลหลักแล้วใช้ <code>IN (...)</code> เพื่อดึงข้อมูลความสัมพันธ์ทั้งหมดในคราวเดียว หรือทำ <code>JOIN</code> ที่ระดับฐานข้อมูล ทำให้เหลือคำสั่งคิวรีเพียง 1 หรือ 2 คำสั่งเท่านั้น
+        </li>
+        <li>
+          <strong>การใช้ <code>Promise.all</code> สำหรับข้อมูลที่ไม่เกี่ยวข้องกันโดยตรง:</strong> 
+          เช่น ใน <code>getDividendData()</code> ข้อมูลสมาชิก ข้อมูลการซื้อ และประวัติการจ่ายปันผล จะถูกคิวรีแบบขนาน (Parallel Execution) ผ่าน <code>Promise.all([prisma.member..., prisma.purchase..., prisma.dividendPayment...])</code> ทำให้ใช้เวลาเท่ากับคิวรีที่ช้าที่สุดเพียงตัวเดียว แทนที่จะรอต่อคิวกันแบบ Sequential
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q18 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q18</span>
+      <span>มีการออกแบบ Database Index อย่างไรใน schema.prisma เพื่อรองรับการค้นหาและสรุปยอดที่มีข้อมูลปริมาณมาก?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบความเข้าใจเรื่อง Indexing Strategies, B-Tree Indexes และ Query Execution Plan
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ใน <code>prisma/schema.prisma</code> มีการวิเคราะห์พฤติกรรมการใช้งานจริง (Query Workload Analysis) และทำ Index ในจุดที่มีการค้นหาบ่อย:
+      </p>
+      <ul>
+        <li><strong>Foreign Key Indexing:</strong> มีการเพิ่ม <code>@@index([memberId])</code> ในตาราง <code>Purchase</code>, <code>Withdrawal</code>, <code>DividendPayment</code> และ <code>MePair</code> ช่วยให้การค้นหาประวัติการทำธุรกรรมของสมาชิกรายคนทำได้อย่างรวดเร็วในระดับ $O(\log N)$</li>
+        <li><strong>Time-Series &amp; Range Query Indexing:</strong> มีการเพิ่ม <code>@@index([recordDate])</code> ในตาราง <code>Purchase</code> และ <code>@@index([actionTime])</code> ในตาราง <code>ActivityLog</code> ทำให้การดึงข้อมูลเพื่อสรุปยอดขายรายวัน รายเดือน หรือการกรองตามช่วงเวลา (Date Range Filtering) สามารถใช้ Index Scan ได้อย่างมีประสิทธิภาพโดยไม่ต้องทำ Full Table Scan</li>
+        <li><strong>Composite Indexing:</strong> ในตาราง <code>ActivityLog</code> มีการทำ Index แบบคู่คือ <code>@@index([targetType, targetId])</code> รองรับการค้นหาประวัติการเปลี่ยนแปลงที่เกิดขึ้นกับเอนทิตีเฉพาะตัวได้อย่างรวดเร็ว</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q19 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q19</span>
+      <span>หากในอนาคตฐานข้อมูลมีรายการรับซื้อ (Purchase) หลายล้านแถว Backend มีกลยุทธ์การทำ Pagination หรือ Data Aggregation อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ประเมินวิสัยทัศน์ด้าน Scalability, Big Data Handling และการออกแบบสถาปัตยกรรมสำหรับอนาคต
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>หากระบบเติบโตจนมีข้อมูลหลายล้านรายการ จะประยุกต์ใช้ 3 กลยุทธ์หลัก:</p>
+      <ol>
+        <li>
+          <strong>เปลี่ยนจาก Offset-based เป็น Keyset Pagination (Cursor Pagination):</strong> 
+          การใช้ <code>skip: 1000000, take: 50</code> ใน SQL แบบเดิมจะช้าลงเรื่อยๆ เพราะฐานข้อมูลต้องสแกนข้ามล้านแถวแรก 
+          การเปลี่ยนมาใช้ Cursor Pagination ผ่าน Prisma เช่น <code>cursor: { id: lastSeenId }, take: 50</code> ร่วมกับ Index จะทำให้เวลาในการดึงข้อมูลหน้าถัดไปคงที่เท่ากันทุกหน้า ไม่ว่าข้อมูลจะอยู่ลึกแค่ไหน
+        </li>
+        <li>
+          <strong>การใช้ Database Aggregation Function:</strong> 
+          แทนที่จะดึงรายการทั้งหมดมาคำนวณผลรวมใน JavaScript ให้ส่งคำสั่ง <code>prisma.purchase.aggregate({ _sum: { dryWeightKg: true, totalAmount: true }, where: { ... } })</code> เพื่อให้ PostgreSQL ประมวลผลผลรวมในระดับ Storage Engine ซึ่งเร็วและกิน Memory น้อยกว่ามาก
+        </li>
+        <li>
+          <strong>Table Partitioning:</strong> 
+          แบ่งตาราง <code>Purchase</code> ในระดับ PostgreSQL ตามปี พ.ศ. (Partition by Range บนคอลัมน์ <code>recordDate</code>) เพื่อให้การสืบค้นข้อมูลของปีปัจจุบันไม่ต้องไปยุ่งเกี่ยวกับข้อมูลย้อนหลังของปีก่อนๆ
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Q20 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q20</span>
+      <span>การลบข้อมูล (Delete) ในระบบนี้ใช้แบบ Soft Delete หรือ Hard Delete และมีผลกระทบต่อ Referential Integrity อย่างไร?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบความเข้าใจเรื่อง Data Retention, Referential Integrity และกฎหมายข้อมูลทางบัญชี
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ในระบบบัญชีการเงิน <strong>ห้ามใช้ Hard Delete (การลบแถวทิ้งออกจากฐานข้อมูลอย่างถาวร) กับข้อมูลหลักโดยเด็ดขาด</strong>:
+      </p>
+      <ul>
+        <li>
+          <strong>การใช้ Soft Delete / Status Deactivation:</strong> 
+          ในโมเดล <code>Member</code> และ <code>Employee</code> มีฟิลด์ <code>status</code> ที่มีค่าเป็น <code>Active</code> หรือ <code>Inactive</code> 
+          เมื่อสมาชิกหรือคนกรีดยางต้องการยกเลิกการใช้งาน ระบบจะอัปเดตสถานะเป็น <code>Inactive</code> เท่านั้น
+        </li>
+        <li>
+          <strong>การรักษาสภาพความสมบูรณ์ของความสัมพันธ์ (Referential Integrity):</strong> 
+          หากเราทำการ Hard Delete สมาชิกที่เคยส่งน้ำยางไปแล้ว รายการในตาราง <code>Purchase</code>, <code>Withdrawal</code> และ <code>DividendPayment</code> 
+          ที่อ้างอิง Foreign Key <code>memberId</code> จะเกิดสภาวะกำพร้า (Orphaned Records) ทำให้รายงานสรุปยอดบัญชีของสหกรณ์คลาดเคลื่อนทันที 
+          การใช้ Soft Delete ทำให้ข้อมูลการเงินในอดีตยังคงสามารถเชื่อมโยงและตรวจสอบย้อนหลังได้ครบถ้วนสมบูรณ์ 100%
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <!-- หมวดที่ 5: ประสิทธิภาพ ความเสถียร และการบำรุงรักษาในระยะยาว (Q21 - Q25)       -->
+  <!-- ──────────────────────────────────────────────────────────────────────── -->
+  <div class="page-break"></div>
+  <h3 class="sub-header" id="p2-sec5">หมวดที่ 5: ประสิทธิภาพ ความเสถียร และการบำรุงรักษาในระยะยาว (Performance &amp; Robustness)</h3>
+
+  <!-- Q21 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q21</span>
+      <span>ระบบจัดการ Error Handling อย่างไรเพื่อไม่ให้ Node.js Process เกิด Unhandled Promise Rejection จนเซิร์ฟเวอร์ Crash?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> วัดความเข้าใจในระบบ Async/Await Lifecycle, Error Boundaries และ High Availability
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>ระบบใช้โครงสร้างการจัดการข้อผิดพลาดแบบหลายชั้น (Multi-Tier Error Handling Architecture):</p>
+      <ul>
+        <li>
+          <strong>Custom Error Classes (<code>server/lib/api-error.js</code>):</strong> 
+          สร้างคลาสมาตรฐานอย่าง <code>ApiError</code>, <code>SellerLookupError</code>, <code>WithdrawalError</code>, และ <code>DividendError</code> 
+          ทำให้สามารถแยกแยะได้ชัดเจนระหว่าง <em>Operational Errors</em> (ข้อผิดพลาดที่คาดการณ์ได้ เช่น เงินไม่พอ, รหัสไม่พบ) กับ <em>Programmer/System Bugs</em> (เช่น ข้อผิดพลาดฐานข้อมูล)
+        </li>
+        <li>
+          <strong>Express Async Error Propagation:</strong> 
+          ด้วยการอัปเกรดมาใช้ <strong>Express 5.2.1</strong> ซึ่งมีจุดเด่นสำคัญที่สุดคือ <strong>รองรับ Native Async/Await Error Handling ในตัว</strong> 
+          ใน Express 4 หากฟังก์ชัน <code>async</code> โยน Error โดยไม่มี try/catch เซิร์ฟเวอร์จะเกิด <em>UnhandledPromiseRejection</em> และล่มได้ 
+          แต่ใน Express 5 ระบบจะส่ง Error ของ Promise ที่ถูก Reject ไปยัง Error-handling Middleware ตัวสุดท้ายโดยอัตโนมัติ
+        </li>
+        <li>
+          <strong>Centralized Error Middleware (<code>server/server.js</code>):</strong> 
+          ดักจับ Error สุดท้ายที่บรรทัด 56-64 ทำการบันทึก <code>console.error(error)</code> และส่ง HTTP Status พร้อมข้อความ JSON ที่เหมาะสมกลับไปให้ไคลเอนต์เสมอ ทำให้โปรเซสของเซิร์ฟเวอร์ยังคงทำงานต่อไปได้อย่างเสถียร
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q22 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q22</span>
+      <span>กลไก Activity Log มีการบันทึกข้อมูลอะไรบ้าง และหากการบันทึก Log ล้มเหลว จะส่งผลให้ Business Transaction หลักล้มเหลวไปด้วยหรือไม่?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบความเข้าใจเรื่อง Audit Logging Policy และ Decoupling ระหว่าง Core Business Transaction กับ Observability/Auditing
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        <strong>1. ข้อมูลที่บันทึกใน <code>ActivityLog</code>:</strong><br>
+        บันทึกข้อมูลสำคัญ ได้แก่ รหัสเจ้าหน้าที่ผู้กระทำ (<code>staffId</code>), ประเภทการกระทำ (<code>ActionType</code> เช่น <code>CREATE_PURCHASE</code>, <code>LOGIN_FAILED</code>), ประเภทเป้าหมาย (<code>TargetType</code>), รหัสอ้างอิงเป้าหมาย (<code>targetId</code>), สถานะสำเร็จหรือล้มเหลว (<code>ActionStatus</code>), คำอธิบายรายละเอียดเพิ่มเติม (<code>description</code>) และเวลาที่เกิดเหตุการณ์ (<code>actionTime</code>)
+      </p>
+      <p>
+        <strong>2. นโยบายเมื่อการบันทึก Log เกิดข้อผิดพลาด:</strong><br>
+        ในเชิงสถาปัตยกรรม การบันทึก Activity Log ถูกออกแบบให้ทำงานแบบ <strong>Non-blocking / Isolated Execution</strong> 
+        โดยการทำงานของ Log จะถูกครอบด้วย <code>try/catch</code> แยกต่างหาก หากเกิดเหตุสุดวิสัยที่ทำให้การเขียน Log ล้มเหลว (เช่น Disk เต็มเฉพาะส่วน หรือติด Index ล็อก) 
+        ระบบจะทำการพ่น Error ออกทาง System Console แต่จะไม่ขัดขวางหรือย้อนกลับ (Rollback) ธุรกรรมหลักที่สำเร็จไปแล้ว (เช่น การส่งน้ำยางหรือการเบิกเงิน) 
+        เพื่อให้การดำเนินงานทางธุรกิจของสหกรณ์สามารถขับเคลื่อนต่อไปได้โดยไม่หยุดชะงัก
+      </p>
+    </div>
+  </div>
+
+  <!-- Q23 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q23</span>
+      <span>การส่งออกไฟล์สรุปยอดซื้อขายเป็น Excel ด้วย ExcelJS มีการจัดการเรื่อง Memory Usage อย่างไร เมื่อต้องจัดการข้อมูลขนาดใหญ่?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ประเมินทักษะการจัดการหน่วยความจำ (Memory Management) และ Stream Processing เมื่อต้องประมวลผลไฟล์ขนาดใหญ่
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ใน <code>server/lib/export/purchase-summary-workbook.js</code> มีการจัดการดังนี้:
+      </p>
+      <ul>
+        <li>
+          <strong>การดึงข้อมูลเฉพาะฟิลด์ที่จำเป็น (Selective Projection):</strong> 
+          ก่อนนำข้อมูลมาสร้าง Excel มีการใช้ Prisma <code>select</code> ดึงเฉพาะคอลัมน์ที่ต้องแสดงในรายงานเท่านั้น เช่น รหัส, วันที่, น้ำหนัก, ยอดเงิน 
+          ตัดฟิลด์ขนาดใหญ่อย่าง Base64 Photo หรือข้อมูลที่อยู่ที่ไม่เกี่ยวข้องออก ช่วยลด Memory Footprint ของ JavaScript V8 Heap ลงได้กว่า 70%
+        </li>
+        <li>
+          <strong>การสตรีมและส่งออกเป็น Buffer:</strong> 
+          เวิร์กบุ๊กถูกคอมไพล์เป็นไบนารี Buffer และส่งผ่าน <code>res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")</code> 
+          แล้วเขียนลงใน HTTP Response Stream ทันที
+        </li>
+        <li>
+          <strong>แนวทางขยายต่อยอดสำหรับข้อมูลระดับล้านแถว:</strong> 
+          ExcelJS มีฟีเจอร์ <code>ExcelJS.stream.xlsx.WorkbookWriter</code> ซึ่งรองรับการเขียนข้อมูลทีละแถวลงดิสก์/เน็ตเวิร์กสตรีมทันที (Row-by-Row Streaming) 
+          โดยไม่จำเป็นต้องเก็บทั้ง Spreadsheet ไว้ในหน่วยความจำ RAM ทำให้สามารถสร้างไฟล์ Excel ขนาดหลายร้อยเมกะไบต์ได้โดยใช้ RAM เพียงไม่กี่สิบเมกะไบต์
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q24 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q24</span>
+      <span>ระบบจัดการเรื่อง Timezone และวันที่ระหว่าง UTC ใน PostgreSQL กับ วันที่ปี พ.ศ. (Thai Buddhist Era) อย่างไรเพื่อไม่ให้เกิดข้อผิดพลาดในการตัดรอบบัญชี?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ตรวจสอบความเข้าใจเรื่อง Timezone Pitfalls, UTC Storage และการจัดการปฏิทินท้องถิ่น
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ปัญหาเรื่อง Timezone เป็นสาเหตุอันดับต้นๆ ที่ทำให้ระบบบัญชีตัดยอดวันผิดพลาด (เช่น ยอดขายตอนเช้าของวันที่ 15 หลุดไปเป็นของวันที่ 14):
+      </p>
+      <ul>
+        <li>
+          <strong>Single Source of Truth in UTC:</strong> 
+          ในฐานข้อมูล PostgreSQL วันที่ทั้งหมดถูกจัดเก็บตามมาตรฐานสากลคือ <strong>UTC (Coordinated Universal Time)</strong> 
+          ฟิลด์ <code>recordDate</code> จะถูก normalize ให้เป็นเที่ยงคืนของวันทำการนั้นๆ ในรูปแบบ UTC เสมอ
+        </li>
+        <li>
+          <strong>Deterministic Year Conversion (<code>dividends.js</code>):</strong> 
+          ในการตัดรอบปี พ.ศ. ของเงินปันผล ระบบมีฟังก์ชันเฉพาะ:
+          <pre style="margin: 0.4rem 0;"><code>function buddhistYearOf(date) { return date.getUTCFullYear() + 543; }</code></pre>
+          การเจาะจงใช้ <code>date.getUTCFullYear()</code> แทน <code>date.getFullYear()</code> เป็นสิ่งสำคัญมาก เพราะจะอิงตามปีสากลของวันที่ถูกบันทึกจริง ไม่ขึ้นอยู่กับ Timezone ของเครื่องเซิร์ฟเวอร์ที่กำลังรันโค้ดอยู่ ทำให้การตัดรอบปีปันผลมีความแน่นอน 100% (Deterministic)
+        </li>
+        <li>
+          <strong>Presentation Layer Formatting (<code>shared/format.js</code>):</strong> 
+          การแปลงวันที่ให้เป็นภาษาไทยและปี พ.ศ. สวยงามสำหรับผู้ใช้ (เช่น "15 ตุลาคม 2569") จะเกิดขึ้นเฉพาะในเลเยอร์การแสดงผลเท่านั้น โดยใช้ <code>Intl.DateTimeFormat('th-TH', { timeZone: 'Asia/Bangkok' })</code>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Q25 -->
+  <div class="qa-card">
+    <div class="qa-question">
+      <span class="q-badge">Q25</span>
+      <span>หากต้องการนำระบบ Backend นี้ขึ้น Production ในสภาพแวดล้อมจริง (เช่น Docker, Cloud VM หรือ Kubernetes) ต้องมีขั้นตอนและแนวทางการปรับปรุงความปลอดภัย (Production Hardening) อะไรเพิ่มเติมบ้าง?</span>
+    </div>
+    <div class="qa-intent">
+      <strong>เจตนาของผู้สอบ:</strong> ประเมินความพร้อมสู่การใช้งานจริง (Production Readiness, DevOps &amp; Infrastructure Security)
+    </div>
+    <div class="qa-answer">
+      <span class="a-header">แนวทางการตอบ:</span>
+      <p>
+        ขั้นตอนและแนวปฏิบัติในการนำระบบขึ้นสู่สภาวะ Production จริงตามมาตรฐานสากล:
+      </p>
+      <ol>
+        <li>
+          <strong>Containerization ด้วย Docker:</strong> 
+          สร้าง <code>Dockerfile</code> แบบ Multi-stage Build โดยใช้ Image พื้นฐานที่เป็น <code>node:20-alpine</code> (ขนาดเล็กและปลอดภัย) 
+          และรันโปรเซสด้วยสิทธิ์ผู้ใช้ทั่วไปที่ไม่ใช่ Root (<code>USER node</code>)
+        </li>
+        <li>
+          <strong>HTTPS &amp; Cookie Security Flags:</strong> 
+          ติดตั้ง SSL/TLS Certificate (เช่น Let's Encrypt) และเมื่อรันในโหมด <code>NODE_ENV=production</code> 
+          คุกกี้เซสชันจะเปิดใช้งานแฟล็ก <strong><code>Secure: true</code></strong> โดยอัตโนมัติ เพื่อบังคับให้ส่งคุกกี้ผ่านช่องทางที่เข้ารหัส HTTPS เท่านั้น
+        </li>
+        <li>
+          <strong>Security Headers &amp; Rate Limiting:</strong> 
+          ติดตั้ง <code>helmet</code> เพื่อเพิ่ม Security Headers เช่น Content-Security-Policy (CSP), HSTS และ X-Content-Type-Options 
+          พร้อมติดตั้ง <code>express-rate-limit</code> ในเส้นทาง <code>/api/auth/login</code> เพื่อป้องกันการโจมตีแบบ Brute-Force คาดเดารหัสผ่าน
+        </li>
+        <li>
+          <strong>Process Management &amp; Monitoring:</strong> 
+          ใช้ <strong>PM2</strong> ในโหมด Cluster หรือรันบน <strong>Kubernetes Pods</strong> ร่วมกับ Health Check Endpoints (<code>/healthz</code>) 
+          เพื่อให้เซิร์ฟเวอร์รีสตาร์ตตัวเองอัตโนมัติหากเกิดปัญหาวิกฤต และทำ Zero-Downtime Deployment
+        </li>
+        <li>
+          <strong>Database Backup &amp; Disaster Recovery:</strong> 
+          ตั้งค่า Automated Daily Backup และ Point-in-Time Recovery (PITR) ของ PostgreSQL บนคลาวด์ เพื่อรับประกันความปลอดภัยของข้อมูลธุรกรรมการเงินของสหกรณ์
+        </li>
+      </ol>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

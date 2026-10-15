@@ -275,7 +275,7 @@ export async function getMemberFinanceHistory(memberId) {
 // รายการแจ้งเตือนล่าสุดสำหรับกระดิ่งบนแถบด้านบน
 // ใช้ข้อมูล 3 แหล่งเดียวกับประวัติการเงิน แต่เรียงตาม "เวลาที่บันทึกจริง"
 // เพื่อให้รายการที่เพิ่งบันทึกขึ้นมาอยู่บนสุดเสมอ (สูงสุด limit รายการ)
-export async function getMemberNotifications(memberId, limit = 20) {
+export async function getMemberNotifications(memberId, limit = 10) {
   const [purchases, withdrawals, dividends] = await Promise.all([
     prisma.purchase.findMany({
       where: { memberId },

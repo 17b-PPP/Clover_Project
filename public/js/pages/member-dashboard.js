@@ -175,7 +175,12 @@ function renderDividendCard() {
   byId("dividend-year-amount").textContent = formatNumber(summary?.amount ?? 0);
   const period = byId("dividend-year-period");
   period.hidden = !summary?.periodLabel;
-  period.textContent = summary?.periodLabel ?? "";
+  if (summary?.periodLabel) {
+    const raw = summary.periodLabel.trim();
+    period.textContent = raw.startsWith("(") ? ` ${raw}` : ` (${raw})`;
+  } else {
+    period.textContent = "";
+  }
 }
 
 // -----------------------------------------------------------------------------

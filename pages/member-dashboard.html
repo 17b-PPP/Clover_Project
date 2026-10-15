@@ -112,8 +112,8 @@
               </section>
 
               <!-- เงินปันผล -->
-              <div class="card card--p6">
-                <p class="info-card-label">เงินปันผล</p>
+              <section class="card card--p6">
+                <h2 class="info-section-title">เงินปันผล</h2>
                 <div class="info-grid info-grid--2">
                   <div class="info-box">
                     <p class="info-box-label">ยอดปันผลสะสม (บาท)</p>
@@ -121,14 +121,16 @@
                   </div>
                   <div class="info-box">
                     <div class="dividend-box-head">
-                      <p class="info-box-label">ปันผลประจำปี</p>
+                      <p class="info-box-label">
+                        <span>ปันผลประจำปี</span>
+                        <span class="dividend-period" id="dividend-year-period" hidden></span>
+                      </p>
                       <select class="mini-select" id="dividend-year"></select>
                     </div>
                     <p class="info-box-value" id="dividend-year-amount"></p>
-                    <p class="dividend-period" id="dividend-year-period" hidden></p>
                   </div>
                 </div>
-              </div>
+              </section>
             </div>
           </div>
         </div>
